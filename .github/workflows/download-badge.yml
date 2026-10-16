@@ -1,0 +1,70 @@
+# Counts release downloads for the README badge.
+#
+# shields.io's own GitHub downloads badge borrows from a shared pool of donated
+# tokens; when the pool runs dry it renders "invalid" or a token error, and
+# GitHub's image proxy caches that for up to half an hour. Instead, this sums
+# download_count over every release asset with our own token and writes a
+# shields.io endpoint file to the orphan badges branch:
+#   https://raw.githubusercontent.com/rpodsada/vandal/badges/downloads.json
+# shields.io then only fetches that static file.
+#
+# The branch holds a single commit, replaced on each change, so it doesn't grow.
+#
+# Actions are pinned to full commit SHAs (the tag is in the comment); Dependabot bumps them.
+name: Download badge
+
+on:
+  schedule:
+    - cron: "41 */6 * * *" # every 6 hours
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: download-badge
+  cancel-in-progress: false
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Count downloads
+        id: count
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          total=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[].assets[].download_count' | awk '{ s += $1 } END { print s + 0 }')
+          echo "Total downloads: $total"
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+
+      - name: Write and push the badge
+        env:
+          TOTAL: ${{ steps.count.outputs.total }}
+        run: |
+          if git ls-remote --exit-code --heads origin badges > /dev/null; then
+            git fetch --depth 1 origin badges
+            if [ "$(git show FETCH_HEAD:downloads.json | jq -r .message)" = "$TOTAL" ]; then
+              echo "Count unchanged."
+              exit 0
+            fi
+          fi
+          git worktree add --orphan -b badges-new badges
+          cd badges
+          jq -n --arg n "$TOTAL" \
+            '{schemaVersion: 1, label: "downloads", message: $n, color: "brightgreen"}' > downloads.json
+          cat > README.md <<'EOF'
+          # Vandal badges
+
+          Written by `.github/workflows/download-badge.yml` on `main`; don't edit by hand.
+          The README's downloads badge reads `downloads.json` through shields.io's endpoint badge.
+          EOF
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Downloads: $TOTAL"
+          git push --force origin HEAD:badges
