@@ -642,7 +642,7 @@ Vandal is open source. To build it yourself or to contribute, see
 
 ## License
 
-Copyright © 2026 Richard Podsada.
+Copyright © 2026 [Flowcat Software](https://flowcat.io).
 
 Vandal is free software: you can redistribute it and/or modify it under the terms of the
 [GNU General Public License](LICENSE) as published by the Free Software Foundation,
