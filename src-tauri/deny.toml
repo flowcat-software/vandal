@@ -16,6 +16,13 @@ ignore = [
   { id = "RUSTSEC-2026-0347", reason = "rustls: needs EchMode::Enable; ECH isn't enabled" },
   { id = "RUSTSEC-2026-0348", reason = "rustls: needs the brotli feature, which isn't enabled" },
   { id = "RUSTSEC-2026-0349", reason = "rustls: low; downgrades updater TLS to classical key exchange only, and updates are signature-checked" },
+  # zip 4 (tauri-plugin-updater's Windows extraction; fixed in zip 9, which no updater release,
+  # 3.0 alphas included, takes yet). The updater only extracts a download whose minisign
+  # signature checked out, and ours are bare setup .exe files, never zips. Remove these once
+  # the updater moves to zip 9.
+  { id = "RUSTSEC-2026-0367", reason = "zip: SUID/SGID bits are Unix only; and only signed updates are extracted" },
+  { id = "RUSTSEC-2026-0368", reason = "zip: symlinks from an attacker's archive; only zips signed with our key are extracted, and we ship none" },
+  { id = "RUSTSEC-2026-0369", reason = "zip: Unix permissions through symlinks; Unix only, and only signed updates are extracted" },
 ]
 # Yanked crates (default: warn) don't fail the check; update them once a fix is a week old.
 
