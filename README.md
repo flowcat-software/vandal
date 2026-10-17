@@ -247,7 +247,7 @@ open, drop, paste (Ctrl+V) or capture an image into it.
   on. Changing a style while a mark is selected restyles that mark. Where there are two colors
   (fill and border, text and its box), **X** swaps them.
 - **Editing marks:** click a mark to select it, drag to move it, and drag its handles to reshape
-  it. Double-click text (or press Enter) to edit it. Right-click a mark for Duplicate, the
+  it. Hold Alt while dragging to drag a copy instead, leaving the original in place. Double-click text (or press Enter) to edit it. Right-click a mark for Duplicate, the
   stacking order (to front, forward one, back one, to back) and Delete.
 - **Copying marks:** Ctrl+Shift+C copies the selected marks and Ctrl+V pastes them, into the
   same editor or another one, in front and selected (Ctrl+C copies the image). They keep their
@@ -415,6 +415,7 @@ printed on the pickers (you can hide them in Settings).
 | Ctrl+Y, Ctrl+Shift+Z | Redo                                                           |
 | Ctrl+A               | Select all marks                                               |
 | Ctrl+D               | Duplicate the selected marks                                   |
+| Alt+drag             | Drag a copy of the marks, leaving them in place                |
 | Ctrl+Shift+C         | Copy the selected marks (editor)                               |
 | Ctrl+V               | Paste copied marks (editor)                                    |
 | Delete / Backspace   | Delete the selected marks                                      |

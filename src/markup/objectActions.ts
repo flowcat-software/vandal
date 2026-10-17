@@ -27,13 +27,25 @@ export function duplicateSelection(): boolean {
 export function addCopies(annotations: readonly Annotation[]): AnnotationId[] {
   const store = docStore.getState();
   if (!annotations.length) return [];
+  store.beginGesture();
+  const ids = insertCopies(annotations);
+  store.endGesture();
+  store.select(ids);
+  return ids;
+}
+
+/**
+ * `addCopies` within a gesture already under way (an Alt+drag copy), which
+ * it leaves open; nothing is selected.
+ */
+export function insertCopies(annotations: readonly Annotation[]): AnnotationId[] {
+  const store = docStore.getState();
   const firstSeq = nextStepSeq(store.doc);
   const numbering = stepsOf(store.doc).length ? stepNumbering(store.doc) : null;
   const stepOrder = annotations
     .filter((a): a is StepAnnotation => a.kind === "step")
     .sort((a, b) => a.seq - b.seq);
-  store.beginGesture();
-  const ids = annotations.map((a) => {
+  return annotations.map((a) => {
     const copy = withoutId(a);
     if (copy.kind === "step") {
       copy.seq = firstSeq + stepOrder.indexOf(a as StepAnnotation);
@@ -41,9 +53,6 @@ export function addCopies(annotations: readonly Annotation[]): AnnotationId[] {
     }
     return store.add(copy);
   });
-  store.endGesture();
-  store.select(ids);
-  return ids;
 }
 
 /** Stacking order means something only with an unselected object to go past. */

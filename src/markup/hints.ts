@@ -121,8 +121,9 @@ const DRAG_HINTS: Record<DragHint, string> = {
   circle: "[Shift] circle",
   stroke: "[Shift] straight line",
   text: "Release to type in a box this wide",
-  move: "[Shift] straight across or up and down",
-  calloutMove: "[Shift] keeps the pointer at 45° steps · Drag the pointer line to move it all",
+  move: "[Shift] straight across or up and down · [Alt] copy",
+  calloutMove:
+    "[Shift] keeps the pointer at 45° steps · Drag the pointer line to move it all · [Alt] copy",
   callout: "Release where the text goes · the pointer points where you pressed · [Shift] 45° steps",
   resize: "[Shift] keep proportions",
   rotate: "Snaps to 45° steps near them",
@@ -178,7 +179,7 @@ function toolHint(tool: Exclude<ToolId, "select">, twoColors: boolean): string {
 }
 
 const SELECTED =
-  "[Del] delete · [Ctrl+D] duplicate · [←↑↓→] nudge, [Shift] 10 px · [Ctrl+[] [Ctrl+]] order · [Shift]+click select multiple";
+  "[Del] delete · [Ctrl+D] or [Alt]+drag duplicate · [←↑↓→] nudge, [Shift] 10 px · [Ctrl+[] [Ctrl+]] order · [Shift]+click select multiple";
 const TEXT_SELECTED = `[Enter] edit the text · ${SELECTED}`;
 const STEP_SELECTED = `[Enter] or double-click to type its own label · ${SELECTED}`;
 const CALLOUT_SELECTED = `Drag the text to move it, the pointer line to move it all · Drag the ● handle to point it · [Shift]+drag 45° steps · [Enter] edit the text · ${SELECTED}`;

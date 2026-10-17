@@ -93,6 +93,7 @@ import { TextEditor } from "./TextEditor";
 import { createText, editText, finishTextEdit } from "./textEditing";
 import { markTaken } from "./pressRouting";
 import { ObjectMenu } from "./ObjectMenu";
+import { insertCopies } from "./objectActions";
 import { markupClipboard } from "./markupClipboard";
 import { useToolStore } from "./toolStore";
 import styles from "./markup.module.css";
@@ -172,6 +173,10 @@ type Drag =
       textSize: { width: number; height: number } | null;
       /** A callout grabbed by its pointer line: it moves with its tip (PLAN 3E.7). */
       rigid: boolean;
+      /** Alt+drag: the copies following the pointer, as made (at the originals' place). */
+      copies: Map<AnnotationId, Annotation> | null;
+      /** The pointer as last seen, for Alt pressed or let go without a move. */
+      last: { x: number; y: number; shift: boolean } | null;
     }
   | { mode: "draw"; start: Point; id: AnnotationId }
   | { mode: "place"; id: AnnotationId }
@@ -275,7 +280,8 @@ export function MarkupLayer({
   const labelEditing = useToolStore((s) => s.labelEditing);
   const drawingToolsSelect = useStyleConfig((s) => s.drawingToolsSelect);
   const [ctrlHeld, setCtrlHeld] = useState(false);
-  /** What the pointer last hovered, so the cursor can follow Ctrl without a move. */
+  const [altHeld, setAltHeld] = useState(false);
+  /** What the pointer last hovered, so the cursor can follow Ctrl and Alt without a move. */
   const hovered = useRef("");
   const stageRef = useRef<Konva.Stage>(null);
   const groupRef = useRef<Konva.Group>(null);
@@ -398,7 +404,7 @@ export function MarkupLayer({
   // right on a box's corner.
   const handlesLive = !(tool !== "select" && !isFreehand(tool) && drawingToolsSelect && ctrlHeld);
 
-  const setCursor = (name: string, ctrl: boolean) => {
+  const setCursor = (name: string, ctrl: boolean, alt: boolean) => {
     const container = stageRef.current?.container();
     if (!container) return;
     const picks = picksObjects(ctrl);
@@ -406,7 +412,9 @@ export function MarkupLayer({
       isFreehand(tool) || (name === "endpoint" && picks)
         ? "crosshair"
         : name === "annotation" && picks
-          ? "move"
+          ? alt
+            ? "copy"
+            : "move"
           : tool === "select"
             ? "default"
             : tool === "text"
@@ -414,12 +422,16 @@ export function MarkupLayer({
               : "crosshair";
   };
 
-  // Track Ctrl for the handles and the cursor.
+  // Track Ctrl for the handles and the cursor, and Alt (drag a copy) for the cursor.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Control") setCtrlHeld(e.type === "keydown");
+      if (e.key === "Alt") setAltHeld(e.type === "keydown");
     };
-    const reset = () => setCtrlHeld(false);
+    const reset = () => {
+      setCtrlHeld(false);
+      setAltHeld(false);
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onKey);
     window.addEventListener("blur", reset);
@@ -431,10 +443,11 @@ export function MarkupLayer({
   }, []);
 
   useEffect(() => {
-    if (interactive && !trRef.current?.isTransforming()) setCursor(hovered.current, ctrlHeld);
+    if (interactive && !trRef.current?.isTransforming())
+      setCursor(hovered.current, ctrlHeld, altHeld);
     // setCursor reads the current tool and setting; rerun when those change too.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctrlHeld, tool, drawingToolsSelect, interactive]);
+  }, [ctrlHeld, altHeld, tool, drawingToolsSelect, interactive]);
 
   const toSource = (clientX: number, clientY: number): Point => {
     const r = stageRef.current!.container().getBoundingClientRect();
@@ -581,6 +594,8 @@ export function MarkupLayer({
     } else if (
       hitCallout &&
       !ev.shiftKey &&
+      // Alt+drag copies the whole callout instead.
+      !ev.altKey &&
       !(store.selection.includes(hitCallout.id) && store.selection.length > 1) &&
       grabsTip(hitCallout, p, TIP_GRAB / view.current.scale) &&
       // The text wins where they meet, as for the pointer line.
@@ -630,6 +645,8 @@ export function MarkupLayer({
         began: false,
         textSize: node ? { width: node.width(), height: node.height() } : null,
         rigid,
+        copies: null,
+        last: null,
       };
     } else if (tool === "select") {
       setWholeId(null);
@@ -727,6 +744,54 @@ export function MarkupLayer({
                       : null,
     );
 
+    // Move the pressed objects with the pointer or, with Alt, copies of them.
+    // Alt can come and go mid-drag, as in design programs: the copies appear
+    // and the originals go back, or the copies go and the originals follow.
+    const applyMove = (clientX: number, clientY: number, shift: boolean, alt: boolean) => {
+      if (drag.mode !== "move") return;
+      const s = docStore.getState();
+      const q = toSource(clientX, clientY);
+      drag.last = { x: clientX, y: clientY, shift };
+      if (alt && !drag.copies) {
+        for (const [id, original] of drag.originals) s.update(id, () => original);
+        const ids = insertCopies([...drag.originals.values()]);
+        const made = docStore.getState().doc.annotations;
+        drag.copies = new Map(ids.map((id) => [id, made.find((a) => a.id === id)!]));
+        setWholeId(drag.rigid ? ids[0] : null);
+        s.select(ids);
+      } else if (!alt && drag.copies) {
+        s.remove([...drag.copies.keys()]);
+        drag.copies = null;
+        const ids = [...drag.originals.keys()];
+        setWholeId(drag.rigid ? ids[0] : null);
+        s.select(ids);
+      }
+      // A callout moved on its own keeps pointing where it did (PLAN 3E).
+      const alone = drag.originals.size === 1 && !drag.rigid;
+      // Shift: moves only across or up and down (diagonals felt jumpy at
+      // the start of a move), except a callout's text on its own, where
+      // Shift keeps its pointer at 45° steps instead (below).
+      const step = { x: q.x - drag.start.x, y: q.y - drag.start.y };
+      const calloutText = alone && [...drag.originals.values()][0]?.kind === "callout";
+      const { x: dx, y: dy } =
+        shift && !calloutText
+          ? Math.abs(step.x) >= Math.abs(step.y)
+            ? { x: step.x, y: 0 }
+            : { x: 0, y: step.y }
+          : step;
+      for (const [id, original] of drag.copies ?? drag.originals) {
+        let moved = translateAnnotation(original, dx, dy, alone);
+        // Shift: the pointer in 45° steps from where it points, as when
+        // drawing it or dragging its end.
+        if (alone && shift && moved.kind === "callout" && drag.textSize) {
+          const pivot = pointerPivot(moved, drag.textSize.width, drag.textSize.height);
+          const snapped = snapAngle(moved.tip, pivot);
+          moved = translateAnnotation(moved, snapped.x - pivot.x, snapped.y - pivot.y, true);
+        }
+        s.update(id, () => moved);
+      }
+    };
+
     const onMove = (m: PointerEvent) => {
       const q = toSource(m.clientX, m.clientY);
       const s = docStore.getState();
@@ -738,30 +803,7 @@ export function MarkupLayer({
             drag.began = true;
             s.beginGesture();
           }
-          // A callout moved on its own keeps pointing where it did (PLAN 3E).
-          const alone = drag.originals.size === 1 && !drag.rigid;
-          // Shift: moves only across or up and down (diagonals felt jumpy at
-          // the start of a move), except a callout's text on its own, where
-          // Shift keeps its pointer at 45° steps instead (below).
-          const step = { x: q.x - drag.start.x, y: q.y - drag.start.y };
-          const calloutText = alone && [...drag.originals.values()][0]?.kind === "callout";
-          const { x: dx, y: dy } =
-            m.shiftKey && !calloutText
-              ? Math.abs(step.x) >= Math.abs(step.y)
-                ? { x: step.x, y: 0 }
-                : { x: 0, y: step.y }
-              : step;
-          for (const [id, original] of drag.originals) {
-            let moved = translateAnnotation(original, dx, dy, alone);
-            // Shift: the pointer in 45° steps from where it points, as when
-            // drawing it or dragging its end.
-            if (alone && m.shiftKey && moved.kind === "callout" && drag.textSize) {
-              const pivot = pointerPivot(moved, drag.textSize.width, drag.textSize.height);
-              const snapped = snapAngle(moved.tip, pivot);
-              moved = translateAnnotation(moved, snapped.x - pivot.x, snapped.y - pivot.y, true);
-            }
-            s.update(id, () => moved);
-          }
+          applyMove(m.clientX, m.clientY, m.shiftKey, m.altKey);
           break;
         }
         case "draw": {
@@ -856,6 +898,7 @@ export function MarkupLayer({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("keyup", onKey, true);
       setDragHint(null);
       const s = docStore.getState();
       switch (drag.mode) {
@@ -1006,12 +1049,20 @@ export function MarkupLayer({
 
     // Esc drops a text selection before it becomes redactions.
     const onKey = (k: KeyboardEvent) => {
-      if (k.key !== "Escape" || drag.mode !== "redactText") return;
+      if (k.key === "Alt" && drag.mode === "move") {
+        // Kept from the browser, which would otherwise go looking for a menu.
+        k.preventDefault();
+        if (drag.began && drag.last)
+          applyMove(drag.last.x, drag.last.y, drag.last.shift, k.type === "keydown");
+        return;
+      }
+      if (k.type !== "keydown" || k.key !== "Escape" || drag.mode !== "redactText") return;
       k.preventDefault();
       k.stopPropagation();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("keyup", onKey, true);
       setDragHint(null);
       setTextSelection(null);
     };
@@ -1019,6 +1070,7 @@ export function MarkupLayer({
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("keydown", onKey, true);
+    window.addEventListener("keyup", onKey, true);
   };
 
   /**
@@ -1047,7 +1099,7 @@ export function MarkupLayer({
     if (!interactive || trRef.current?.isTransforming()) return;
     if (e.target.getParent() instanceof Konva.Transformer) return;
     hovered.current = e.target.name();
-    setCursor(hovered.current, e.evt.ctrlKey);
+    setCursor(hovered.current, e.evt.ctrlKey, e.evt.altKey);
     setOverObject(hovered.current === "annotation" || hovered.current === "endpoint");
     // Text redaction: show the word a click would take.
     const word =

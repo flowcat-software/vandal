@@ -6,6 +6,12 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Alt+drag to copy:** hold Alt while dragging marks to drag copies of them, leaving the
+  originals in place, as in design programs. Press or let go of Alt mid-drag to switch between
+  moving and copying. Copied step markers take the next numbers, as with Ctrl+D.
+
 ## [0.3.0-beta.12] - 2026-10-10
 
 ### Added
