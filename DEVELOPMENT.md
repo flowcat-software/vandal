@@ -199,7 +199,7 @@ before the release itself (`0.3.0`). Every release must have a new, higher numbe
    updater signature (`…-setup.exe.sig`), `SHA256SUMS.txt` and that version's CHANGELOG section. Tags with a `-` are marked as
    prereleases.
 6. Download the installer from the draft, install it over the previous version and smoke-test
-   it. Check `gh attestation verify <installer> --repo rpodsada/vandal` passes and that its
+   it. Check `gh attestation verify <installer> --repo flowcat-software/vandal` passes and that its
    SHA-256 (`Get-FileHash`) matches the draft's `SHA256SUMS.txt`, and put
    it on the website's download dialog, which is hosted apart from GitHub, so a swapped
    installer can't come with a matching hash. Then press **Publish release** on GitHub.
@@ -207,7 +207,7 @@ before the release itself (`0.3.0`). Every release must have a new, higher numbe
    It checks the installer's updater signature against the public key and writes the channel
    manifests to the `update-manifests` branch: `beta.json` gets every release, `stable.json`
    only final ones. Installed copies read them from
-   `https://raw.githubusercontent.com/rpodsada/vandal/update-manifests/<channel>.json` (cached for
+   `https://raw.githubusercontent.com/flowcat-software/vandal/update-manifests/<channel>.json` (cached for
    up to 5 minutes). Check the run is green and the manifest shows the new version.
 
 **Pulling a bad release:** turn it back into a draft on GitHub (or delete it), then run
@@ -244,7 +244,7 @@ in its environment. Never put the key in the repo or a `VITE_` variable.
 
 ### Testing updates
 
-The app checks `https://raw.githubusercontent.com/rpodsada/vandal/update-manifests/<channel>.json`
+The app checks `https://raw.githubusercontent.com/flowcat-software/vandal/update-manifests/<channel>.json`
 (`src-tauri/src/updater.rs`). For testing, `VANDAL_UPDATE_ENDPOINT` replaces that address with
 any manifest URL; the installer it points at must still be signed with the key in the build's
 `tauri.conf.json`. Dev builds only check when it's set, so with it, `npm run tauri:dev` shows

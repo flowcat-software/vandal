@@ -1,6 +1,6 @@
 # Publishes the updater's channel manifests (PLAN 3P.2).
 #
-# Installed copies read https://raw.githubusercontent.com/rpodsada/vandal/update-manifests/<channel>.json
+# Installed copies read https://raw.githubusercontent.com/flowcat-software/vandal/update-manifests/<channel>.json
 # (beta.json or stable.json). This workflow rewrites them on the orphan
 # update-manifests branch with scripts/update-manifests.mjs, which only offers
 # installers whose updater signature checks out against tauri.conf.json's key.

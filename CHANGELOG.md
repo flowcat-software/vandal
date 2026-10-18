@@ -6,6 +6,13 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Vandal's home on GitHub is now
+  [flowcat-software/vandal](https://github.com/flowcat-software/vandal).** Links in the app
+  (**Settings › About**, update notices, bug reports) and update checks use the new address.
+  The old address redirects, so older versions keep finding updates.
+
 ## [0.3.0-beta.13] - 2026-10-17
 
 ### Added
@@ -81,7 +88,7 @@ All notable changes to Vandal are listed here. The format follows
   around), and **Home** and **End** the first and last. The status bar shows "12 of 41". If
   you've changed the image, Vandal asks whether to save it first.
 - **Report a bug or suggest an idea** in Settings › About opens a new issue on
-  [GitHub](https://github.com/rpodsada/vandal/issues), where bugs and ideas now go.
+  [GitHub](https://github.com/flowcat-software/vandal/issues), where bugs and ideas now go.
 
 ### Changed
 
@@ -106,7 +113,7 @@ All notable changes to Vandal are listed here. The format follows
 
 - **Vandal now connects to the internet for update checks**, and only for them: a small file
   from GitHub that names the latest version, with nothing about you in the request. See
-  [Privacy](https://github.com/rpodsada/vandal/blob/main/README.md#privacy).
+  [Privacy](https://github.com/flowcat-software/vandal/blob/main/README.md#privacy).
 - **The installer is about 3.5 MB** (was about 2.6 MB): the part that downloads updates securely.
 
 ## [0.3.0-beta.6] - 2026-10-03
@@ -158,7 +165,7 @@ All notable changes to Vandal are listed here. The format follows
   release can't change how installers are built.
 - Every release is checked first against known vulnerabilities in the libraries Vandal is built
   from, and isn't built while one is open. To report a security problem privately, see
-  [SECURITY.md](https://github.com/rpodsada/vandal/blob/main/SECURITY.md).
+  [SECURITY.md](https://github.com/flowcat-software/vandal/blob/main/SECURITY.md).
 
 ## [0.3.0-beta.5] - 2026-10-02
 
@@ -387,18 +394,18 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.13...HEAD
-[0.3.0-beta.13]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.12...v0.3.0-beta.13
-[0.3.0-beta.12]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.11...v0.3.0-beta.12
-[0.3.0-beta.11]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.10...v0.3.0-beta.11
-[0.3.0-beta.10]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.9...v0.3.0-beta.10
-[0.3.0-beta.9]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.8...v0.3.0-beta.9
-[0.3.0-beta.8]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.7...v0.3.0-beta.8
-[0.3.0-beta.7]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.6...v0.3.0-beta.7
-[0.3.0-beta.6]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.5...v0.3.0-beta.6
-[0.3.0-beta.5]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.4...v0.3.0-beta.5
-[0.3.0-beta.4]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.3...v0.3.0-beta.4
-[0.3.0-beta.3]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.2...v0.3.0-beta.3
-[0.3.0-beta.2]: https://github.com/rpodsada/vandal/compare/v0.3.0-beta.1...v0.3.0-beta.2
-[0.3.0-beta.1]: https://github.com/rpodsada/vandal/compare/v0.2.0...v0.3.0-beta.1
-[0.2.0]: https://github.com/rpodsada/vandal/releases/tag/v0.2.0
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.13...HEAD
+[0.3.0-beta.13]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.12...v0.3.0-beta.13
+[0.3.0-beta.12]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.11...v0.3.0-beta.12
+[0.3.0-beta.11]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.10...v0.3.0-beta.11
+[0.3.0-beta.10]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.9...v0.3.0-beta.10
+[0.3.0-beta.9]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.8...v0.3.0-beta.9
+[0.3.0-beta.8]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.7...v0.3.0-beta.8
+[0.3.0-beta.7]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.6...v0.3.0-beta.7
+[0.3.0-beta.6]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.5...v0.3.0-beta.6
+[0.3.0-beta.5]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.4...v0.3.0-beta.5
+[0.3.0-beta.4]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.3...v0.3.0-beta.4
+[0.3.0-beta.3]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.2...v0.3.0-beta.3
+[0.3.0-beta.2]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.1...v0.3.0-beta.2
+[0.3.0-beta.1]: https://github.com/flowcat-software/vandal/compare/v0.2.0...v0.3.0-beta.1
+[0.2.0]: https://github.com/flowcat-software/vandal/releases/tag/v0.2.0

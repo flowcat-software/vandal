@@ -28,7 +28,8 @@ use crate::settings::{UpdateChannel, UpdateSettings};
 use crate::state::AppState;
 use crate::{editor, output, session};
 
-const MANIFESTS: &str = "https://raw.githubusercontent.com/rpodsada/vandal/update-manifests";
+const MANIFESTS: &str =
+    "https://raw.githubusercontent.com/flowcat-software/vandal/update-manifests";
 const ENDPOINT_ENV: &str = "VANDAL_UPDATE_ENDPOINT";
 /// The relaunch after an update: starts quietly in the tray, like a login start.
 pub const UPDATED_ARG: &str = "--updated";
@@ -318,7 +319,7 @@ pub fn open_release_notes(version: &str) {
     }
     let _ = std::process::Command::new("explorer.exe")
         .arg(format!(
-            "https://github.com/rpodsada/vandal/releases/tag/v{plain}"
+            "https://github.com/flowcat-software/vandal/releases/tag/v{plain}"
         ))
         .spawn();
 }
@@ -402,7 +403,7 @@ fn friendly_error(e: &tauri_plugin_updater::Error) -> String {
         | E::MissingSignedVersion => concat!(
             "This update couldn't be verified as coming from Vandal, so it wasn't installed ",
             "and nothing changed. Try again later, and if it keeps happening, please report it ",
-            "at github.com/rpodsada/vandal/issues.",
+            "at github.com/flowcat-software/vandal/issues.",
         )
         .into(),
         E::Reqwest(_) | E::Network(_) | E::ReleaseNotFound | E::Io(_) => {

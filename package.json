@@ -5,7 +5,7 @@
   "description": "Fast, free screen capture and markup for Windows",
   "author": "Richard Podsada",
   "license": "GPL-3.0-or-later",
-  "repository": "github:rpodsada/vandal",
+  "repository": "github:flowcat-software/vandal",
   "type": "module",
   "scripts": {
     "dev": "vite",

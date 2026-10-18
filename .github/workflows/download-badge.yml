@@ -5,7 +5,7 @@
 # GitHub's image proxy caches that for up to half an hour. Instead, this sums
 # download_count over every release asset with our own token and writes a
 # shields.io endpoint file to the orphan badges branch:
-#   https://raw.githubusercontent.com/rpodsada/vandal/badges/downloads.json
+#   https://raw.githubusercontent.com/flowcat-software/vandal/badges/downloads.json
 # shields.io then only fetches that static file.
 #
 # The branch holds a single commit, replaced on each change, so it doesn't grow.

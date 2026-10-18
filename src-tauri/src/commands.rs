@@ -152,7 +152,7 @@ pub fn open_keyboard_settings() {
 #[specta::specta]
 pub fn open_project_page() {
     let _ = std::process::Command::new("explorer.exe")
-        .arg("https://github.com/rpodsada/vandal")
+        .arg("https://github.com/flowcat-software/vandal")
         .spawn();
 }
 
@@ -228,7 +228,7 @@ pub async fn editor_flip(
 #[specta::specta]
 pub fn open_issues() {
     let _ = std::process::Command::new("explorer.exe")
-        .arg("https://github.com/rpodsada/vandal/issues/new")
+        .arg("https://github.com/flowcat-software/vandal/issues/new")
         .spawn();
 }
 

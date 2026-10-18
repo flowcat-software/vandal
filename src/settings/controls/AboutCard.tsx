@@ -56,7 +56,7 @@ export function AboutCard({ id }: ControlProps<AboutItem>) {
             className={styles.aboutLink}
             onClick={() => void commands.openProjectPage()}
           >
-            github.com/rpodsada/vandal
+            github.com/flowcat-software/vandal
           </button>
           <button
             type="button"

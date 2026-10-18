@@ -12,7 +12,7 @@ you unless you'd rather not be named.
 ## Supported versions
 
 Only the latest release gets security fixes. Install new versions over the old one from the
-[Releases](https://github.com/rpodsada/vandal/releases) page.
+[Releases](https://github.com/flowcat-software/vandal/releases) page.
 
 ## Checking a download
 

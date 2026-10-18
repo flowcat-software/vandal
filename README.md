@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rpodsada/vandal/releases"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frpodsada%2Fvandal%2Fbadges%2Fdownloads.json&logo=github" alt="Downloads"></a>
+  <a href="https://github.com/flowcat-software/vandal/releases"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fflowcat-software%2Fvandal%2Fbadges%2Fdownloads.json&logo=github" alt="Downloads"></a>
 </p>
 
 <p align="center">
@@ -498,7 +498,7 @@ Optional, but worth it while the installer isn't code-signed. Either check works
   built. This proves the file came from that workflow, unchanged:
 
   ```powershell
-  gh attestation verify .\Vandal_<version>_x64-setup.exe --repo rpodsada/vandal
+  gh attestation verify .\Vandal_<version>_x64-setup.exe --repo flowcat-software/vandal
   ```
 
 ## Troubleshooting
@@ -523,7 +523,7 @@ Taskbar › Other system tray icons**.
 
 **SmartScreen blocks the installer.** Click **More info → Run anyway** (see [Install](#install)).
 
-**Something else?** [Open an issue on GitHub](https://github.com/rpodsada/vandal/issues/new)
+**Something else?** [Open an issue on GitHub](https://github.com/flowcat-software/vandal/issues/new)
 (see [Feedback and bug reports](#feedback-and-bug-reports)).
 
 ## Privacy
@@ -620,9 +620,9 @@ policy is at [vandalscreenshot.com/privacy](https://vandalscreenshot.com/privacy
 
 ## Feedback and bug reports
 
-Found a bug or have an idea? [Open an issue on GitHub](https://github.com/rpodsada/vandal/issues/new)
+Found a bug or have an idea? [Open an issue on GitHub](https://github.com/flowcat-software/vandal/issues/new)
 (it needs a free GitHub account), or look through the
-[existing issues](https://github.com/rpodsada/vandal/issues) first in case it's already there.
+[existing issues](https://github.com/flowcat-software/vandal/issues) first in case it's already there.
 You can also get there from **Settings › About › Report a bug or suggest an idea**. For a bug, it
 helps to include:
 
@@ -633,7 +633,7 @@ helps to include:
   paste the text into the issue
 
 Security problems are the exception: please report those privately, as
-[SECURITY.md](https://github.com/rpodsada/vandal/blob/main/SECURITY.md) explains.
+[SECURITY.md](https://github.com/flowcat-software/vandal/blob/main/SECURITY.md) explains.
 
 ## Building from source
 
