@@ -200,8 +200,8 @@ before the release itself (`0.3.0`). Every release must have a new, higher numbe
    prereleases.
 6. Download the installer from the draft, install it over the previous version and smoke-test
    it. Check `gh attestation verify <installer> --repo flowcat-software/vandal` passes and that its
-   SHA-256 (`Get-FileHash`) matches the draft's `SHA256SUMS.txt`, and put
-   it on the website's download dialog, which is hosted apart from GitHub, so a swapped
+   SHA-256 (`Get-FileHash`) matches the draft's `SHA256SUMS.txt`, and put it on the
+   website's home page (under the version), which is hosted apart from GitHub, so a swapped
    installer can't come with a matching hash. Then press **Publish release** on GitHub.
 7. Publishing starts the **Publish updates** workflow (`.github/workflows/publish-updates.yml`).
    It checks the installer's updater signature against the public key and writes the channel
