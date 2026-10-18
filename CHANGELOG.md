@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.14] - 2026-10-18
+
 ### Changed
 
 - **Vandal's home on GitHub is now
@@ -401,7 +403,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.13...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.14...HEAD
+[0.3.0-beta.14]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.13...v0.3.0-beta.14
 [0.3.0-beta.13]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.12...v0.3.0-beta.13
 [0.3.0-beta.12]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.11...v0.3.0-beta.12
 [0.3.0-beta.11]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.10...v0.3.0-beta.11
