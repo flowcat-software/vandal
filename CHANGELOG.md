@@ -11,7 +11,14 @@ All notable changes to Vandal are listed here. The format follows
 - **Vandal's home on GitHub is now
   [flowcat-software/vandal](https://github.com/flowcat-software/vandal).** Links in the app
   (**Settings › About**, update notices, bug reports) and update checks use the new address.
-  The old address redirects, so older versions keep finding updates.
+  The old address redirects, so older versions keep finding updates. Build provenance
+  records for 0.3.0-beta.13 and earlier stayed with the old owner: to
+  [verify](https://github.com/flowcat-software/vandal#verify-your-download) one of those
+  installers, pass `--owner rpodsada` to `gh attestation verify`.
+- **Vandal is now published by [Flowcat Software](https://flowcat.io).** **Settings › About**
+  says so, with a link to flowcat.io, and Windows' installed apps list shows Flowcat Software as
+  the publisher. Updating keeps Vandal where it's installed, including a folder you chose
+  yourself.
 
 ## [0.3.0-beta.13] - 2026-10-17
 

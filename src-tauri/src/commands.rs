@@ -166,6 +166,16 @@ pub fn open_website() {
         .spawn();
 }
 
+/// Flowcat Software's website, the maker (Settings › About). A fixed address,
+/// like `open_project_page`.
+#[tauri::command]
+#[specta::specta]
+pub fn open_flowcat_site() {
+    let _ = std::process::Command::new("explorer.exe")
+        .arg("https://flowcat.io")
+        .spawn();
+}
+
 /// The quick start guide on the website (Settings › About, the welcome
 /// toast's Guide). A fixed address, like `open_project_page`.
 #[tauri::command]

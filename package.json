@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.3.0-beta.13",
   "description": "Fast, free screen capture and markup for Windows",
-  "author": "Richard Podsada",
+  "author": "Flowcat Software",
   "license": "GPL-3.0-or-later",
   "repository": "github:flowcat-software/vandal",
   "type": "module",

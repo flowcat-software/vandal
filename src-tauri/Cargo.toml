@@ -2,7 +2,7 @@
 name = "vandal"
 version = "0.3.0-beta.13"
 description = "Fast, free screen capture and markup for Windows"
-authors = ["Richard Podsada"]
+authors = ["Flowcat Software"]
 license = "GPL-3.0-or-later"
 repository = "https://github.com/flowcat-software/vandal"
 publish = false

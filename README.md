@@ -501,6 +501,10 @@ Optional, but worth it while the installer isn't code-signed. Either check works
   gh attestation verify .\Vandal_<version>_x64-setup.exe --repo flowcat-software/vandal
   ```
 
+  Versions up to 0.3.0-beta.13 were built before the repository moved to
+  flowcat-software, and their records stayed with the old owner. For those, use
+  `--owner rpodsada` instead of `--repo flowcat-software/vandal`.
+
 ## Troubleshooting
 
 **A shortcut doesn't do anything.** Another app (or Windows) may already use that key

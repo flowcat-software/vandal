@@ -30,7 +30,14 @@ export function AboutCard({ id }: ControlProps<AboutItem>) {
           The screenshot & markup tool that unlocks your productivity.
         </p>
         <p className={styles.aboutMeta}>
-          Created by {pkg.author}
+          Made by{" "}
+          <button
+            type="button"
+            className={`${styles.aboutLink} ${styles.aboutInlineLink}`}
+            onClick={() => void commands.openFlowcatSite()}
+          >
+            {pkg.author}
+          </button>
           <br />
           Copyright © 2026 {pkg.author}
           <br />
@@ -47,16 +54,16 @@ export function AboutCard({ id }: ControlProps<AboutItem>) {
           <button
             type="button"
             className={styles.aboutLink}
-            onClick={() => void commands.openQuickStart()}
+            onClick={() => void commands.openProjectPage()}
           >
-            Quick start guide
+            github.com/flowcat-software/vandal
           </button>
           <button
             type="button"
             className={styles.aboutLink}
-            onClick={() => void commands.openProjectPage()}
+            onClick={() => void commands.openQuickStart()}
           >
-            github.com/flowcat-software/vandal
+            Quick start guide
           </button>
           <button
             type="button"

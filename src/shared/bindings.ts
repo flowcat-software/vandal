@@ -115,6 +115,11 @@ export const commands = {
 	 */
 	openWebsite: () => __TAURI_INVOKE<void>("open_website"),
 	/**
+	 *  Flowcat Software's website, the maker (Settings › About). A fixed address,
+	 *  like `open_project_page`.
+	 */
+	openFlowcatSite: () => __TAURI_INVOKE<void>("open_flowcat_site"),
+	/**
 	 *  The browser extension's Chrome Web Store page (Settings › About). A fixed
 	 *  address, like `open_project_page`.
 	 */

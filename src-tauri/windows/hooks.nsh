@@ -59,7 +59,48 @@
   !insertmacro ${MACRO} "Chromium"
 !macroend
 
+; The publisher moved from Richard Podsada to Flowcat Software in 0.3.0-beta.14.
+; Tauri keeps the install folder in Software\<publisher>\<product> and reads it
+; in .onInit, before any hook, so an upgrade would miss a custom folder (a
+; second copy in the default one), and "Uninstall before installing" would get
+; no folder at all. MUI's GUI init runs after .onInit and before every page:
+; carry the old record across there, and in PREINSTALL for silent installs.
+; Only older installers write the old key, and POSTINSTALL deletes it, so when
+; it exists it's the current install, even over a new key left behind by an
+; uninstall that kept app data. This file is included before Tauri's defines,
+; hence the literal keys (checked against ${MANUPRODUCTKEY} in POSTINSTALL).
+!define VANDAL_OLD_KEY "Software\Richard Podsada\Vandal"
+!define VANDAL_KEY "Software\Flowcat Software\Vandal"
+
+Function VandalMigrateInstallKey
+  Push $0
+  ReadRegStr $0 SHCTX "${VANDAL_OLD_KEY}" ""
+  ${If} $0 != ""
+    WriteRegStr SHCTX "${VANDAL_KEY}" "" $0
+    ; Only replace the default folder, never one passed with /D.
+    ${If} $INSTDIR == "$LOCALAPPDATA\Vandal"
+      StrCpy $INSTDIR $0
+    ${EndIf}
+  ${EndIf}
+  Pop $0
+FunctionEnd
+!define MUI_CUSTOMFUNCTION_GUIINIT VandalMigrateInstallKey
+
+; Silent installs skip GUI init. Not otherwise: it would undo a folder picked
+; on the directory page.
+!macro NSIS_HOOK_PREINSTALL
+  ${If} ${Silent}
+    Call VandalMigrateInstallKey
+    SetOutPath $INSTDIR
+  ${EndIf}
+!macroend
+
 !macro NSIS_HOOK_POSTINSTALL
+  !if "${MANUPRODUCTKEY}" != "${VANDAL_KEY}"
+    !error "hooks.nsh: VANDAL_KEY must match Tauri's ${MANUPRODUCTKEY}"
+  !endif
+  DeleteRegKey SHCTX "${VANDAL_OLD_KEY}"
+  DeleteRegKey /ifempty SHCTX "Software\Richard Podsada"
   WriteRegStr SHCTX "Software\Classes\${CAPTURE_PROGID}" "" "Image"
   WriteRegStr SHCTX "Software\Classes\${CAPTURE_PROGID}\DefaultIcon" "" "$INSTDIR\${MAINBINARYNAME}.exe,0"
   WriteRegStr SHCTX "Software\Classes\${CAPTURE_PROGID}\shell\open" "FriendlyAppName" "${PRODUCTNAME}"

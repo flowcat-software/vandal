@@ -874,6 +874,11 @@
   text-decoration-thickness: 2px;
 }
 
+/* A link inside a line of text ("Made by Flowcat Software"): the text's size. */
+.aboutInlineLink {
+  font-size: inherit;
+}
+
 /* ---- Chrome Extension (PLAN 3N.10) ---- */
 
 /* The text and button, with the popup's screenshot to their right; the
