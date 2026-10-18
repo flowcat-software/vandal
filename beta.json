@@ -1,11 +1,11 @@
 {
-  "version": "0.3.0-beta.13",
-  "notes": "### Added\n\n- **Alt+drag to copy:** hold Alt while dragging marks to drag copies of them, leaving the\n  originals in place, as in design programs. Press or let go of Alt mid-drag to switch between\n  moving and copying. Copied step markers take the next numbers, as with Ctrl+D.\n",
-  "pub_date": "2026-10-17T17:40:37Z",
+  "version": "0.3.0-beta.14",
+  "notes": "### Changed\n\n- **Vandal's home on GitHub is now\n  [flowcat-software/vandal](https://github.com/flowcat-software/vandal).** Links in the app\n  (**Settings › About**, update notices, bug reports) and update checks use the new address.\n  The old address redirects, so older versions keep finding updates. Build provenance\n  records for 0.3.0-beta.13 and earlier stayed with the old owner: to\n  [verify](https://github.com/flowcat-software/vandal#verify-your-download) one of those\n  installers, pass `--owner rpodsada` to `gh attestation verify`.\n- **Vandal is now published by [Flowcat Software](https://flowcat.io).** **Settings › About**\n  says so, with a link to flowcat.io, and Windows' installed apps list shows Flowcat Software as\n  the publisher. Updating keeps Vandal where it's installed, including a folder you chose\n  yourself.\n",
+  "pub_date": "2026-10-18T21:14:05Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUYkpmeDFMdFh6ZnIwWlJ4VzNWdjN1T1g2UnpKQUFSTE9jRjE2VGFqS29ZTXhDT0c1ZWx5UnpMVGNFcWhMY2RiZmhJQkxuKzd1aVQxbCtUNUNJZys5SHJ4SFpJVjNRSGcwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyMjU4NzEzCWZpbGU6VmFuZGFsXzAuMy4wLWJldGEuMTNfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjAuMy4wLWJldGEuMTMKYVQzZTltb1ZmSGNteHpJMlZWRDZVV3YvL2VTY0NlN25VTkFjN3ZLTzdSR3JWNk40S3QwYnBOUG5hY3QxSHg1NGJVR1FiclhIZk9BNE15ZFk0Rk9EQlE9PQo=",
-      "url": "https://github.com/rpodsada/vandal/releases/download/v0.3.0-beta.13/Vandal_0.3.0-beta.13_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUYkpmeDFMdFh6ZmxPWGtqK09JTDFuZkNlNnJIaFNNUlVEV2hXek5kN0JrUFZjNUVhSVUrNXBmdytzREs1YVJyY3NTVHEyOEpVazEwSUl1alhIMGRzSUxIUXFuSnFCbVE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyMzU3OTI5CWZpbGU6VmFuZGFsXzAuMy4wLWJldGEuMTRfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjAuMy4wLWJldGEuMTQKODBDTExpdm84VzIyR1VkcWN0am9OckxrM1c4aHBNakRIUjJ0eGN3RlNwY29ncTFiWmttL1orYXVRZ0JadE1jeFAxVXRCUEpYQUNqOUZJbWZaT3VKQ1E9PQo=",
+      "url": "https://github.com/flowcat-software/vandal/releases/download/v0.3.0-beta.14/Vandal_0.3.0-beta.14_x64-setup.exe"
     }
   }
 }
