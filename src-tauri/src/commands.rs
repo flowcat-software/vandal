@@ -11,7 +11,7 @@ use crate::editor::{
 };
 use crate::folder::{FolderPosition, FolderStep};
 use crate::frames::CaptureId;
-use crate::geometry::PhysicalRect;
+use crate::geometry::{PhysicalPoint, PhysicalRect};
 use crate::ocr::{OcrError, OcrLine};
 use crate::output;
 use crate::session::{
@@ -276,11 +276,30 @@ pub fn quick_markup_changed(app: AppHandle, capture_id: CaptureId, monitor_index
     session::markup_changed(&app, capture_id, monitor_index, has);
 }
 
-/// Quick edit: bring the overlay with the markup back to the front.
+/// Give an overlay the keyboard: quick edit's overlay with the markup, or the
+/// one the eyedropper's loupe moved onto (PLAN 3U).
 #[tauri::command]
 #[specta::specta]
 pub fn quick_focus_overlay(app: AppHandle, monitor_index: u32) {
     session::focus_overlay(&app, monitor_index);
+}
+
+/// The color picker's eyedropper (PLAN 3U): capture the screens and pick a
+/// pixel on the overlays; the color comes back as `ScreenColorPicked`. False
+/// if it couldn't start (a capture is already on screen).
+#[tauri::command]
+#[specta::specta]
+pub async fn pick_screen_color(app: AppHandle, window: WebviewWindow) -> bool {
+    tauri::async_runtime::spawn_blocking(move || session::start_color_pick(&app, window.label()))
+        .await
+        .unwrap_or(false)
+}
+
+/// Pick mode: the pixel at `point` (virtual-desktop physical px) is the color.
+#[tauri::command]
+#[specta::specta]
+pub fn commit_color_pick(app: AppHandle, capture_id: CaptureId, point: PhysicalPoint) {
+    session::commit_color(&app, capture_id, point);
 }
 
 /// Esc / right-click on an overlay.

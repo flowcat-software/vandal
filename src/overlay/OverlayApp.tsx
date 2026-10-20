@@ -11,6 +11,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { commands, events, type OverlayLoad } from "../shared/ipc";
 import { cssToLocalPhysical } from "../shared/geometry";
 import { drawFrame } from "./frame";
+import { ColorLoupe } from "./ColorLoupe";
 import { HintBar } from "./HintBar";
 import { MarkupLayer } from "../markup/MarkupLayer";
 import { useDoc } from "../markup/model/store";
@@ -79,10 +80,16 @@ export function OverlayApp() {
   const [hovered, setHovered] = useState<number | null>(null);
   /** The window a click started on; it's picked if the click ends there too. */
   const pressedWindow = useRef<number | null>(null);
+  /** Eyedropper: a press started here, so its release picks. */
+  const pressedColor = useRef(false);
+  /** Eyedropper: this overlay asked for the keyboard (until it next loses it). */
+  const focusAsked = useRef(false);
 
   const scale = load?.scaleFactor ?? window.devicePixelRatio;
   const size = useMemo(() => (load ? { width: load.width, height: load.height } : null), [load]);
 
+  // The color picker's eyedropper (PLAN 3U): a click picks a pixel, nothing else.
+  const pickColor = !!load?.pickColor;
   // Quick edit's markup (PLAN 2B.2): the tools work while there's a selection.
   const quickEdit = !!load?.quickEdit;
   const creating = drag?.mode === "create";
@@ -114,7 +121,11 @@ export function OverlayApp() {
       setLoad(payload);
       setSelection(null);
       setDrag(null);
-      setPointer(null);
+      // The eyedropper's loupe shows where the pointer is before it moves.
+      const c = payload.pickColor ? payload.cursor : null;
+      const b = payload.physicalBounds;
+      const onHere = c && c.x >= b.x && c.y >= b.y && c.x < b.x + b.width && c.y < b.y + b.height;
+      setPointer(onHere ? { x: c.x - b.x, y: c.y - b.y } : null);
       setNotice(null);
       setBusy(false);
       setPicking(payload.picking);
@@ -167,7 +178,10 @@ export function OverlayApp() {
     });
 
     const onFocus = () => setFocused(true);
-    const onBlur = () => setFocused(false);
+    const onBlur = () => {
+      setFocused(false);
+      focusAsked.current = false;
+    };
     window.addEventListener("focus", onFocus);
     window.addEventListener("blur", onBlur);
 
@@ -219,6 +233,16 @@ export function OverlayApp() {
   const cancel = useCallback(() => {
     if (load) void commands.cancelCapture(load.captureId);
   }, [load]);
+
+  /** Eyedropper: the pixel at a monitor-local point is the color. */
+  const pickColorAt = useCallback(
+    (p: Point) => {
+      if (!load) return;
+      const { x, y } = load.physicalBounds;
+      void commands.commitColorPick(load.captureId, { x: p.x + x, y: p.y + y });
+    },
+    [load],
+  );
 
   // Quick edit: the toolbar on the selection (PLAN 2B.1).
   const quickOutput = useCallback(
@@ -315,6 +339,17 @@ export function OverlayApp() {
       if (!load || e.defaultPrevented || isTyping(e.target)) return;
       // The markup is on another monitor: its overlay has the keys.
       if (lockedOut) return;
+      if (pickColor) {
+        // Esc cancels, Enter picks, arrows nudge the loupe (Shift: 10 px).
+        if (e.key === "Escape") return cancel();
+        if (e.key === "Enter" && pointer) return pickColorAt(pointer);
+        const step = arrowDelta(e.key, e.shiftKey ? 10 : 1);
+        if (step && pointer && size) {
+          e.preventDefault();
+          setPointer(clampPoint({ x: pointer.x + step.x, y: pointer.y + step.y }, size));
+        }
+        return;
+      }
       if (picking) {
         // Esc / W go back to selecting an area; Enter picks the highlighted window.
         if (e.key === "Escape" || (e.code === "KeyW" && !e.repeat && !hasModifier(e))) {
@@ -406,6 +441,8 @@ export function OverlayApp() {
     setWindowPick,
     windowUnder,
     pickWindow,
+    pickColor,
+    pickColorAt,
   ]);
 
   // ---- pointer ----
@@ -442,6 +479,11 @@ export function OverlayApp() {
       return;
     }
     e.currentTarget.setPointerCapture(e.pointerId);
+    if (pickColor) {
+      pressedColor.current = true;
+      setPointer(toLocal(e));
+      return;
+    }
     if (picking) {
       pressedWindow.current = windowUnder(toLocal(e));
       return;
@@ -463,6 +505,14 @@ export function OverlayApp() {
     if (!size) return;
     const p = toLocal(e);
     setPointer(p);
+    if (pickColor) {
+      // The keys (arrows nudge the loupe) go where the loupe is.
+      if (!focused && !focusAsked.current) {
+        focusAsked.current = true;
+        void commands.quickFocusOverlay(monitorIndex);
+      }
+      return;
+    }
     if (picking) {
       const w = windowUnder(p);
       if (w !== hovered) setWindowPick(true, w);
@@ -513,6 +563,13 @@ export function OverlayApp() {
   };
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
+    if (pickColor) {
+      // Picked on release, so the release can't land on the window below.
+      const pressed = pressedColor.current;
+      pressedColor.current = false;
+      if (e.button === 0 && pressed) pickColorAt(toLocal(e));
+      return;
+    }
     if (picking) {
       // Picked on release, so the release can't land on the window below.
       const w = pressedWindow.current;
@@ -549,7 +606,8 @@ export function OverlayApp() {
   // ---- render ----
 
   const css = (v: number) => v / scale;
-  let cursor = picking ? "default" : "crosshair";
+  // The eyedropper's loupe stands in for the cursor.
+  let cursor = pickColor ? "none" : picking ? "default" : "crosshair";
   if (drag?.mode === "move") cursor = "move";
   else if (drag?.mode === "resize") cursor = cursorFor({ kind: "edge", edges: drag.edges });
   else if (!drag && selection && pointer)
@@ -569,7 +627,7 @@ export function OverlayApp() {
           { width: css(size.width), height: css(size.height) },
         )
       : null;
-  const showGuides = load && !selection && !drag && pointer && !picking;
+  const showGuides = load && !selection && !drag && pointer && !picking && !pickColor;
   // The highlighted window: its part on this monitor, and the whole of it in
   // this monitor's pixels (it may run off the edges).
   const picked = picking && load && hovered !== null ? load.windows[hovered] : undefined;
@@ -590,11 +648,22 @@ export function OverlayApp() {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerLeave={() => !drag && setPointer(null)}
+      onPointerLeave={() => {
+        focusAsked.current = false;
+        if (!drag) setPointer(null);
+      }}
       onDoubleClick={onDoubleClick}
     >
       <canvas ref={canvasRef} className={styles.frame} />
-      {load && !selection && !windowShown && <div className={styles.dimAll} />}
+      {load && !selection && !windowShown && !pickColor && <div className={styles.dimAll} />}
+
+      {pickColor && pointer && size && (
+        <ColorLoupe
+          point={pointer}
+          scale={scale}
+          view={{ width: css(size.width), height: css(size.height) }}
+        />
+      )}
 
       {windowRect && windowShown && (
         <>
@@ -691,6 +760,7 @@ export function OverlayApp() {
 
       {load && focused && !drag && !lockedOut && (
         <HintBar
+          pickColor={pickColor}
           picking={picking}
           hasSelection={!!selection}
           quick={quickEdit}

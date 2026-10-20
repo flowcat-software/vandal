@@ -55,6 +55,17 @@ pub struct OverlayLoad {
     pub hovered: Option<u32>,
     /// How many monitors there are: with one, "all screens" is just this one.
     pub monitor_count: u32,
+    /// The color picker's eyedropper (PLAN 3U): click a pixel, nothing else.
+    pub pick_color: bool,
+    /// Where the pointer was at capture time, so the loupe shows straight away.
+    pub cursor: Option<PhysicalPoint>,
+}
+
+/// Rust → the window whose eyedropper asked: the picked `#rrggbb`, or None
+/// if the pick was cancelled.
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+pub struct ScreenColorPicked {
+    pub color: Option<String>,
 }
 
 /// Rust → overlays: you're now shown; reply with `overlay_visible` once painted.
@@ -150,6 +161,9 @@ pub struct Session {
     /// selection goes to the editor (into it, if it's empty), and cancelling
     /// brings it back as it was.
     into: Option<editor::EditorId>,
+    /// Started by the eyedropper of this window (a label, PLAN 3U): the
+    /// overlays pick a color for it, and the capture is dropped afterwards.
+    color_for: Option<String>,
 }
 
 /// What quick edit's image is: the region and the markup's revision (the page
@@ -345,26 +359,39 @@ fn grab(state: &AppState) -> Option<(Vec<MonitorInfo>, bool, Vec<MonitorFrame>, 
 /// Region-capture entry point (hotkey, tray, second launch). Grabs pixels
 /// *first*: nothing may change focus or show a window before that (PLAN §1.1).
 pub fn start_region(app: &AppHandle) {
-    start_region_for(app, None, false);
+    start_region_for(app, None, false, None);
 }
 
 /// Window-capture entry point (the window shortcut, PLAN 3H.4): the region
 /// overlay, already in window mode.
 pub fn start_window(app: &AppHandle) {
-    start_region_for(app, None, true);
+    start_region_for(app, None, true, None);
 }
 
 /// A region capture from the editor `id` (its New capture, PLAN 3G): the
 /// plain selection, which then goes to the editor, into `id` if it's empty.
 pub fn start_region_into(app: &AppHandle, id: editor::EditorId) {
     // No capture after all (one already on screen): the editor comes back.
-    if !start_region_for(app, Some(id), false) {
+    if !start_region_for(app, Some(id), false, None) {
         editor::bring_back(app, id);
     }
 }
 
+/// The eyedropper of the window `requester` (PLAN 3U): the overlays show the
+/// frozen screens in pick mode, and the color goes back to it as
+/// [`ScreenColorPicked`]. The requester stays on screen, so it can be picked
+/// from too. False if no pick started (a capture is already on screen).
+pub fn start_color_pick(app: &AppHandle, requester: &str) -> bool {
+    start_region_for(app, None, false, Some(requester.to_string()))
+}
+
 /// False if no capture started. `picking`: start in window mode.
-fn start_region_for(app: &AppHandle, into: Option<editor::EditorId>, picking: bool) -> bool {
+fn start_region_for(
+    app: &AppHandle,
+    into: Option<editor::EditorId>,
+    picking: bool,
+    color_for: Option<String>,
+) -> bool {
     let started = Instant::now();
     let state = app.state::<AppState>();
     let mut session = state.session.lock().unwrap();
@@ -389,8 +416,10 @@ fn start_region_for(app: &AppHandle, into: Option<editor::EditorId>, picking: bo
     let format = *state.transfer_format.lock().unwrap();
     let (overlay_settings, quick_edit) = {
         let s = state.settings.read().unwrap();
-        (s.overlay.clone(), s.quick_edit.enabled && into.is_none())
+        let plain = into.is_none() && color_for.is_none();
+        (s.overlay.clone(), s.quick_edit.enabled && plain)
     };
+    let cursor = overlay::cursor_position();
     let loads: Vec<OverlayLoad> = capture
         .frames
         .iter()
@@ -412,6 +441,8 @@ fn start_region_for(app: &AppHandle, into: Option<editor::EditorId>, picking: bo
             picking,
             hovered,
             monitor_count: monitors.len() as u32,
+            pick_color: color_for.is_some(),
+            cursor,
         })
         .collect();
     *session = Some(Session {
@@ -436,6 +467,7 @@ fn start_region_for(app: &AppHandle, into: Option<editor::EditorId>, picking: bo
         layer: None,
         highlights: None,
         into,
+        color_for,
     });
     drop(session);
 
@@ -693,9 +725,47 @@ fn end(app: &AppHandle, capture_id: CaptureId) -> Option<Session> {
 }
 
 pub fn cancel(app: &AppHandle, capture_id: CaptureId) {
+    let Some(session) = end(app, capture_id) else {
+        return;
+    };
     // From an editor: it comes back as it was.
-    if let Some(id) = end(app, capture_id).and_then(|s| s.into) {
+    if let Some(id) = session.into {
         editor::bring_back(app, id);
+    }
+    if let Some(requester) = session.color_for {
+        color_picked(app, capture_id, &requester, None);
+    }
+}
+
+/// Pick mode (PLAN 3U): the pixel at `point` (virtual-desktop px) is the color.
+pub fn commit_color(app: &AppHandle, capture_id: CaptureId, point: PhysicalPoint) {
+    let Some(session) = end(app, capture_id) else {
+        return;
+    };
+    let Some(requester) = session.color_for else {
+        return;
+    };
+    let state = app.state::<AppState>();
+    let capture = state.frames.lock().unwrap().get(capture_id);
+    let color = capture.and_then(|c| c.color_at(point));
+    color_picked(app, capture_id, &requester, color);
+}
+
+/// The pick is over: the capture was only for it, and the window that asked
+/// gets its color and the keyboard back.
+fn color_picked(app: &AppHandle, capture_id: CaptureId, requester: &str, color: Option<String>) {
+    app.state::<AppState>()
+        .frames
+        .lock()
+        .unwrap()
+        .remove(capture_id);
+    let _ = ScreenColorPicked { color }.emit_to(app, requester);
+    if let Some(window) = app.get_webview_window(requester) {
+        let _ = app.run_on_main_thread(move || {
+            if let Ok(hwnd) = window.hwnd() {
+                overlay::force_foreground(windows::Win32::Foundation::HWND(hwnd.0));
+            }
+        });
     }
 }
 

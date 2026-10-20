@@ -1,18 +1,8 @@
 import { useRef, useState } from "react";
+import { pickScreenColor } from "../shared/ipc";
 import { hexToHsv, hexToRgb, hsvToHex, parseHex, rgbToHex, type Hsv } from "./color";
 import { setPickingFromScreen } from "./usePopover";
 import styles from "./options.module.css";
-
-// The browser's eyedropper (Chromium, so WebView2): picks any pixel on screen.
-interface EyeDropperApi {
-  open(): Promise<{ sRGBHex: string }>;
-}
-declare global {
-  interface Window {
-    EyeDropper?: new () => EyeDropperApi;
-  }
-}
-const canPickFromScreen = typeof window !== "undefined" && !!window.EyeDropper;
 
 interface Props {
   /** "#rrggbb". */
@@ -57,7 +47,7 @@ export function ColorPicker({ value, onChange }: Props) {
         thumbStyle={{ background: value }}
       />
       <div className={styles.hueRow}>
-        {canPickFromScreen && <Eyedropper onPick={onChange} />}
+        <Eyedropper onPick={onChange} />
         <Area
           className={styles.hueBar}
           label="Hue"
@@ -218,18 +208,19 @@ function NumberField({
   );
 }
 
-/** Pick a color from anywhere on screen, the capture included. */
+/**
+ * Pick a color from anywhere on screen, the capture included: ours (PLAN 3U),
+ * since WebView2's `EyeDropper` stopped opening.
+ */
 function Eyedropper({ onPick }: { onPick: (hex: string) => void }) {
   const pick = async () => {
-    const Api = window.EyeDropper;
-    if (!Api) return;
+    // The overlays take the focus: the popover stays open meanwhile.
     setPickingFromScreen(true);
     try {
-      const { sRGBHex } = await new Api().open();
-      const hex = parseHex(sRGBHex);
+      const hex = parseHex((await pickScreenColor()) ?? "");
       if (hex) onPick(hex);
-    } catch {
-      // Esc: nothing picked.
+    } catch (e) {
+      console.error("Eyedropper failed:", e);
     } finally {
       // After the click or Esc that ended it has gone past the popover.
       setTimeout(() => setPickingFromScreen(false));

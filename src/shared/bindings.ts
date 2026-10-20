@@ -39,6 +39,10 @@ export const commands = {
 	hovered: number | null,
 	/**  How many monitors there are: with one, "all screens" is just this one. */
 	monitorCount: number,
+	/**  The color picker's eyedropper (PLAN 3U): click a pixel, nothing else. */
+	pickColor: boolean,
+	/**  Where the pointer was at capture time, so the loupe shows straight away. */
+	cursor: PhysicalPoint | null,
 } | null>("overlay_pending_load", { monitorIndex }),
 	/**  Overlay finished drawing its frame. */
 	overlayReady: (captureId: number, report: OverlayReport) => __TAURI_INVOKE<void>("overlay_ready", { captureId, report }),
@@ -55,6 +59,14 @@ export const commands = {
 	commitSelection: (captureId: number, target: CaptureTarget) => __TAURI_INVOKE<void>("commit_selection", { captureId, target }),
 	/**  Esc / right-click on an overlay. */
 	cancelCapture: (captureId: number) => __TAURI_INVOKE<void>("cancel_capture", { captureId }),
+	/**
+	 *  The color picker's eyedropper (PLAN 3U): capture the screens and pick a
+	 *  pixel on the overlays; the color comes back as `ScreenColorPicked`. False
+	 *  if it couldn't start (a capture is already on screen).
+	 */
+	pickScreenColor: () => __TAURI_INVOKE<boolean>("pick_screen_color"),
+	/**  Pick mode: the pixel at `point` (virtual-desktop physical px) is the color. */
+	commitColorPick: (captureId: number, point: PhysicalPoint) => __TAURI_INVOKE<void>("commit_color_pick", { captureId, point }),
 	/**  Quick edit's Copy / Save on the selection; may close quick edit. */
 	quickOutput: (captureId: number, rect: PhysicalRect, action: QuickAction, markup: QuickMarkup) => typedError<QuickOutcome, string>(__TAURI_INVOKE("quick_output", { captureId, rect, action, markup })),
 	/**  Quick edit's Done (Enter): deliver the selection with its markup. */
@@ -159,7 +171,10 @@ export const commands = {
 	defaultSettings: () => __TAURI_INVOKE<Settings>("default_settings"),
 	/**  Quick edit: this overlay's selection now has markup (or no longer has). */
 	quickMarkupChanged: (captureId: number, monitorIndex: number, has: boolean) => __TAURI_INVOKE<void>("quick_markup_changed", { captureId, monitorIndex, has }),
-	/**  Quick edit: bring the overlay with the markup back to the front. */
+	/**
+	 *  Give an overlay the keyboard: quick edit's overlay with the markup, or the
+	 *  one the eyedropper's loupe moved onto (PLAN 3U).
+	 */
 	quickFocusOverlay: (monitorIndex: number) => __TAURI_INVOKE<void>("quick_focus_overlay", { monitorIndex }),
 	getSettings: () => __TAURI_INVOKE<Settings>("get_settings"),
 	/**
@@ -319,6 +334,7 @@ export const events = {
 	overlayMarkupOwner: makeEvent<OverlayMarkupOwner>("overlay-markup-owner"),
 	overlayShown: makeEvent<OverlayShown>("overlay-shown"),
 	overlayWindowPick: makeEvent<OverlayWindowPick>("overlay-window-pick"),
+	screenColorPicked: makeEvent<ScreenColorPicked>("screen-color-picked"),
 	settingsChanged: makeEvent<SettingsChanged>("settings-changed"),
 	settingsShowPage: makeEvent<SettingsShowPage>("settings-show-page"),
 	updateAvailable: makeEvent<UpdateAvailable>("update-available"),
@@ -647,6 +663,10 @@ export type OverlayLoad = {
 	hovered: number | null,
 	/**  How many monitors there are: with one, "all screens" is just this one. */
 	monitorCount: number,
+	/**  The color picker's eyedropper (PLAN 3U): click a pixel, nothing else. */
+	pickColor: boolean,
+	/**  Where the pointer was at capture time, so the loupe shows straight away. */
+	cursor: PhysicalPoint | null,
 };
 
 /**
@@ -782,6 +802,14 @@ export type SaveSettings = {
 	openStartsIn?: OpenStartsIn,
 	/**  Where the editor's Save As dialog starts. */
 	saveAsStartsIn?: SaveAsStartsIn,
+};
+
+/**
+ *  Rust → the window whose eyedropper asked: the picked `#rrggbb`, or None
+ *  if the pick was cancelled.
+ */
+export type ScreenColorPicked = {
+	color: string | null,
 };
 
 export type Settings = {

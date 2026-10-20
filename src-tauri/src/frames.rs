@@ -5,12 +5,32 @@ use std::collections::VecDeque;
 use std::sync::Arc;
 
 use crate::capture::MonitorFrame;
+use crate::geometry::PhysicalPoint;
 
 pub type CaptureId = u32;
 
 pub struct Capture {
     pub id: CaptureId,
     pub frames: Vec<Arc<MonitorFrame>>,
+}
+
+impl Capture {
+    /// The color at `p` (virtual-desktop physical px) as `#rrggbb`, if a
+    /// frame covers it (the eyedropper, PLAN 3U).
+    pub fn color_at(&self, p: PhysicalPoint) -> Option<String> {
+        let frame = self
+            .frames
+            .iter()
+            .find(|f| f.monitor.physical_bounds.contains(p))?;
+        let origin = frame.monitor.physical_bounds.origin();
+        let (x, y) = (p.x - origin.x, p.y - origin.y);
+        if x as u32 >= frame.width || y as u32 >= frame.height {
+            return None;
+        }
+        let i = (y as usize * frame.width as usize + x as usize) * 4;
+        let [b, g, r] = [frame.bgra[i], frame.bgra[i + 1], frame.bgra[i + 2]];
+        Some(format!("#{r:02x}{g:02x}{b:02x}"))
+    }
 }
 
 pub struct FrameStore {
@@ -145,6 +165,32 @@ mod tests {
         store.set_capacity(1);
         assert_eq!(store.len(), 1);
         assert!(store.get(ids[2]).is_some());
+    }
+
+    #[test]
+    fn color_at_reads_the_pixel_on_its_monitor() {
+        // A 2×1 monitor left of the origin, pixels BGRA: blue-ish, then red.
+        let mut left = frame(1);
+        left.monitor.physical_bounds = PhysicalRect::new(-2, 0, 2, 1);
+        left.bgra = vec![0xff, 0x80, 0x00, 0, 0x00, 0x00, 0xff, 0];
+        let capture = Capture {
+            id: 1,
+            frames: vec![Arc::new(frame(0)), Arc::new(left)],
+        };
+        assert_eq!(
+            capture.color_at(PhysicalPoint::new(-2, 0)).as_deref(),
+            Some("#0080ff")
+        );
+        assert_eq!(
+            capture.color_at(PhysicalPoint::new(-1, 0)).as_deref(),
+            Some("#ff0000")
+        );
+        assert_eq!(
+            capture.color_at(PhysicalPoint::new(1, 0)).as_deref(),
+            Some("#000000")
+        );
+        assert_eq!(capture.color_at(PhysicalPoint::new(2, 0)), None);
+        assert_eq!(capture.color_at(PhysicalPoint::new(0, 1)), None);
     }
 
     #[test]
