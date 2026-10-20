@@ -1,11 +1,11 @@
 {
-  "version": "0.3.0-beta.14",
-  "notes": "### Changed\n\n- **Vandal's home on GitHub is now\n  [flowcat-software/vandal](https://github.com/flowcat-software/vandal).** Links in the app\n  (**Settings › About**, update notices, bug reports) and update checks use the new address.\n  The old address redirects, so older versions keep finding updates. Build provenance\n  records for 0.3.0-beta.13 and earlier stayed with the old owner: to\n  [verify](https://github.com/flowcat-software/vandal#verify-your-download) one of those\n  installers, pass `--owner rpodsada` to `gh attestation verify`.\n- **Vandal is now published by [Flowcat Software](https://flowcat.io).** **Settings › About**\n  says so, with a link to flowcat.io, and Windows' installed apps list shows Flowcat Software as\n  the publisher. Updating keeps Vandal where it's installed, including a folder you chose\n  yourself.\n",
-  "pub_date": "2026-10-18T21:14:05Z",
+  "version": "0.3.0-beta.15",
+  "notes": "### Changed\n\n- **The capture overlay appears and disappears instantly.** Windows no longer zooms and fades\n  it, which made the screens jump at the edges when a capture started or ended.\n\n### Fixed\n\n- **The color picker's eyedropper works again.** A recent update of Windows' WebView2 broke\n  the browser eyedropper it used, so clicking it did nothing. Vandal now has its own: the\n  screens freeze, and a magnifier shows the pixel under the pointer with its color code. Click\n  or press Enter to pick it, use the arrow keys to move one pixel at a time (Shift: 10), and\n  press Esc to cancel.\n",
+  "pub_date": "2026-10-20T04:04:30Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUYkpmeDFMdFh6ZmxPWGtqK09JTDFuZkNlNnJIaFNNUlVEV2hXek5kN0JrUFZjNUVhSVUrNXBmdytzREs1YVJyY3NTVHEyOEpVazEwSUl1alhIMGRzSUxIUXFuSnFCbVE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyMzU3OTI5CWZpbGU6VmFuZGFsXzAuMy4wLWJldGEuMTRfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjAuMy4wLWJldGEuMTQKODBDTExpdm84VzIyR1VkcWN0am9OckxrM1c4aHBNakRIUjJ0eGN3RlNwY29ncTFiWmttL1orYXVRZ0JadE1jeFAxVXRCUEpYQUNqOUZJbWZaT3VKQ1E9PQo=",
-      "url": "https://github.com/flowcat-software/vandal/releases/download/v0.3.0-beta.14/Vandal_0.3.0-beta.14_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUYkpmeDFMdFh6ZmhQdWk3UHZIcXUzbWxmM1dldzI1MHdkVmdZdGkwZnExVHBIVG5mckMycTFSRXY2NVhzSW5JTW0zRFZ4aWF4cDRyNHpyVllTMnFjOG8va1VOc01TUmdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyNDY4OTE0CWZpbGU6VmFuZGFsXzAuMy4wLWJldGEuMTVfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjAuMy4wLWJldGEuMTUKL1ByT045Vm02dnluV3FwQjVZeGJJaEJJMXZibWFkNEpwOWsvM1JIdklzVlpwMCthN05ndWR5U0FMKzkvYmRpcndjRDA5b2ZMYnFMbElZYTc4b01GQUE9PQo=",
+      "url": "https://github.com/flowcat-software/vandal/releases/download/v0.3.0-beta.15/Vandal_0.3.0-beta.15_x64-setup.exe"
     }
   }
 }
