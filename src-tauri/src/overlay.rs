@@ -1,9 +1,13 @@
 //! Overlay window pool: one pre-created, hidden, borderless window per monitor,
 //! sized in physical pixels to the full monitor bounds (PLAN §4.1, §4.4).
 
+use std::ffi::c_void;
+
 use tauri::webview::Color;
 use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindow};
+use windows::core::BOOL;
 use windows::Win32::Foundation::{HWND, POINT};
+use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_TRANSITIONS_FORCEDISABLED};
 use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
 use windows::Win32::UI::Input::KeyboardAndMouse::SetFocus;
 use windows::Win32::UI::WindowsAndMessaging::{
@@ -49,7 +53,33 @@ fn create(app: &AppHandle, m: &MonitorInfo) -> tauri::Result<()> {
         .background_color(Color(0, 0, 0, 255))
         .build()?;
     crate::browser_keys::disable(&window);
+    no_transitions(&window);
     place(&window, m.physical_bounds)
+}
+
+/// No show/hide animation: Windows zooms and fades a window as it appears or
+/// goes, which on a window the size of a monitor makes the whole screen jump
+/// (PLAN 3U.4). An overlay should just be there, and then just be gone.
+fn no_transitions(window: &WebviewWindow) {
+    let Ok(hwnd) = window.hwnd() else {
+        return;
+    };
+    let disabled = BOOL::from(true);
+    // SAFETY: a valid window handle and a BOOL-sized attribute value.
+    let result = unsafe {
+        DwmSetWindowAttribute(
+            HWND(hwnd.0),
+            DWMWA_TRANSITIONS_FORCEDISABLED,
+            &disabled as *const BOOL as *const c_void,
+            size_of::<BOOL>() as u32,
+        )
+    };
+    if let Err(e) = result {
+        eprintln!(
+            "[overlay] {}: can't turn off transitions: {e}",
+            window.label()
+        );
+    }
 }
 
 /// Match the pool to a new monitor layout: re-place existing overlays, create

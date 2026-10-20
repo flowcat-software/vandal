@@ -6,6 +6,19 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **The capture overlay appears and disappears instantly.** Windows no longer zooms and fades
+  it, which made the screens jump at the edges when a capture started or ended.
+
+### Fixed
+
+- **The color picker's eyedropper works again.** A recent update of Windows' WebView2 broke
+  the browser eyedropper it used, so clicking it did nothing. Vandal now has its own: the
+  screens freeze, and a magnifier shows the pixel under the pointer with its color code. Click
+  or press Enter to pick it, use the arrow keys to move one pixel at a time (Shift: 10), and
+  press Esc to cancel.
+
 ## [0.3.0-beta.14] - 2026-10-18
 
 ### Changed
