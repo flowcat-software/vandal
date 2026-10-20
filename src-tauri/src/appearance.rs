@@ -47,8 +47,10 @@ pub fn themed<'a>(
     builder: WebviewWindowBuilder<'a, Wry, AppHandle>,
 ) -> WebviewWindowBuilder<'a, Wry, AppHandle> {
     let mode = current(app);
+    // Init scripts also run in documents that have no <html> yet (null
+    // documentElement); those have nothing to theme.
     builder.theme(native(mode)).initialization_script(format!(
-        "document.documentElement.dataset.theme = {:?};",
+        "if (document.documentElement) document.documentElement.dataset.theme = {:?};",
         attribute(mode)
     ))
 }
