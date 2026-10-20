@@ -7,6 +7,11 @@ export function setPickingFromScreen(on: boolean): void {
   pickingFromScreen = on;
 }
 
+/** Whether the eyedropper is picking (the dropdown that holds a picker stays open too). */
+export function isPickingFromScreen(): boolean {
+  return pickingFromScreen;
+}
+
 /**
  * How the color popovers close while `open`: Enter keeps, Esc cancels (and is
  * not a step of the editor's Esc ladder), and a click elsewhere or the window
@@ -31,9 +36,10 @@ export function usePopover(
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" && e.key !== "Enter") return;
+      // The eyedropper's: in quick edit, the overlay's pick mode takes them.
+      if (pickingFromScreen) return;
       e.stopImmediatePropagation();
       e.preventDefault();
-      if (pickingFromScreen) return;
       // A field being typed in applies its text first.
       if (e.key === "Enter" && document.activeElement instanceof HTMLInputElement)
         document.activeElement.blur();

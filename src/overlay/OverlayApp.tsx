@@ -88,15 +88,18 @@ export function OverlayApp() {
   const scale = load?.scaleFactor ?? window.devicePixelRatio;
   const size = useMemo(() => (load ? { width: load.width, height: load.height } : null), [load]);
 
-  // The color picker's eyedropper (PLAN 3U): a click picks a pixel, nothing else.
-  const pickColor = !!load?.pickColor;
+  // The color picker's eyedropper (PLAN 3U): a click picks a pixel, nothing
+  // else. A capture of its own, or quick edit's switched over in place (3U.2).
+  const [pickingInPlace, setPickingInPlace] = useState(false);
+  const pickColor = !!load?.pickColor || pickingInPlace;
   // Quick edit's markup (PLAN 2B.2): the tools work while there's a selection.
   const quickEdit = !!load?.quickEdit;
   const creating = drag?.mode === "create";
   const quickActive = quickEdit && !!selection && !creating;
   const quickActiveRef = useRef(quickActive);
   useEffect(() => {
-    quickActiveRef.current = quickActive;
+    // While the eyedropper picks, the keys are its own.
+    quickActiveRef.current = quickActive && !pickColor;
   });
   // First, so the markup's keys (Esc steps, arrows on objects...) come before ours.
   useMarkupKeys(() => quickActiveRef.current);
@@ -114,18 +117,18 @@ export function OverlayApp() {
   useEffect(() => {
     const canvas = canvasRef.current!;
     let captureId: number | null = null;
+    let loaded: OverlayLoad | null = null;
 
     const handleLoad = async (payload: OverlayLoad) => {
       if (payload.monitorIndex !== monitorIndex) return;
       captureId = payload.captureId;
+      loaded = payload;
       setLoad(payload);
       setSelection(null);
       setDrag(null);
       // The eyedropper's loupe shows where the pointer is before it moves.
-      const c = payload.pickColor ? payload.cursor : null;
-      const b = payload.physicalBounds;
-      const onHere = c && c.x >= b.x && c.y >= b.y && c.x < b.x + b.width && c.y < b.y + b.height;
-      setPointer(onHere ? { x: c.x - b.x, y: c.y - b.y } : null);
+      setPointer(payload.pickColor ? localPoint(payload, payload.cursor) : null);
+      setPickingInPlace(false);
       setNotice(null);
       setBusy(false);
       setPicking(payload.picking);
@@ -163,6 +166,12 @@ export function OverlayApp() {
           setSelection(null);
           setDrag(null);
         }
+      }),
+      events.overlayColorPick.listen(({ payload }) => {
+        if (payload.captureId !== captureId || !loaded) return;
+        setPickingInPlace(payload.on);
+        pressedColor.current = false;
+        if (payload.on) setPointer(localPoint(loaded, payload.cursor));
       }),
       events.overlayClearSelection.listen(({ payload }) => {
         if (payload.captureId === captureId && payload.monitorIndex !== monitorIndex) {
@@ -234,12 +243,12 @@ export function OverlayApp() {
     if (load) void commands.cancelCapture(load.captureId);
   }, [load]);
 
-  /** Eyedropper: the pixel at a monitor-local point is the color. */
+  /** Eyedropper: the pixel at a monitor-local point is the color (null: none). */
   const pickColorAt = useCallback(
-    (p: Point) => {
+    (p: Point | null) => {
       if (!load) return;
       const { x, y } = load.physicalBounds;
-      void commands.commitColorPick(load.captureId, { x: p.x + x, y: p.y + y });
+      void commands.commitColorPick(load.captureId, p && { x: p.x + x, y: p.y + y });
     },
     [load],
   );
@@ -337,11 +346,10 @@ export function OverlayApp() {
     const onKeyDown = (e: KeyboardEvent) => {
       // Taken by the markup (or typed into a text box).
       if (!load || e.defaultPrevented || isTyping(e.target)) return;
-      // The markup is on another monitor: its overlay has the keys.
-      if (lockedOut) return;
       if (pickColor) {
-        // Esc cancels, Enter picks, arrows nudge the loupe (Shift: 10 px).
-        if (e.key === "Escape") return cancel();
+        // Esc cancels (the pick only, in quick edit), Enter picks, arrows
+        // nudge the loupe (Shift: 10 px).
+        if (e.key === "Escape") return pickColorAt(null);
         if (e.key === "Enter" && pointer) return pickColorAt(pointer);
         const step = arrowDelta(e.key, e.shiftKey ? 10 : 1);
         if (step && pointer && size) {
@@ -350,6 +358,8 @@ export function OverlayApp() {
         }
         return;
       }
+      // The markup is on another monitor: its overlay has the keys.
+      if (lockedOut) return;
       if (picking) {
         // Esc / W go back to selecting an area; Enter picks the highlighted window.
         if (e.key === "Escape" || (e.code === "KeyW" && !e.repeat && !hasModifier(e))) {
@@ -410,6 +420,7 @@ export function OverlayApp() {
     };
     const onContextMenu = (e: MouseEvent) => {
       e.preventDefault();
+      if (pickColor) return pickColorAt(null);
       // The quick edit card has right-clicks of its own (edit a preset, open
       // the custom color picker), and none of them mean cancel.
       if (barRef.current?.contains(e.target as Node)) return;
@@ -460,6 +471,7 @@ export function OverlayApp() {
    * leaves (Select on empty space) moves the selection.
    */
   const onPointerDownCapture = (e: PointerEvent<HTMLDivElement>) => {
+    if (pickColor) return;
     if (!quickActive || e.button !== 0 || !selection) return;
     const target = e.target as Element;
     if (target.closest("[data-grip]") || barRef.current?.contains(target)) return;
@@ -472,6 +484,12 @@ export function OverlayApp() {
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0 || !load || !size) return;
+    if (pickColor) {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      pressedColor.current = true;
+      setPointer(toLocal(e));
+      return;
+    }
     // Selecting text in the box being typed into.
     if (wasTaken(e.nativeEvent) || isTyping(e.target)) return;
     if (lockedOut) {
@@ -479,11 +497,6 @@ export function OverlayApp() {
       return;
     }
     e.currentTarget.setPointerCapture(e.pointerId);
-    if (pickColor) {
-      pressedColor.current = true;
-      setPointer(toLocal(e));
-      return;
-    }
     if (picking) {
       pressedWindow.current = windowUnder(toLocal(e));
       return;
@@ -583,7 +596,7 @@ export function OverlayApp() {
   };
 
   const onDoubleClick = (e: { nativeEvent: Event }) => {
-    if (wasTaken(e.nativeEvent) || picking) return;
+    if (wasTaken(e.nativeEvent) || picking || pickColor) return;
     // In quick edit only with the Select tool: otherwise it's a drawing gesture.
     if (quickEdit && tool !== "select") return;
     if (selection && pointer && hitTest(selection, pointer, 0)?.kind === "inside") {
@@ -656,14 +669,6 @@ export function OverlayApp() {
     >
       <canvas ref={canvasRef} className={styles.frame} />
       {load && !selection && !windowShown && !pickColor && <div className={styles.dimAll} />}
-
-      {pickColor && pointer && size && (
-        <ColorLoupe
-          point={pointer}
-          scale={scale}
-          view={{ width: css(size.width), height: css(size.height) }}
-        />
-      )}
 
       {windowRect && windowShown && (
         <>
@@ -758,7 +763,17 @@ export function OverlayApp() {
         />
       )}
 
-      {load && focused && !drag && !lockedOut && (
+      {/* Over everything, quick edit's toolbar and markup too: a click only picks. */}
+      {pickColor && <div className={styles.pickShield} />}
+      {pickColor && pointer && size && (
+        <ColorLoupe
+          point={pointer}
+          scale={scale}
+          view={{ width: css(size.width), height: css(size.height) }}
+        />
+      )}
+
+      {load && focused && !drag && (!lockedOut || pickColor) && (
         <HintBar
           pickColor={pickColor}
           picking={picking}
@@ -777,3 +792,10 @@ const hasModifier = (e: KeyboardEvent) => e.ctrlKey || e.altKey || e.shiftKey ||
 const HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"] as const;
 /** Grab strips along the edges (quick edit, where the markup covers the rest). */
 const EDGES = ["n", "e", "s", "w"] as const;
+
+/** A virtual-desktop point as this monitor's local px, or null if it's elsewhere. */
+function localPoint(load: OverlayLoad, p: Point | null): Point | null {
+  const b = load.physicalBounds;
+  if (!p || p.x < b.x || p.y < b.y || p.x >= b.x + b.width || p.y >= b.y + b.height) return null;
+  return { x: p.x - b.x, y: p.y - b.y };
+}

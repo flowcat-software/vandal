@@ -121,6 +121,7 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             session::OverlayWindowPick,
             session::OverlayMarkupOwner,
             session::ScreenColorPicked,
+            session::OverlayColorPick,
             appearance::WindowsAccentChanged,
             settings::SettingsChanged,
             updater::UpdateAvailable,

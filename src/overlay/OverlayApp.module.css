@@ -386,6 +386,7 @@
 /* Centred on the pointer, which it stands in for. */
 .loupe {
   position: absolute;
+  z-index: 1001;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -448,4 +449,12 @@
   height: 14px;
   border-radius: 3px;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
+}
+
+/* Quick edit's eyedropper: above the toolbar and markup, so a click only picks. */
+.pickShield {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  cursor: none;
 }

@@ -65,8 +65,14 @@ export const commands = {
 	 *  if it couldn't start (a capture is already on screen).
 	 */
 	pickScreenColor: () => __TAURI_INVOKE<boolean>("pick_screen_color"),
-	/**  Pick mode: the pixel at `point` (virtual-desktop physical px) is the color. */
-	commitColorPick: (captureId: number, point: PhysicalPoint) => __TAURI_INVOKE<void>("commit_color_pick", { captureId, point }),
+	/**
+	 *  Pick mode: the pixel at `point` (virtual-desktop physical px) is the
+	 *  color; None cancels the pick.
+	 */
+	commitColorPick: (captureId: number, point: {
+	x: number,
+	y: number,
+} | null) => __TAURI_INVOKE<void>("commit_color_pick", { captureId, point }),
 	/**  Quick edit's Copy / Save on the selection; may close quick edit. */
 	quickOutput: (captureId: number, rect: PhysicalRect, action: QuickAction, markup: QuickMarkup) => typedError<QuickOutcome, string>(__TAURI_INVOKE("quick_output", { captureId, rect, action, markup })),
 	/**  Quick edit's Done (Enter): deliver the selection with its markup. */
@@ -330,6 +336,7 @@ export const commands = {
 export const events = {
 	editorLeaveForUpdate: makeEvent<EditorLeaveForUpdate>("editor-leave-for-update"),
 	overlayClearSelection: makeEvent<OverlayClearSelection>("overlay-clear-selection"),
+	overlayColorPick: makeEvent<OverlayColorPick>("overlay-color-pick"),
 	overlayLoad: makeEvent<OverlayLoad>("overlay-load"),
 	overlayMarkupOwner: makeEvent<OverlayMarkupOwner>("overlay-markup-owner"),
 	overlayShown: makeEvent<OverlayShown>("overlay-shown"),
@@ -630,6 +637,16 @@ export type OpenStartsIn =
 export type OverlayClearSelection = {
 	captureId: number,
 	monitorIndex: number,
+};
+
+/**
+ *  Rust → overlays: quick edit's eyedropper (PLAN 3U.2) turns pick mode on
+ *  or off in place, with the pointer's position when it starts.
+ */
+export type OverlayColorPick = {
+	captureId: number,
+	on: boolean,
+	cursor: PhysicalPoint | null,
 };
 
 /**  Rust → overlay-n: fetch and draw this frame, then call `overlay_ready`. */

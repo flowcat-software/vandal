@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { boxOf, useMenuPlacement, type MenuAlign } from "./menuPlacement";
+import { isPickingFromScreen } from "./usePopover";
 import styles from "./options.module.css";
 
 interface Props {
@@ -62,6 +63,8 @@ export function Dropdown({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
+      // Quick edit's eyedropper (PLAN 3U.2): its clicks land on the overlay.
+      if (isPickingFromScreen()) return;
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
     // Esc closes the menu only, not a step of the editor's Esc ladder.

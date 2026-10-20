@@ -295,10 +295,11 @@ pub async fn pick_screen_color(app: AppHandle, window: WebviewWindow) -> bool {
         .unwrap_or(false)
 }
 
-/// Pick mode: the pixel at `point` (virtual-desktop physical px) is the color.
+/// Pick mode: the pixel at `point` (virtual-desktop physical px) is the
+/// color; None cancels the pick.
 #[tauri::command]
 #[specta::specta]
-pub fn commit_color_pick(app: AppHandle, capture_id: CaptureId, point: PhysicalPoint) {
+pub fn commit_color_pick(app: AppHandle, capture_id: CaptureId, point: Option<PhysicalPoint>) {
     session::commit_color(&app, capture_id, point);
 }
 

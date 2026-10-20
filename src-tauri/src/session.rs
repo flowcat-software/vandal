@@ -68,6 +68,25 @@ pub struct ScreenColorPicked {
     pub color: Option<String>,
 }
 
+/// Rust → overlays: quick edit's eyedropper (PLAN 3U.2) turns pick mode on
+/// or off in place, with the pointer's position when it starts.
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(rename_all = "camelCase")]
+pub struct OverlayColorPick {
+    pub capture_id: CaptureId,
+    pub on: bool,
+    pub cursor: Option<PhysicalPoint>,
+}
+
+/// An eyedropper pick on the overlays (PLAN 3U): for the window `requester`
+/// (a label). `in_place`: quick edit's own, on its capture, which goes on
+/// afterwards; otherwise the capture was made for the pick and ends with it.
+#[derive(Debug, Clone)]
+struct ColorPick {
+    requester: String,
+    in_place: bool,
+}
+
 /// Rust → overlays: you're now shown; reply with `overlay_visible` once painted.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 #[serde(rename_all = "camelCase")]
@@ -161,9 +180,8 @@ pub struct Session {
     /// selection goes to the editor (into it, if it's empty), and cancelling
     /// brings it back as it was.
     into: Option<editor::EditorId>,
-    /// Started by the eyedropper of this window (a label, PLAN 3U): the
-    /// overlays pick a color for it, and the capture is dropped afterwards.
-    color_for: Option<String>,
+    /// An eyedropper pick going on (PLAN 3U).
+    color_pick: Option<ColorPick>,
 }
 
 /// What quick edit's image is: the region and the markup's revision (the page
@@ -380,9 +398,36 @@ pub fn start_region_into(app: &AppHandle, id: editor::EditorId) {
 /// The eyedropper of the window `requester` (PLAN 3U): the overlays show the
 /// frozen screens in pick mode, and the color goes back to it as
 /// [`ScreenColorPicked`]. The requester stays on screen, so it can be picked
-/// from too. False if no pick started (a capture is already on screen).
+/// from too. From quick edit (an overlay), its capture switches to pick mode
+/// in place (3U.2). False if no pick started (another capture is on screen).
 pub fn start_color_pick(app: &AppHandle, requester: &str) -> bool {
+    if overlay::is_overlay(requester) {
+        return pick_in_place(app, requester);
+    }
     start_region_for(app, None, false, Some(requester.to_string()))
+}
+
+fn pick_in_place(app: &AppHandle, requester: &str) -> bool {
+    let state = app.state::<AppState>();
+    let capture_id = {
+        let mut guard = state.session.lock().unwrap();
+        let Some(s) = guard.as_mut().filter(|s| s.color_pick.is_none()) else {
+            return false;
+        };
+        s.color_pick = Some(ColorPick {
+            requester: requester.to_string(),
+            in_place: true,
+        });
+        s.capture_id
+    };
+    let cursor = overlay::cursor_position();
+    let _ = OverlayColorPick {
+        capture_id,
+        on: true,
+        cursor,
+    }
+    .emit(app);
+    true
 }
 
 /// False if no capture started. `picking`: start in window mode.
@@ -467,7 +512,10 @@ fn start_region_for(
         layer: None,
         highlights: None,
         into,
-        color_for,
+        color_pick: color_for.map(|requester| ColorPick {
+            requester,
+            in_place: false,
+        }),
     });
     drop(session);
 
@@ -732,35 +780,64 @@ pub fn cancel(app: &AppHandle, capture_id: CaptureId) {
     if let Some(id) = session.into {
         editor::bring_back(app, id);
     }
-    if let Some(requester) = session.color_for {
-        color_picked(app, capture_id, &requester, None);
+    if let Some(pick) = session.color_pick {
+        color_picked(app, capture_id, &pick, None);
     }
 }
 
-/// Pick mode (PLAN 3U): the pixel at `point` (virtual-desktop px) is the color.
-pub fn commit_color(app: &AppHandle, capture_id: CaptureId, point: PhysicalPoint) {
-    let Some(session) = end(app, capture_id) else {
-        return;
-    };
-    let Some(requester) = session.color_for else {
-        return;
-    };
+/// Pick mode (PLAN 3U): the pixel at `point` (virtual-desktop px) is the
+/// color; None cancels the pick (and a capture made only for it).
+pub fn commit_color(app: &AppHandle, capture_id: CaptureId, point: Option<PhysicalPoint>) {
     let state = app.state::<AppState>();
-    let capture = state.frames.lock().unwrap().get(capture_id);
-    let color = capture.and_then(|c| c.color_at(point));
-    color_picked(app, capture_id, &requester, color);
+    let in_place = {
+        let guard = state.session.lock().unwrap();
+        match guard.as_ref().filter(|s| s.capture_id == capture_id) {
+            Some(Session {
+                color_pick: Some(pick),
+                ..
+            }) => pick.in_place,
+            _ => return,
+        }
+    };
+    let color = point.and_then(|p| {
+        let capture = state.frames.lock().unwrap().get(capture_id)?;
+        capture.color_at(p)
+    });
+    let pick = if in_place {
+        // Quick edit goes on.
+        let pick = state
+            .session
+            .lock()
+            .unwrap()
+            .as_mut()
+            .and_then(|s| s.color_pick.take());
+        let _ = OverlayColorPick {
+            capture_id,
+            on: false,
+            cursor: None,
+        }
+        .emit(app);
+        pick
+    } else {
+        end(app, capture_id).and_then(|s| s.color_pick)
+    };
+    if let Some(pick) = pick {
+        color_picked(app, capture_id, &pick, color);
+    }
 }
 
-/// The pick is over: the capture was only for it, and the window that asked
-/// gets its color and the keyboard back.
-fn color_picked(app: &AppHandle, capture_id: CaptureId, requester: &str, color: Option<String>) {
-    app.state::<AppState>()
-        .frames
-        .lock()
-        .unwrap()
-        .remove(capture_id);
-    let _ = ScreenColorPicked { color }.emit_to(app, requester);
-    if let Some(window) = app.get_webview_window(requester) {
+/// The pick is over: the window that asked gets its color and the keyboard
+/// back, and a capture made only for the pick goes.
+fn color_picked(app: &AppHandle, capture_id: CaptureId, pick: &ColorPick, color: Option<String>) {
+    if !pick.in_place {
+        app.state::<AppState>()
+            .frames
+            .lock()
+            .unwrap()
+            .remove(capture_id);
+    }
+    let _ = ScreenColorPicked { color }.emit_to(app, pick.requester.as_str());
+    if let Some(window) = app.get_webview_window(&pick.requester) {
         let _ = app.run_on_main_thread(move || {
             if let Ok(hwnd) = window.hwnd() {
                 overlay::force_foreground(windows::Win32::Foundation::HWND(hwnd.0));
