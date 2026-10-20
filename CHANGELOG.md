@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.15] - 2026-10-19
+
 ### Changed
 
 - **The capture overlay appears and disappears instantly.** Windows no longer zooms and fades
@@ -416,7 +418,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.14...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.15...HEAD
+[0.3.0-beta.15]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.14...v0.3.0-beta.15
 [0.3.0-beta.14]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.13...v0.3.0-beta.14
 [0.3.0-beta.13]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.12...v0.3.0-beta.13
 [0.3.0-beta.12]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.11...v0.3.0-beta.12
