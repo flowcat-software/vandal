@@ -7,7 +7,7 @@ import { useToolStore, type ToolId } from "./toolStore";
 import styles from "./markup.module.css";
 
 const TOOL_BUTTONS: { id: ToolId; label: string; icon: ReactNode }[] = [
-  { id: "select", label: "Select", icon: <path d="M6 3.5l12 7.2-5.4 1.4-2.6 5.4z" /> },
+  { id: "select", label: "Select", icon: <path d="M6 5l12 7.2-5.4 1.4-2.6 5.4z" /> },
   {
     id: "pen",
     label: "Pen",

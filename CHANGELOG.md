@@ -11,6 +11,11 @@ All notable changes to Vandal are listed here. The format follows
 - **Settings › About links to Flowcat Software's new address,
   [flowcat.studio](https://flowcat.studio).**
 
+### Fixed
+
+- **The toolbar's Select icon sits level with the other tools.** Its arrow was drawn a little
+  high.
+
 ## [0.3.0-beta.15] - 2026-10-19
 
 ### Changed
