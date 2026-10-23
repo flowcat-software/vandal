@@ -172,7 +172,7 @@ pub fn open_website() {
 #[specta::specta]
 pub fn open_flowcat_site() {
     let _ = std::process::Command::new("explorer.exe")
-        .arg("https://flowcat.io")
+        .arg("https://flowcat.studio")
         .spawn();
 }
 
