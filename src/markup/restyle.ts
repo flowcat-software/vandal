@@ -68,7 +68,13 @@ export function styleTarget(
       kinds.find((k) => k !== "highlighter" && k !== "redact" && k !== "spotlight") ??
       kinds.find((k) => k !== "highlighter") ??
       kinds[0];
-    return { tool: TOOL_FOR_KIND[lead], ids: picked.map((a) => a.id), kinds };
+    // Its first object first: the controls show its values (PLAN 3V.5, from
+    // Razorcat: a spotlight drawn first showed its color over a step marker's).
+    const ordered = [
+      ...picked.filter((a) => a.kind === lead),
+      ...picked.filter((a) => a.kind !== lead),
+    ];
+    return { tool: TOOL_FOR_KIND[lead], ids: ordered.map((a) => a.id), kinds };
   }
   if (tool === "select") return null;
   return { tool, ids: [], kinds: [tool] };

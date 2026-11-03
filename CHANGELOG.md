@@ -30,6 +30,9 @@ All notable changes to Vandal are listed here. The format follows
 
 ### Fixed
 
+- **Selecting different kinds of marks together shows the right style.** With a spotlight drawn
+  before a rectangle or step marker, for example, the options bar showed the shape's controls
+  with the spotlight's color.
 - **The toolbar's Select icon sits level with the other tools.** Its arrow was drawn a little
   high.
 

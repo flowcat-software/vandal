@@ -193,6 +193,24 @@ describe("applyStyle on spotlights", () => {
   const spotlight = (id: string) =>
     docStore.getState().doc.annotations.find((a) => a.id === id) as SpotlightAnnotation;
 
+  it("shows the other kind's values in a selection with a spotlight, whichever is first", () => {
+    for (const spotFirst of [true, false]) {
+      docStore.getState().load(emptyDoc({ width: 100, height: 100 }));
+      const rect = () =>
+        docStore.getState().add({
+          kind: "rect",
+          rect: { x: 0, y: 0, width: 10, height: 10 },
+          rotation: 0,
+          fill: "none",
+          fillColor: "#000000",
+          style: { color: "#123456", width: 4, opacity: 1 },
+        });
+      const ids = spotFirst ? [addSpotlight(), rect()] : [rect(), addSpotlight()];
+      docStore.getState().select(ids);
+      expect(targetValues(styleTarget()!, docStore.getState().doc).color).toBe("#123456");
+    }
+  });
+
   it("changes every spotlight's darkness, selected or not", () => {
     const a = addSpotlight();
     const b = addSpotlight();
