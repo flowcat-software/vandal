@@ -971,3 +971,57 @@
   color: var(--text-2);
   font-size: 12px;
 }
+
+/* Buttons side by side (Settings › About › Reset). */
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- alerts (Alert.tsx, PLAN 3V.3): the fields' bars in four tones ---- */
+
+.alert {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.alertSuccess {
+  background: var(--success-bg);
+  box-shadow: 0 0 0 1px var(--success-border);
+}
+
+.alertInfo {
+  background: var(--info-bg);
+  box-shadow: 0 0 0 1px var(--info-border);
+}
+
+.alertWarning {
+  background: var(--warning-bg);
+  box-shadow: 0 0 0 1px var(--warning-border);
+}
+
+.alertError {
+  background: var(--error-bg);
+  box-shadow: 0 0 0 1px var(--error-border);
+}
+
+/* A confirmation that goes by itself: shown, then faded (Alert's `fadeAfter` sets the delay). */
+.fadeOut {
+  animation: alertFade 0.4s ease forwards;
+}
+
+@keyframes alertFade {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fadeOut {
+    animation-duration: 1ms;
+  }
+}

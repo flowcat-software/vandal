@@ -7,8 +7,11 @@
 //! and ignores anything it doesn't recognize, so adding a tool option needs no
 //! change here. `editor.rememberToolStyles` off: nothing is handed out or kept.
 
+use serde::Serialize;
+use specta::Type;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_store::StoreExt;
+use tauri_specta::Event;
 
 use crate::state::AppState;
 
@@ -53,4 +56,20 @@ pub fn save(app: &AppHandle, json: &str) {
     if let Err(e) = store.save() {
         eprintln!("[tool-styles] cannot save: {e}");
     }
+}
+
+/// Rust → the pages: the remembered styles were forgotten (Settings › About's
+/// resets, PLAN 3V.3): their tools go back to theirs as installed.
+#[derive(Debug, Clone, Serialize, Type, Event)]
+pub struct ToolStylesReset;
+
+/// Forget the remembered styles, and tell the pages to (Settings › About's resets).
+pub fn forget(app: &AppHandle) {
+    if let Ok(store) = app.store(FILE) {
+        store.delete(KEY);
+        if let Err(e) = store.save() {
+            eprintln!("[tool-styles] cannot save: {e}");
+        }
+    }
+    let _ = ToolStylesReset.emit(app);
 }

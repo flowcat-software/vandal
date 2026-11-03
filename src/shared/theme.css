@@ -51,6 +51,11 @@
   /* A delete button's hover (as Windows' close button), with white on it. */
   --danger: light-dark(#c42b1c, #b02719); /* dark: 10% darker, less glaring */
   --success-text: light-dark(#0f7b0f, #6ccb5f);
+  /* Settings' alerts (Alert.tsx, PLAN 3V.3): done (Fluent's success), and for information. */
+  --success-bg: light-dark(#dff6dd, #393d1b);
+  --success-border: light-dark(rgb(15 123 15 / 0.25), rgb(108 203 95 / 0.25));
+  --info-bg: light-dark(#e5f1fb, #1f3447);
+  --info-border: light-dark(rgb(0 95 184 / 0.25), rgb(96 205 255 / 0.25));
 }
 
 :root[data-theme="light"] {

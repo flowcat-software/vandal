@@ -428,6 +428,16 @@ impl Default for UpdateSettings {
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 pub struct SettingsChanged(pub Settings);
 
+/// `s` with its styles as installed (Settings › About › Reset all styles,
+/// PLAN 3V.3): Settings › Markup's pickers, not its Behavior. The rest is
+/// left as it is.
+pub fn styles_reset(s: &Settings) -> Settings {
+    Settings {
+        styles: Styles::default(),
+        ..s.clone()
+    }
+}
+
 /// Normalize values and reject ones that can't work. Returns the settings as
 /// they will be stored.
 pub fn validate(mut s: Settings) -> Result<Settings, String> {
@@ -663,6 +673,20 @@ pub fn save(app: &AppHandle<Wry>, settings: &Settings) -> Result<(), String> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn resetting_the_styles_leaves_the_rest() {
+        let mut s = Settings::default();
+        s.styles.palette = vec!["#123456".into()];
+        // Behavior, not style: kept.
+        s.editor.share_color = !s.editor.share_color;
+        s.editor.remember_tool_styles = !s.editor.remember_tool_styles;
+        s.save.directory = r"D:\Shots".into();
+        let r = styles_reset(&s);
+        assert_eq!(r.styles, Styles::default());
+        assert_eq!(r.editor, s.editor);
+        assert_eq!(r.save, s.save);
+    }
 
     #[test]
     fn missing_store_gives_defaults_and_saves() {

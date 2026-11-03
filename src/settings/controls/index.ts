@@ -15,6 +15,7 @@ import { KeyList } from "./KeyList";
 import { ShortcutField } from "./ShortcutField";
 import { NumberPickerSetting } from "./NumberPickerEditor";
 import { PaletteSetting } from "./PaletteEditor";
+import { ResetButtons } from "./ResetButtons";
 import { Slider } from "./Slider";
 import { TextInput } from "./TextInput";
 import { ToolStyleSetting } from "./ToolStyleEditor";
@@ -56,4 +57,5 @@ export const controls: Registry = {
   updates: { component: UpdatesCard, layout: "bare" },
   text: { component: TextInput, layout: "stacked" },
   folder: { component: FolderInput, layout: "stacked" },
+  reset: { component: ResetButtons, layout: "stacked" },
 };

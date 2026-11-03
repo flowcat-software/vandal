@@ -12,6 +12,9 @@ All notable changes to Vandal are listed here. The format follows
   in "…". Rest the pointer for a moment and it glides along to the end, then back. Turn it off
   in **Settings › Markup › Scroll long hints**; it stays still when Windows is set to reduce
   motion.
+- **Reset to defaults.** **Settings › About › Reset** puts every setting back as installed, or
+  only the markup styles (colors, widths, sizes and fonts). Either way the markup tools forget
+  the styles they remembered. Each asks first.
 
 ### Changed
 

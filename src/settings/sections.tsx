@@ -825,6 +825,27 @@ export const sections: Section[] = [
           },
         ],
       },
+      {
+        title: "Reset",
+        items: [
+          {
+            id: "reset",
+            kind: "reset",
+            label: "Reset to defaults",
+            description:
+              "Put Vandal back as it was installed: every setting, or only the styles (Markup's colors, widths, sizes and fonts). The markup tools forget the styles they remembered too.",
+            keywords: [
+              "reset",
+              "defaults",
+              "default",
+              "restore",
+              "factory",
+              "styles",
+              "start over",
+            ],
+          },
+        ],
+      },
     ],
   },
 ];

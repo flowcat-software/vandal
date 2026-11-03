@@ -151,6 +151,11 @@ export interface InfoItem extends BaseItem {
   value: (s: Settings) => string;
 }
 
+/** Settings › About › Reset: every setting, or the styles, as installed (asked first). */
+export interface ResetItem extends BaseItem {
+  kind: "reset";
+}
+
 export type Item =
   | ToggleItem
   | TextItem
@@ -168,7 +173,8 @@ export type Item =
   | AboutItem
   | ExtensionItem
   | UpdatesItem
-  | InfoItem;
+  | InfoItem
+  | ResetItem;
 export type ItemKind = Item["kind"];
 
 export interface Group {

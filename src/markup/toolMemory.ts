@@ -207,3 +207,12 @@ export function restoreToolMemory(stored: unknown): void {
     ),
   });
 }
+
+/**
+ * Every tool's style as installed (Settings › About's resets, PLAN 3V.3):
+ * what's being picked and typed into is kept.
+ */
+export function forgetToolMemory(): void {
+  const { tool, editing, labelEditing } = useToolStore.getState();
+  useToolStore.setState({ ...useToolStore.getInitialState(), tool, editing, labelEditing });
+}

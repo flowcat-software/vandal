@@ -175,6 +175,12 @@ export const commands = {
 } | null, string>(__TAURI_INVOKE("editor_flip", { step, by })),
 	/**  The default settings, for "Reset" buttons. */
 	defaultSettings: () => __TAURI_INVOKE<Settings>("default_settings"),
+	/**
+	 *  Settings › About's resets (PLAN 3V.3): every setting as installed, or with
+	 *  `styles_only` only the styles (Settings › Markup's pickers); either way the
+	 *  tools' remembered styles are forgotten. Returns the settings as stored.
+	 */
+	resetSettings: (stylesOnly: boolean) => typedError<Settings, string>(__TAURI_INVOKE("reset_settings", { stylesOnly })),
 	/**  Quick edit: this overlay's selection now has markup (or no longer has). */
 	quickMarkupChanged: (captureId: number, monitorIndex: number, has: boolean) => __TAURI_INVOKE<void>("quick_markup_changed", { captureId, monitorIndex, has }),
 	/**
@@ -344,6 +350,7 @@ export const events = {
 	screenColorPicked: makeEvent<ScreenColorPicked>("screen-color-picked"),
 	settingsChanged: makeEvent<SettingsChanged>("settings-changed"),
 	settingsShowPage: makeEvent<SettingsShowPage>("settings-show-page"),
+	toolStylesReset: makeEvent<ToolStylesReset>("tool-styles-reset"),
 	updateAvailable: makeEvent<UpdateAvailable>("update-available"),
 	updateProgress: makeEvent<UpdateProgress>("update-progress"),
 	windowsAccentChanged: makeEvent<WindowsAccentChanged>("windows-accent-changed"),
@@ -933,6 +940,12 @@ export type ToolStyles = {
 	width?: NumberPicker | null,
 	colorControl?: ColorControl | null,
 };
+
+/**
+ *  Rust → the pages: the remembered styles were forgotten (Settings › About's
+ *  resets, PLAN 3V.3): their tools go back to theirs as installed.
+ */
+export type ToolStylesReset = null;
 
 /**  How frame pixels are encoded for the overlay (benchmarked in docs/perf.md). */
 export type TransferFormat = 

@@ -242,6 +242,23 @@ pub fn open_issues() {
         .spawn();
 }
 
+/// Settings › About's resets (PLAN 3V.3): every setting as installed, or with
+/// `styles_only` only the styles (Settings › Markup's pickers); either way the
+/// tools' remembered styles are forgotten. Returns the settings as stored.
+#[tauri::command]
+#[specta::specta]
+pub fn reset_settings(app: AppHandle, styles_only: bool) -> Result<Settings, String> {
+    let now = app.state::<AppState>().settings.read().unwrap().clone();
+    let reset = if styles_only {
+        crate::settings::styles_reset(&now)
+    } else {
+        Settings::default()
+    };
+    let stored = crate::settings::update(&app, reset)?;
+    crate::tool_styles::forget(&app);
+    Ok(stored)
+}
+
 /// The default settings, for "Reset" buttons.
 #[tauri::command]
 #[specta::specta]

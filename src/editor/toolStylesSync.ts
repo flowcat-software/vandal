@@ -3,9 +3,9 @@
 // the next window starts the same. Rust ignores both when
 // `editor.rememberToolStyles` is off.
 
-import { restoreToolMemory, snapshotToolMemory } from "../markup/toolMemory";
+import { forgetToolMemory, restoreToolMemory, snapshotToolMemory } from "../markup/toolMemory";
 import { useToolStore } from "../markup/toolStore";
-import { commands } from "../shared/ipc";
+import { commands, events } from "../shared/ipc";
 
 /** Changes within this long are saved together. */
 const SAVE_DELAY_MS = 300;
@@ -49,6 +49,9 @@ export function startToolStylesSync(): () => void {
   last = JSON.stringify(snapshotToolMemory());
   let unsubscribe = () => {};
   let stopped = false;
+  // Settings › About's resets (PLAN 3V.3): the tools as installed too. Rust
+  // has forgotten the file; what the tools then hold is saved as usual.
+  const unlistenReset = events.toolStylesReset.listen(() => forgetToolMemory());
 
   void loadToolStyles().then(() => {
     if (stopped) return;
@@ -66,6 +69,7 @@ export function startToolStylesSync(): () => void {
   return () => {
     stopped = true;
     unsubscribe();
+    void unlistenReset.then((f) => f());
     void save();
   };
 }
