@@ -844,6 +844,15 @@ export const sections: Section[] = [
               "start over",
             ],
           },
+          {
+            id: "reset-ask-for-groups",
+            kind: "toggle",
+            path: "reset.askForGroups",
+            label: "Ask before resetting a group",
+            description:
+              'Each group of settings has a Reset by its heading while it differs from the defaults. It asks first; its "Don\'t ask again" turns this off.',
+            keywords: ["reset", "ask", "confirm", "group", "don't ask again"],
+          },
         ],
       },
     ],

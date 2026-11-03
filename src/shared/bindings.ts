@@ -804,6 +804,15 @@ export type Redaction = {
 	strength: number,
 };
 
+/**  Settings › About › Reset (PLAN 3V.4). */
+export type ResetSettings = {
+	/**
+	 *  A group's Reset (its heading's link) asks first; its "Don't ask again"
+	 *  turns this off. On by default, so Reset all settings asks again.
+	 */
+	askForGroups?: boolean,
+};
+
 /**  Where the editor's Save As dialog starts. */
 export type SaveAsStartsIn = 
 /**  The folder the last Save As saved to. */
@@ -860,6 +869,8 @@ export type Settings = {
 	tray?: TraySettings,
 	/**  Automatic updates (PLAN 3P). */
 	updates?: UpdateSettings,
+	/**  Settings › About › Reset: how a group's reset asks (PLAN 3V.4). */
+	reset?: ResetSettings,
 };
 
 /**  Rust → all windows: settings changed (from any source), here's the new state. */

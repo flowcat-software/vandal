@@ -15,6 +15,9 @@ All notable changes to Vandal are listed here. The format follows
 - **Reset to defaults.** **Settings › About › Reset** puts every setting back as installed, or
   only the markup styles (colors, widths, sizes and fonts). Either way the markup tools forget
   the styles they remembered. Each asks first.
+- **Reset a group of settings.** A group whose settings differ from the defaults has a **Reset**
+  link by its heading, which puts back just that group. It asks first, with "Don't ask again"
+  (**Settings › About › Reset › Ask before resetting a group** turns asking back on).
 
 ### Changed
 

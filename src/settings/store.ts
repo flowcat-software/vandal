@@ -10,6 +10,8 @@ import { getIn, setIn, type Path, type PathValue } from "./path";
 
 interface SettingsState {
   settings: Settings | null;
+  /** Every setting as installed: what a group's Reset puts back (PLAN 3V.4). */
+  defaults: Settings | null;
   error: string | null;
   init: () => Promise<void>;
   set: <P extends Path<Settings>>(path: P, value: PathValue<Settings, P>) => Promise<void>;
@@ -18,11 +20,13 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: null,
+  defaults: null,
   error: null,
 
   init: async () => {
     void events.settingsChanged.listen(({ payload }) => set({ settings: payload as Settings }));
     set({ settings: (await commands.getSettings()) as Settings });
+    set({ defaults: (await commands.defaultSettings()) as Settings });
   },
 
   set: async (path, value) => {

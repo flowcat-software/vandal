@@ -182,8 +182,22 @@
 
 /* Headings step down: page title 28px, group 20px, setting 15px, then the
    14px text inside a setting. */
+/* A group's title, and its Reset at the far end (GroupHeading.tsx, PLAN 3V.4). */
+.groupHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 2px 10px 0;
+}
+
+/* "… is back to its defaults", under the heading. */
+.groupMessage {
+  margin: -4px 0 8px;
+}
+
 .groupTitle {
-  margin: 0 0 10px 2px;
+  margin: 0 0 0 2px;
   font-size: 20px;
   font-weight: 600;
   line-height: 28px;

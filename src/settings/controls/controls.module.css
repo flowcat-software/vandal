@@ -1025,3 +1025,30 @@
     animation-duration: 1ms;
   }
 }
+
+/* A text button that reads as a link (a group's Reset, PLAN 3V.4). */
+.linkButton {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* A choice that goes with a dialog's answer (a group's Reset: "Don't ask again"). */
+.dialogCheck {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}

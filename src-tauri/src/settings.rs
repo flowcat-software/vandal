@@ -45,6 +45,8 @@ pub struct Settings {
     pub tray: TraySettings,
     /// Automatic updates (PLAN 3P).
     pub updates: UpdateSettings,
+    /// Settings › About › Reset: how a group's reset asks (PLAN 3V.4).
+    pub reset: ResetSettings,
 }
 
 impl Default for Settings {
@@ -64,6 +66,7 @@ impl Default for Settings {
             history: History::default(),
             tray: TraySettings::default(),
             updates: UpdateSettings::default(),
+            reset: ResetSettings::default(),
         }
     }
 }
@@ -377,6 +380,23 @@ pub struct TraySettings {
     // in 3H.10; older files' value is ignored.
     /// Clicking the tray icon (PLAN 3G).
     pub click_action: IconAction,
+}
+
+/// Settings › About › Reset (PLAN 3V.4).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(default, rename_all = "camelCase")]
+pub struct ResetSettings {
+    /// A group's Reset (its heading's link) asks first; its "Don't ask again"
+    /// turns this off. On by default, so Reset all settings asks again.
+    pub ask_for_groups: bool,
+}
+
+impl Default for ResetSettings {
+    fn default() -> Self {
+        Self {
+            ask_for_groups: true,
+        }
+    }
 }
 
 /// Which releases the updater offers (PLAN 3P).
