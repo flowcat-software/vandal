@@ -72,6 +72,8 @@ impl FileFormat {
 /// Write `image` to `path` as `format`, replacing any file there only once
 /// the new one is complete.
 pub fn write_file(image: &RgbaImage, path: &Path, format: FileFormat) -> Result<(), String> {
+    // Its name stays out of the log (PLAN 3V.8).
+    crate::log::private_file(path);
     let started = std::time::Instant::now();
     let flat;
     let image = if format.has_alpha() {
@@ -89,7 +91,7 @@ pub fn write_file(image: &RgbaImage, path: &Path, format: FileFormat) -> Result<
         let _ = std::fs::remove_file(&temp);
         return Err(format!("Couldn't save {}: {e}", path.display()));
     }
-    eprintln!(
+    logln!(
         "[encode] {format:?} {}×{} → {} in {:.1}ms",
         image.width,
         image.height,

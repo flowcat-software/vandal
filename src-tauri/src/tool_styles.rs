@@ -45,7 +45,7 @@ pub fn save(app: &AppHandle, json: &str) {
     let value = match serde_json::from_str::<serde_json::Value>(json) {
         Ok(v) if v.is_object() => v,
         _ => {
-            eprintln!("[tool-styles] ignoring a value that isn't a JSON object");
+            logln!("[tool-styles] ignoring a value that isn't a JSON object");
             return;
         }
     };
@@ -54,7 +54,7 @@ pub fn save(app: &AppHandle, json: &str) {
     };
     store.set(KEY, value);
     if let Err(e) = store.save() {
-        eprintln!("[tool-styles] cannot save: {e}");
+        logln!("[tool-styles] cannot save: {e}");
     }
 }
 
@@ -68,7 +68,7 @@ pub fn forget(app: &AppHandle) {
     if let Ok(store) = app.store(FILE) {
         store.delete(KEY);
         if let Err(e) = store.save() {
-            eprintln!("[tool-styles] cannot save: {e}");
+            logln!("[tool-styles] cannot save: {e}");
         }
     }
     let _ = ToolStylesReset.emit(app);

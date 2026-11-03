@@ -60,7 +60,7 @@ pub fn themed<'a>(
 pub fn apply(app: &AppHandle, mode: ThemeMode) {
     for window in app.webview_windows().values() {
         if let Err(e) = window.set_theme(native(mode)) {
-            eprintln!("[appearance] {}: {e}", window.label());
+            logln!("[appearance] {}: {e}", window.label());
         }
     }
 }
@@ -110,7 +110,7 @@ pub fn watch_windows_accent(app: &AppHandle) {
             let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
         }
         let Ok(ui) = UISettings::new() else {
-            eprintln!("[appearance] no UISettings: the Windows accent won't update live");
+            logln!("[appearance] no UISettings: the Windows accent won't update live");
             return;
         };
         let last = std::sync::Mutex::new(accent_of(&ui));
@@ -127,7 +127,7 @@ pub fn watch_windows_accent(app: &AppHandle) {
             Ok(())
         });
         if let Err(e) = ui.ColorValuesChanged(&handler) {
-            eprintln!("[appearance] can't watch the Windows accent: {e}");
+            logln!("[appearance] can't watch the Windows accent: {e}");
             return;
         }
         // The subscription lives as long as `ui`: keep it for the app's lifetime.

@@ -25,10 +25,10 @@ pub fn disable(window: &WebviewWindow) {
                 .and_then(|settings| settings.SetAreBrowserAcceleratorKeysEnabled(false))
         };
         if let Err(e) = done {
-            eprintln!("[webview] {label}: can't turn off browser keys: {e}");
+            logln!("[webview] {label}: can't turn off browser keys: {e}");
         }
     });
     if let Err(e) = result {
-        eprintln!("[webview] {}: {e}", window.label());
+        logln!("[webview] {}: {e}", window.label());
     }
 }

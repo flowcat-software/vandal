@@ -259,6 +259,42 @@ pub fn reset_settings(app: AppHandle, styles_only: bool) -> Result<Settings, Str
     Ok(stored)
 }
 
+/// Lines from a page for the log (PLAN 3V.8): its edits by name, its errors
+/// (`src/shared/log.ts`).
+#[tauri::command]
+#[specta::specta]
+pub fn log_page(page: String, lines: Vec<String>) {
+    crate::log::page(&page, lines);
+}
+
+/// Opens the logs folder (logs and crash dumps) in Explorer.
+#[tauri::command]
+#[specta::specta]
+pub fn open_logs_folder() -> Result<(), String> {
+    let dir = crate::log::dir().ok_or("There's no logs folder.")?;
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    std::process::Command::new("explorer.exe")
+        .arg(dir)
+        .spawn()
+        .map(drop)
+        .map_err(|e| e.to_string())
+}
+
+/// Deletes the older logs and every crash dump, and starts this run's log
+/// again (Settings › About › Debugging).
+#[tauri::command]
+#[specta::specta]
+pub fn clear_logs() -> Result<(), String> {
+    crate::log::clear()
+}
+
+/// The logs folder's size in bytes (Settings › About › Debugging).
+#[tauri::command]
+#[specta::specta]
+pub fn logs_size() -> f64 {
+    crate::log::folder_bytes() as f64
+}
+
 /// The default settings, for "Reset" buttons.
 #[tauri::command]
 #[specta::specta]
@@ -677,7 +713,7 @@ async fn recognize_text(
             .as_ref()
             .map(|lines| lines.iter().map(|l| l.words.len()).sum())
             .unwrap_or(0);
-        eprintln!(
+        logln!(
             "[perf] ocr ({}) {}×{}: {:.1}ms, {words} words",
             state.text_recognizer.name(),
             image.width,

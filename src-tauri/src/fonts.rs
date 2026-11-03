@@ -17,10 +17,10 @@ pub fn list() -> Vec<String> {
         .get_or_init(|| {
             let started = std::time::Instant::now();
             let fonts = enumerate().unwrap_or_else(|e| {
-                eprintln!("[fonts] couldn't list fonts: {e}");
+                logln!("[fonts] couldn't list fonts: {e}");
                 Vec::new()
             });
-            eprintln!(
+            logln!(
                 "[fonts] {} families in {:.1}ms",
                 fonts.len(),
                 started.elapsed().as_secs_f64() * 1000.0

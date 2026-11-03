@@ -12,6 +12,7 @@ import { ExtensionCard } from "./ExtensionCard";
 import { UpdatesCard } from "./UpdatesCard";
 import { Info } from "./Info";
 import { KeyList } from "./KeyList";
+import { LogButtons } from "./LogButtons";
 import { ShortcutField } from "./ShortcutField";
 import { NumberPickerSetting } from "./NumberPickerEditor";
 import { PaletteSetting } from "./PaletteEditor";
@@ -57,5 +58,6 @@ export const controls: Registry = {
   updates: { component: UpdatesCard, layout: "bare" },
   text: { component: TextInput, layout: "stacked" },
   folder: { component: FolderInput, layout: "stacked" },
+  logs: { component: LogButtons, layout: "stacked" },
   reset: { component: ResetButtons, layout: "stacked" },
 };

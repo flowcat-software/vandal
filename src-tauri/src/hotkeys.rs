@@ -75,7 +75,7 @@ pub fn check(app: &AppHandle, hotkey: &str) -> Result<(), String> {
             Ok(())
         }
         Err(e) => {
-            eprintln!("[hotkeys] check {hotkey}: {e}");
+            logln!("[hotkeys] check {hotkey}: {e}");
             if hotkey.to_ascii_lowercase().contains("printscreen") && print_screen_opens_snipping()
             {
                 Err(format!(
@@ -162,9 +162,9 @@ pub fn register(app: &AppHandle, hotkeys: &Hotkeys) {
             }
         });
         match result {
-            Ok(()) => eprintln!("[hotkeys] {hotkey} → {}", action.describe()),
+            Ok(()) => logln!("[hotkeys] {hotkey} → {}", action.describe()),
             Err(e) => {
-                eprintln!("[hotkeys] {hotkey} failed: {e}");
+                logln!("[hotkeys] {hotkey} failed: {e}");
                 failures.push(hotkey.to_string());
             }
         }

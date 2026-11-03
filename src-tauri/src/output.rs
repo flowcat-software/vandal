@@ -131,12 +131,12 @@ pub fn deliver(
             && match copy_to_clipboard(&image) {
                 Ok(()) => true,
                 Err(e) => {
-                    eprintln!("[output] clipboard failed: {e}");
+                    logln!("[output] clipboard failed: {e}");
                     false
                 }
             };
         if copied {
-            eprintln!(
+            logln!(
                 "[perf] capture → clipboard {:.1}ms ({}×{})",
                 started.elapsed().as_secs_f64() * 1000.0,
                 image.width,
@@ -151,7 +151,7 @@ pub fn deliver(
             match save_with_template(&settings.save, &image) {
                 Ok(p) => Some(p),
                 Err(e) => {
-                    eprintln!("[output] save failed: {e}");
+                    logln!("[output] save failed: {e}");
                     notify_error(&app, "Couldn't save screenshot", &e);
                     None
                 }
@@ -467,6 +467,8 @@ pub fn save_with_template(save: &SaveSettings, image: &RgbaImage) -> Result<Path
 
 /// PNG with fast compression: saving must not feel slow.
 pub fn write_png(image: &RgbaImage, path: &Path) -> Result<(), String> {
+    // Its name stays out of the log (PLAN 3V.8).
+    crate::log::private_file(path);
     let file = File::create(path).map_err(|e| format!("{}: {e}", path.display()))?;
     write_png_to(image, BufWriter::new(file))
 }
@@ -511,7 +513,7 @@ fn write_preview(image: &RgbaImage) -> Result<PathBuf, String> {
 pub fn delete_preview() {
     match std::fs::remove_file(preview_path()) {
         Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
-            eprintln!("[output] couldn't delete the preview: {e}");
+            logln!("[output] couldn't delete the preview: {e}");
         }
         _ => {}
     }
@@ -587,18 +589,18 @@ fn notify_capture(app: &AppHandle, t: CaptureToast) {
                     reveal_in_explorer(path);
                 }
             }
-            Some(other) => eprintln!("[output] unknown toast action {other:?}"),
+            Some(other) => logln!("[output] unknown toast action {other:?}"),
         }
         Ok(())
     });
     if let Err(e) = toast.show() {
-        eprintln!("[output] toast failed: {e}");
+        logln!("[output] toast failed: {e}");
     }
 }
 
 pub fn notify_error(app: &AppHandle, title: &str, body: &str) {
     if let Err(e) = Toast::new(&app_id(app)).title(title).text1(body).show() {
-        eprintln!("[output] toast failed: {e} ({title}: {body})");
+        logln!("[output] toast failed: {e} ({title}: {body})");
     }
 }
 

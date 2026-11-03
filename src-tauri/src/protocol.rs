@@ -148,7 +148,7 @@ pub fn handle<R: Runtime>(
                 responder.respond(error(StatusCode::NOT_FOUND));
                 return;
             };
-            eprintln!(
+            logln!(
                 "[editor] #{id}: raw pixels ({:.1} MB)",
                 image.rgba.len() as f64 / 1e6
             );
@@ -161,7 +161,7 @@ pub fn handle<R: Runtime>(
                 responder.respond(error(StatusCode::NOT_FOUND));
                 return;
             };
-            eprintln!(
+            logln!(
                 "[editor] #{id}: the file ({}, {:.1} MB)",
                 source.mime,
                 source.bytes.len() as f64 / 1e6
@@ -172,7 +172,7 @@ pub fn handle<R: Runtime>(
             let bytes = request.into_body();
             let n = bytes.len();
             if state.editors.lock().unwrap().set_layer(id, kind, bytes) {
-                eprintln!(
+                logln!(
                     "[editor] #{id}: {kind:?} received ({:.1} MB)",
                     n as f64 / 1e6
                 );
@@ -185,7 +185,7 @@ pub fn handle<R: Runtime>(
             let bytes = request.into_body();
             let n = bytes.len();
             if crate::session::set_layer(ctx.app_handle(), capture_id, kind, bytes) {
-                eprintln!(
+                logln!(
                     "[capture] #{capture_id}: {kind:?} received ({:.1} MB)",
                     n as f64 / 1e6
                 );

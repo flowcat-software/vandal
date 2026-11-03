@@ -113,6 +113,18 @@ jobs:
         with:
           subject-path: out/*-setup.exe
 
+      # The exe and its .pdb turn a tester's crash dump into function names
+      # (PLAN 3V.8). Never shipped: kept with the run for as long as GitHub
+      # allows.
+      - name: Keep the symbols
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vandal-symbols
+          path: |
+            src-tauri/target/release/vandal.exe
+            src-tauri/target/release/vandal.pdb
+          retention-days: 90
+
       - name: Keep the installer (manual runs)
         if: env.IS_TAG != 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

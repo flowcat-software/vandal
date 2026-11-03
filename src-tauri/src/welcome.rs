@@ -52,7 +52,7 @@ pub fn show(app: &AppHandle) {
             Ok(())
         });
     if let Err(e) = toast.show() {
-        eprintln!("[welcome] toast failed: {e}");
+        logln!("[welcome] toast failed: {e}");
     }
 }
 

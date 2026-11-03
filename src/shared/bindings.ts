@@ -181,6 +181,20 @@ export const commands = {
 	 *  tools' remembered styles are forgotten. Returns the settings as stored.
 	 */
 	resetSettings: (stylesOnly: boolean) => typedError<Settings, string>(__TAURI_INVOKE("reset_settings", { stylesOnly })),
+	/**
+	 *  Lines from a page for the log (PLAN 3V.8): its edits by name, its errors
+	 *  (`src/shared/log.ts`).
+	 */
+	logPage: (page: string, lines: string[]) => __TAURI_INVOKE<void>("log_page", { page, lines }),
+	/**  Opens the logs folder (logs and crash dumps) in Explorer. */
+	openLogsFolder: () => typedError<null, string>(__TAURI_INVOKE("open_logs_folder")),
+	/**
+	 *  Deletes the older logs and every crash dump, and starts this run's log
+	 *  again (Settings › About › Debugging).
+	 */
+	clearLogs: () => typedError<null, string>(__TAURI_INVOKE("clear_logs")),
+	/**  The logs folder's size in bytes (Settings › About › Debugging). */
+	logsSize: () => __TAURI_INVOKE<number | null>("logs_size"),
 	/**  Quick edit: this overlay's selection now has markup (or no longer has). */
 	quickMarkupChanged: (captureId: number, monitorIndex: number, has: boolean) => __TAURI_INVOKE<void>("quick_markup_changed", { captureId, monitorIndex, has }),
 	/**
@@ -396,6 +410,15 @@ export type ColorControl =
 "swatches" | 
 /**  A button per color that opens the palette. */
 "dropdown";
+
+/**  Settings › About › Debugging (PLAN 3V.8). */
+export type Debugging = {
+	/**
+	 *  The log file and crash reports (log.rs, crash.rs); off, nothing is
+	 *  written (on by default).
+	 */
+	logging?: boolean,
+};
 
 /**  Editor page → Rust on mount: what to show. */
 export type EditorInit = {
@@ -871,6 +894,8 @@ export type Settings = {
 	updates?: UpdateSettings,
 	/**  Settings › About › Reset: how a group's reset asks (PLAN 3V.4). */
 	reset?: ResetSettings,
+	/**  Settings › About › Debugging (PLAN 3V.8). */
+	debugging?: Debugging,
 };
 
 /**  Rust → all windows: settings changed (from any source), here's the new state. */

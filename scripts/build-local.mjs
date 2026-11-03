@@ -9,7 +9,7 @@
 // through VITE_BUILD_* variables.
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import process from "node:process";
 import { localBuildVersion } from "./releaseLib.mjs";
 
@@ -69,6 +69,15 @@ const result = spawnSync(command, {
   },
 });
 if (result.status !== 0) fail(`tauri build failed (exit ${result.status ?? result.signal})`);
+
+// The exe and its symbols, kept for reading this build's crash dumps (never
+// shipped, PLAN 3V.8).
+const symbols = `${TARGET}/release/bundle/symbols/Vandal_${version}`;
+mkdirSync(symbols, { recursive: true });
+for (const file of ["vandal.exe", "vandal.pdb"]) {
+  copyFileSync(`${TARGET}/release/${file}`, `${symbols}/${file}`);
+}
+console.log(`build:local: symbols kept in ${symbols}`);
 
 const output = extra.includes("--no-bundle")
   ? `${TARGET}/release/vandal.exe`

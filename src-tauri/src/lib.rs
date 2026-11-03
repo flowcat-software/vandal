@@ -1,3 +1,6 @@
+// First: its `logln!` is used by the modules after it (PLAN 3V.8).
+#[macro_use]
+mod log;
 mod appearance;
 mod bench;
 mod browser_keys;
@@ -6,6 +9,7 @@ mod cli;
 mod clipboard;
 mod commands;
 mod compose;
+mod crash;
 mod decode;
 mod editor;
 mod encode;
@@ -24,6 +28,7 @@ mod output;
 mod overlay;
 mod protocol;
 mod redact;
+mod scrub;
 mod session;
 mod settings;
 mod settings_window;
@@ -33,6 +38,7 @@ mod styles;
 mod tool_styles;
 mod tray;
 mod updater;
+mod webview_crash;
 mod welcome;
 mod winenum;
 
@@ -87,6 +93,10 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             commands::editor_flip,
             commands::default_settings,
             commands::reset_settings,
+            commands::log_page,
+            commands::open_logs_folder,
+            commands::clear_logs,
+            commands::logs_size,
             commands::quick_markup_changed,
             commands::quick_focus_overlay,
             commands::get_settings,
@@ -176,6 +186,11 @@ pub fn run() {
         return;
     }
 
+    // The log and crash reports first (PLAN 3V.8): not for the native host above, a separate
+    // process the browser starts, which would turn over the app's own log.
+    let context = tauri::generate_context!();
+    log::init(&context.config().identifier);
+
     #[cfg(debug_assertions)]
     export_bindings();
 
@@ -232,14 +247,14 @@ pub fn run() {
             specta.mount_events(app);
 
             if monitors::is_per_monitor_v2() {
-                eprintln!("[startup] DPI awareness: Per-Monitor V2");
+                logln!("[startup] DPI awareness: Per-Monitor V2");
             } else {
-                eprintln!("[startup] WARNING: process is NOT Per-Monitor V2 DPI aware; captures will be misaligned");
+                logln!("[startup] WARNING: process is NOT Per-Monitor V2 DPI aware; captures will be misaligned");
             }
 
             let monitors = monitors::enumerate()?;
             for m in &monitors {
-                eprintln!(
+                logln!(
                     "[startup] monitor {} {}: {:?} scale {}{}",
                     m.index,
                     m.name,
@@ -250,6 +265,8 @@ pub fn run() {
             }
 
             let (settings, first_run) = settings::load(app.handle());
+            // Opens this run's log, with the lines held so far, unless it's off.
+            log::set_enabled(&product_name(app.handle()), settings.debugging.logging);
             app.manage(AppState {
                 capturer: Box::new(GdiCapturer),
                 window_capturer: Box::new(capture::wgc::WgcCapturer::default()),
@@ -315,7 +332,12 @@ pub fn run() {
             for file in browser {
                 editor::open_browser_capture(app.handle(), &file);
             }
-            eprintln!("[startup] ready");
+            logln!("[startup] ready");
+            // The last run crashed: say so, with the report a click away.
+            if let Some(text) = log::take_notice() {
+                crash::tell(app.handle(), &text);
+            }
+            crash::test_from_env(app.handle());
             Ok(())
         })
         .on_window_event(|window, event| match event {
@@ -348,7 +370,7 @@ pub fn run() {
             }
             _ => {}
         })
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while building tauri application");
 
     app.run(|_app, event| match event {

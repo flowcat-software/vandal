@@ -12,6 +12,10 @@ All notable changes to Vandal are listed here. The format follows
   in "…". Rest the pointer for a moment and it glides along to the end, then back. Turn it off
   in **Settings › Markup › Scroll long hints**; it stays still when Windows is set to reduce
   motion.
+- **Logs and crash reports, for when something goes wrong.** Vandal keeps a log of what it
+  does, and a small report if it crashes, on your PC only: never your screenshots, file names,
+  folders or text. After a crash, the next start says so, with the report a click away. Settings
+  › About › Debugging opens the folder, clears it, or turns the log off.
 - **Copy Style and Paste Style.** Ctrl+Alt+C (or **Copy Style** in the right-click menu) copies
   the selected mark's style, and Ctrl+Alt+V (**Paste Style**) gives it to the selected marks:
   colors, width, font and the rest. Another kind of mark takes what it has a place for, so an

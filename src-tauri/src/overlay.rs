@@ -53,6 +53,7 @@ fn create(app: &AppHandle, m: &MonitorInfo) -> tauri::Result<()> {
         .background_color(Color(0, 0, 0, 255))
         .build()?;
     crate::browser_keys::disable(&window);
+    crate::webview_crash::watch(&window);
     no_transitions(&window);
     place(&window, m.physical_bounds)
 }
@@ -75,7 +76,7 @@ fn no_transitions(window: &WebviewWindow) {
         )
     };
     if let Err(e) = result {
-        eprintln!(
+        logln!(
             "[overlay] {}: can't turn off transitions: {e}",
             window.label()
         );
@@ -119,7 +120,7 @@ fn ensure_placed(window: &WebviewWindow, r: PhysicalRect) {
     if actual == r {
         return;
     }
-    eprintln!(
+    logln!(
         "[overlay] {} misplaced at {actual:?}, expected {r:?}; correcting",
         window.label()
     );
@@ -190,9 +191,7 @@ pub(crate) fn force_foreground(hwnd: HWND) {
             let _ = AttachThreadInput(me, fg_thread, false);
         }
         if !ok {
-            eprintln!(
-                "[focus] could not take foreground; keyboard input will not reach the window"
-            );
+            logln!("[focus] could not take foreground; keyboard input will not reach the window");
         }
     }
 }
@@ -234,11 +233,11 @@ pub fn watch_displays(app: &AppHandle) {
         if *state.monitors.read().unwrap() == current {
             continue;
         }
-        eprintln!("[overlay] display layout changed; rebuilding pool");
+        logln!("[overlay] display layout changed; rebuilding pool");
         *state.monitors.write().unwrap() = current.clone();
         crate::tray::rebuild(&app);
         if let Err(e) = reconcile_pool(&app, &current) {
-            eprintln!("[overlay] rebuild failed: {e}");
+            logln!("[overlay] rebuild failed: {e}");
         }
     });
 }

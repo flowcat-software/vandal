@@ -56,6 +56,7 @@ fn open_at(app: &AppHandle, page: Option<&str>) {
         match built {
             Ok(window) => {
                 crate::browser_keys::disable(&window);
+                crate::webview_crash::watch(&window);
                 follow_overlay(&app, &window);
                 // Fallback in case the page never signals it rendered.
                 std::thread::sleep(Duration::from_secs(3));
@@ -64,7 +65,7 @@ fn open_at(app: &AppHandle, page: Option<&str>) {
                     let _ = window.set_focus();
                 }
             }
-            Err(e) => eprintln!("[settings] window failed: {e}"),
+            Err(e) => logln!("[settings] window failed: {e}"),
         }
     });
 }

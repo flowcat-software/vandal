@@ -146,6 +146,33 @@ Local installers have no updater signature (`.sig`): only CI has the updater's p
 ("A public key has been found, but no private key"). Use `build:local`, or add
 `--config '{"bundle":{"createUpdaterArtifacts":false}}'`. `--no-bundle` builds aren't affected.
 
+**Symbols:** release builds keep function names and lines in `vandal.pdb`, never in the exe or
+the installer. `build:local` copies the exe and its `.pdb` to
+`src-tauri/target/release/bundle/symbols/Vandal_<version>/`, and each CI run keeps them as the
+`vandal-symbols` artifact for 90 days. Keep the symbols of any build that testers use: they're
+what turn a crash dump into function names.
+
+## Logs and crash reports
+
+Vandal logs to `%LOCALAPPDATA%\<identifier>\logs\vandal.log` (`com.vandal.desktop`, or
+`com.vandal.desktop.dev` for dev builds), and keeps the last five runs as `vandal.1.log` and
+on. In dev the same lines go to the terminal. Log with `logln!("[module] ...")` in Rust, never
+`eprintln!`; pages log with `logLine` (`src/shared/log.ts`), and their errors and the markup's
+edits are logged for them. The file never holds paths, file names or anything else that
+identifies the user (`scrub.rs`), and it never holds a capture's text or pixels: log what
+happened, not what was in it. A run's log stops at 10 MB, except for crashes.
+
+A panic logs its backtrace, and a native crash logs its exception and the module it happened
+in. Either one writes a small minidump, `crash-<date>-<time>.dmp`, beside the log, with the
+user's and computer's names blanked. The newest five are kept. When a page's renderer crashes,
+WebView2 reports it, and the page reloads (`webview_crash.rs`). The next launch after a crash
+shows a notification with the report a click away. Settings › About › Debugging turns all of
+this off, opens the folder or clears it.
+
+To check it end to end, set `VANDAL_CRASH_TEST` before starting the app. It crashes three
+seconds after startup: `native`, `panic` or `thread-panic`; `webview` (an overlay's renderer)
+or `browser` (the whole webview); or `flood`, which fills the log past its cap, then panics.
+
 ## Releasing
 
 `package.json` holds the version, which `tauri.conf.json` reads. `src-tauri/Cargo.toml` and

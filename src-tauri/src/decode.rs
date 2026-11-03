@@ -50,10 +50,12 @@ pub fn decode_file(path: &Path) -> Result<RgbaImage, String> {
 /// (1: none), so the editor page can decode the file itself the same way
 /// (PLAN 3Q).
 pub fn decode_file_oriented(path: &Path) -> Result<(RgbaImage, u16), String> {
+    // Its name stays out of the log (PLAN 3V.8).
+    crate::log::private_file(path);
     let started = std::time::Instant::now();
     let (image, orientation) = decode_wic(path).map_err(|e| describe(path, &e))?;
     let image = orient(image, orientation);
-    eprintln!(
+    logln!(
         "[decode] {} {}×{} (orientation {orientation}) in {:.1}ms",
         path.display(),
         image.width,

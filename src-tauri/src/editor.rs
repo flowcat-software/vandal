@@ -347,7 +347,7 @@ fn open_frames(
     let bounds = virtual_bounds(&monitors);
     let (Some(image), Some(crop)) = (compose::compose(&touched, bounds), rect.intersect(&bounds))
     else {
-        eprintln!("[editor] nothing to open for {rect:?}");
+        logln!("[editor] nothing to open for {rect:?}");
         return;
     };
     let markup = annotations.map(|annotations| HandoffMarkup {
@@ -391,6 +391,8 @@ pub fn open_file(app: &AppHandle, path: &Path) {
 
 /// [`open_file`], into the editor `into` if it's empty (PLAN 3G).
 pub fn open_file_in(app: &AppHandle, path: &Path, into: Option<EditorId>) {
+    // Its name stays out of the log (PLAN 3V.8).
+    crate::log::private_file(path);
     let app = app.clone();
     let path = path.to_path_buf();
     std::thread::spawn(move || match read_image_file(&path) {
@@ -414,7 +416,7 @@ pub fn open_browser_capture(app: &AppHandle, path: &Path) {
         let page_title = crate::native_host::take_title(&path);
         let decoded = decode::decode_file(&path);
         if let Err(e) = std::fs::remove_file(&path) {
-            eprintln!("[editor] couldn't delete {}: {e}", path.display());
+            logln!("[editor] couldn't delete {}: {e}", path.display());
         }
         match decoded {
             Ok(image) => {
@@ -547,7 +549,7 @@ fn load_into(
     let _ = window.set_title(title);
     if mode != Load::Swap {
         if let Err(e) = window.eval("location.reload()") {
-            eprintln!("[editor] couldn't reload {}: {e}", label(id));
+            logln!("[editor] couldn't reload {}: {e}", label(id));
         }
     }
     true
@@ -574,7 +576,7 @@ pub fn pick_images(app: &AppHandle, parent: Option<&WebviewWindow>) -> Vec<PathB
         .into_iter()
         .filter_map(|path| {
             path.into_path()
-                .map_err(|e| eprintln!("[editor] can't open a picked file: {e}"))
+                .map_err(|e| logln!("[editor] can't open a picked file: {e}"))
                 .ok()
         })
         .collect();
@@ -652,7 +654,7 @@ fn remember_folder(app: &AppHandle, key: &str, folder: &Path) {
     }
     store.set(key, folder);
     if let Err(e) = store.save() {
-        eprintln!("[editor] cannot save {key}: {e}");
+        logln!("[editor] cannot save {key}: {e}");
     }
 }
 
@@ -764,7 +766,7 @@ pub fn flip(
                 );
                 return Ok(folder::position(&path));
             }
-            Err(e) => eprintln!("[folder] skipped {}: {e}", path.display()),
+            Err(e) => logln!("[folder] skipped {}: {e}", path.display()),
         }
     }
     Err("None of the other images in this folder could be opened.".into())
@@ -888,10 +890,11 @@ fn open(
         let window = match built {
             Ok(w) => {
                 crate::browser_keys::disable(&w);
+                crate::webview_crash::watch(&w);
                 w
             }
             Err(e) => {
-                eprintln!("[editor] window failed: {e}");
+                logln!("[editor] window failed: {e}");
                 app.state::<AppState>()
                     .editors
                     .lock()
@@ -909,7 +912,7 @@ fn open(
         // Fallback in case the page never reports that it has painted.
         std::thread::sleep(Duration::from_secs(3));
         if !window.is_visible().unwrap_or(true) {
-            eprintln!(
+            logln!(
                 "[editor] {} did not report ready; showing anyway",
                 label(id)
             );
@@ -1029,7 +1032,7 @@ pub fn export(
     let layer = layer_ms.map_or(String::new(), |ms| {
         format!(" +layer (render+upload {ms:.1}ms)")
     });
-    eprintln!(
+    logln!(
         "[perf] editor export {action:?} {}×{}{layer}: compose {:.1}ms, total {:.1}ms",
         image.width,
         image.height,
@@ -1135,7 +1138,7 @@ fn confirm_overwrite(app: &AppHandle, window: &WebviewWindow, id: EditorId, file
     };
     if always {
         if let Err(e) = settings::modify(app, |s| s.editor.confirm_overwrite = false) {
-            eprintln!("[editor] couldn't turn off the overwrite warning: {e}");
+            logln!("[editor] couldn't turn off the overwrite warning: {e}");
         }
     }
     if let Some(e) = state.editors.lock().unwrap().open.get_mut(&id) {
@@ -1458,7 +1461,7 @@ fn save_window_state(app: &AppHandle, state: &WindowState) {
         }),
     );
     if let Err(e) = store.save() {
-        eprintln!("[editor] cannot save window state: {e}");
+        logln!("[editor] cannot save window state: {e}");
     }
 }
 

@@ -103,7 +103,7 @@ pub fn init(app: &AppHandle<Wry>) {
         loop {
             if check_due(&app) {
                 if let Err(e) = tauri::async_runtime::block_on(check(&app, true)) {
-                    eprintln!("[updates] check failed: {e}");
+                    logln!("[updates] check failed: {e}");
                 }
             }
             std::thread::sleep(WAKE_EVERY);
@@ -136,7 +136,7 @@ pub fn settings_changed(app: &AppHandle<Wry>, old: &UpdateSettings, new: &Update
         let app = app.clone();
         tauri::async_runtime::spawn(async move {
             if let Err(e) = check(&app, true).await {
-                eprintln!("[updates] check failed: {e}");
+                logln!("[updates] check failed: {e}");
             }
         });
     }
@@ -193,7 +193,7 @@ pub async fn check(app: &AppHandle<Wry>, notify: bool) -> Result<Option<UpdateIn
         .build()
         .map_err(|e| e.to_string())?;
     let found = updater.check().await.map_err(|e| {
-        eprintln!("[updates] check: {e}");
+        logln!("[updates] check: {e}");
         friendly_error(&e)
     })?;
 
@@ -248,7 +248,7 @@ fn notify_available(app: &AppHandle<Wry>, info: &UpdateInfo) {
         Ok(())
     });
     if let Err(e) = toast.show() {
-        eprintln!("[updates] toast failed: {e}");
+        logln!("[updates] toast failed: {e}");
     }
 }
 
@@ -302,7 +302,7 @@ pub fn announce_updated(app: &AppHandle<Wry>) {
         Ok(())
     });
     if let Err(e) = toast.show() {
-        eprintln!("[updates] toast failed: {e}");
+        logln!("[updates] toast failed: {e}");
     }
 }
 
@@ -380,7 +380,7 @@ async fn install_inner(app: &AppHandle<Wry>, update: &Update) -> Result<(), Stri
         )
         .await
         .map_err(|e| {
-            eprintln!("[updates] download: {e}");
+            logln!("[updates] download: {e}");
             friendly_error(&e)
         })?;
     if !leave_editors(app).await {

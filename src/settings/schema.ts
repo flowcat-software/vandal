@@ -151,6 +151,11 @@ export interface InfoItem extends BaseItem {
   value: (s: Settings) => string;
 }
 
+/** Settings › About › Debugging: the logs folder's size, Open and Clear (PLAN 3V.8). */
+export interface LogsItem extends BaseItem {
+  kind: "logs";
+}
+
 /** Settings › About › Reset: every setting, or the styles, as installed (asked first). */
 export interface ResetItem extends BaseItem {
   kind: "reset";
@@ -174,6 +179,7 @@ export type Item =
   | ExtensionItem
   | UpdatesItem
   | InfoItem
+  | LogsItem
   | ResetItem;
 export type ItemKind = Item["kind"];
 

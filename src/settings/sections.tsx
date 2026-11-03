@@ -826,6 +826,27 @@ export const sections: Section[] = [
         ],
       },
       {
+        title: "Debugging",
+        items: [
+          {
+            id: "logging",
+            kind: "toggle",
+            path: "debugging.logging",
+            label: "Keep a log",
+            description:
+              "A log of what Vandal does, and a report if it crashes, to send when something goes wrong. It stays on your PC: never your screenshots, file names, folders or text. Off, nothing is written.",
+            keywords: ["log", "logging", "debug", "crash", "report", "diagnostics"],
+          },
+          {
+            id: "logs",
+            kind: "logs",
+            label: "Logs and crash reports",
+            visible: (s) => s.debugging.logging,
+            keywords: ["log", "logs", "folder", "clear", "delete", "crash", "report", "debug"],
+          },
+        ],
+      },
+      {
         title: "Reset",
         items: [
           {

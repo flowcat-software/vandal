@@ -75,7 +75,7 @@ fn run(app: &AppHandle, iterations: usize) {
                 }
             };
             let Some(id) = id else {
-                eprintln!("[bench] capture did not start");
+                logln!("[bench] capture did not start");
                 continue;
             };
 

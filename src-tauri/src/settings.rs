@@ -47,6 +47,8 @@ pub struct Settings {
     pub updates: UpdateSettings,
     /// Settings › About › Reset: how a group's reset asks (PLAN 3V.4).
     pub reset: ResetSettings,
+    /// Settings › About › Debugging (PLAN 3V.8).
+    pub debugging: Debugging,
 }
 
 impl Default for Settings {
@@ -67,6 +69,7 @@ impl Default for Settings {
             tray: TraySettings::default(),
             updates: UpdateSettings::default(),
             reset: ResetSettings::default(),
+            debugging: Debugging::default(),
         }
     }
 }
@@ -399,6 +402,21 @@ impl Default for ResetSettings {
     }
 }
 
+/// Settings › About › Debugging (PLAN 3V.8).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Debugging {
+    /// The log file and crash reports (log.rs, crash.rs); off, nothing is
+    /// written (on by default).
+    pub logging: bool,
+}
+
+impl Default for Debugging {
+    fn default() -> Self {
+        Self { logging: true }
+    }
+}
+
 /// Which releases the updater offers (PLAN 3P).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -532,6 +550,9 @@ pub fn update(app: &AppHandle<Wry>, new: Settings) -> Result<Settings, String> {
     if new.updates != old.updates {
         crate::updater::settings_changed(app, &old.updates, &new.updates);
     }
+    if new.debugging.logging != old.debugging.logging {
+        crate::log::set_enabled(&crate::product_name(app), new.debugging.logging);
+    }
 
     let _ = SettingsChanged(new.clone()).emit(app);
     Ok(new)
@@ -591,7 +612,7 @@ pub fn migrate(stored: Option<Value>) -> (Settings, bool) {
                     settings.shortcuts = shortcuts;
                 }
                 Err(e) => {
-                    eprintln!("[settings] markup shortcuts ({e}); using defaults");
+                    logln!("[settings] markup shortcuts ({e}); using defaults");
                     settings.shortcuts = Shortcuts::default();
                     changed = true;
                 }
@@ -600,7 +621,7 @@ pub fn migrate(stored: Option<Value>) -> (Settings, bool) {
             (settings, changed)
         }
         Err(e) => {
-            eprintln!("[settings] unreadable settings ({e}); using defaults");
+            logln!("[settings] unreadable settings ({e}); using defaults");
             (Settings::default(), true)
         }
     }
@@ -643,12 +664,12 @@ fn repair_file(app: &AppHandle<Wry>) {
     match check_raw(&bytes) {
         Repair::None => {}
         Repair::StripBom(body) => {
-            eprintln!("[settings] stripping UTF-8 BOM from {}", path.display());
+            logln!("[settings] stripping UTF-8 BOM from {}", path.display());
             let _ = std::fs::write(&path, body);
         }
         Repair::Quarantine => {
             let backup = dir.join("settings.corrupt.json");
-            eprintln!(
+            logln!(
                 "[settings] {} is not valid JSON; moved to {} and using defaults",
                 path.display(),
                 backup.display()
@@ -665,7 +686,7 @@ pub fn load(app: &AppHandle<Wry>) -> (Settings, bool) {
     let store = match app.store(STORE_FILE) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("[settings] cannot open store: {e}; using defaults");
+            logln!("[settings] cannot open store: {e}; using defaults");
             return (Settings::default(), false);
         }
     };
@@ -674,7 +695,7 @@ pub fn load(app: &AppHandle<Wry>) -> (Settings, bool) {
     let (settings, changed) = migrate(stored);
     if changed {
         if let Err(e) = save(app, &settings) {
-            eprintln!("[settings] cannot save: {e}");
+            logln!("[settings] cannot save: {e}");
         }
     }
     (settings, first_run)

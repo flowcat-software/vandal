@@ -204,7 +204,7 @@ impl WindowCapturer for WgcCapturer {
         if device.is_none() {
             match Device::new() {
                 Ok(d) => *device = Some(d),
-                Err(e) => eprintln!("[capture] D3D device for window capture failed: {e}"),
+                Err(e) => logln!("[capture] D3D device for window capture failed: {e}"),
             }
         }
     }
@@ -221,7 +221,7 @@ impl WindowCapturer for WgcCapturer {
             match device.as_ref().unwrap().capture(hwnd) {
                 Ok(image) => return Ok(image),
                 Err(e) if attempt == 0 => {
-                    eprintln!("[capture] window capture failed ({e}); retrying on a new device");
+                    logln!("[capture] window capture failed ({e}); retrying on a new device");
                     *device = None;
                 }
                 Err(e) => return Err(e.into()),

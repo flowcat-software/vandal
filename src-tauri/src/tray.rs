@@ -168,7 +168,7 @@ pub fn create(app: &AppHandle, s: &Settings) -> tauri::Result<()> {
                 }
             };
             if let Err(e) = result {
-                eprintln!("[tray] {e}");
+                logln!("[tray] {e}");
             }
         })
         .on_tray_icon_event(|tray, event| {
@@ -234,7 +234,7 @@ pub fn refresh(app: &AppHandle, s: &Settings) {
         Ok(menu) => {
             let _ = tray.set_menu(Some(menu));
         }
-        Err(e) => eprintln!("[tray] menu rebuild failed: {e}"),
+        Err(e) => logln!("[tray] menu rebuild failed: {e}"),
     }
     let _ = tray.set_tooltip(Some(tooltip(app, s)));
 }
@@ -242,7 +242,7 @@ pub fn refresh(app: &AppHandle, s: &Settings) {
 pub fn apply_autostart(app: &AppHandle, enabled: bool) {
     // Never register a dev build to start with Windows.
     if cfg!(debug_assertions) {
-        eprintln!("[startup] dev build: launch on login = {enabled} (not applied)");
+        logln!("[startup] dev build: launch on login = {enabled} (not applied)");
         return;
     }
     let launcher = app.autolaunch();
@@ -252,7 +252,7 @@ pub fn apply_autostart(app: &AppHandle, enabled: bool) {
         launcher.disable()
     };
     if let Err(e) = result {
-        eprintln!("[startup] autostart {enabled}: {e}");
+        logln!("[startup] autostart {enabled}: {e}");
     }
 }
 

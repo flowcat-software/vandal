@@ -361,14 +361,14 @@ fn opt_ms(d: Option<Duration>) -> String {
 fn grab(state: &AppState) -> Option<(Vec<MonitorInfo>, bool, Vec<MonitorFrame>, CaptureTiming)> {
     let known = state.monitors.read().unwrap().clone();
     let current = monitors::enumerate().unwrap_or_else(|e| {
-        eprintln!("[capture] monitor enumeration failed: {e}");
+        logln!("[capture] monitor enumeration failed: {e}");
         known.clone()
     });
     let changed = current != known;
     match state.capturer.capture_all(&current) {
         Ok((frames, timing)) => Some((current, changed, frames, timing)),
         Err(e) => {
-            eprintln!("[capture] {} capture failed: {e}", state.capturer.name());
+            logln!("[capture] {} capture failed: {e}", state.capturer.name());
             None
         }
     }
@@ -441,7 +441,7 @@ fn start_region_for(
     let state = app.state::<AppState>();
     let mut session = state.session.lock().unwrap();
     if session.is_some() {
-        eprintln!("[capture] ignored: a capture is already on screen");
+        logln!("[capture] ignored: a capture is already on screen");
         return false;
     }
     let Some((monitors, layout_changed, frames, capture_timing)) = grab(&state) else {
@@ -522,13 +522,13 @@ fn start_region_for(
     let app = app.clone();
     let id = capture.id;
     if layout_changed {
-        eprintln!("[capture] display layout changed; rebuilding overlays");
+        logln!("[capture] display layout changed; rebuilding overlays");
         *state.monitors.write().unwrap() = monitors.clone();
         crate::tray::rebuild(&app);
         // Window creation must not run on the main thread while it's busy here.
         std::thread::spawn(move || {
             if let Err(e) = overlay::reconcile_pool(&app, &monitors) {
-                eprintln!("[overlay] rebuild failed: {e}");
+                logln!("[overlay] rebuild failed: {e}");
             }
             emit_loads(&app, &loads);
             std::thread::sleep(READY_TIMEOUT_AFTER_REBUILD);
@@ -547,7 +547,7 @@ fn start_region_for(
 fn emit_loads(app: &AppHandle, loads: &[OverlayLoad]) {
     for load in loads {
         if let Err(e) = load.emit_to(app, overlay::label(load.monitor_index)) {
-            eprintln!(
+            logln!(
                 "[capture] emit to overlay {} failed: {e}",
                 load.monitor_index
             );
@@ -574,7 +574,7 @@ pub fn capture_fullscreen(app: &AppHandle, screens: Screens) {
     let started = Instant::now();
     let state = app.state::<AppState>();
     if state.session.lock().unwrap().is_some() {
-        eprintln!("[capture] ignored: a capture is already on screen");
+        logln!("[capture] ignored: a capture is already on screen");
         return;
     }
     let Some((monitors, layout_changed, frames, _)) = grab(&state) else {
@@ -605,7 +605,7 @@ pub fn capture_fullscreen(app: &AppHandle, screens: Screens) {
         let app = app.clone();
         std::thread::spawn(move || {
             if let Err(e) = overlay::reconcile_pool(&app, &monitors) {
-                eprintln!("[overlay] rebuild failed: {e}");
+                logln!("[overlay] rebuild failed: {e}");
             }
         });
     }
@@ -654,7 +654,7 @@ fn show(app: &AppHandle, capture_id: CaptureId, by_timeout: bool) {
         s.show_started = true;
         s.shown_by_timeout = by_timeout;
         if by_timeout {
-            eprintln!(
+            logln!(
                 "[capture] #{capture_id}: overlays {:?} not ready in time, showing anyway",
                 s.pending
             );
@@ -691,7 +691,7 @@ fn show(app: &AppHandle, capture_id: CaptureId, by_timeout: bool) {
                 )
             })
             .collect();
-        eprintln!(
+        logln!(
             "[perf] #{} {}/{}: captured {:.1}ms (grab [{}] copy {:.1}, {} windows {:.1}) → ready {} → shown {} | {}",
             s.capture_id,
             state.capturer.name(),
@@ -718,7 +718,7 @@ pub fn overlay_visible(app: &AppHandle, capture_id: CaptureId, monitor_index: u3
         if s.visible.is_none() {
             let t = s.started.elapsed();
             s.visible = Some(t);
-            eprintln!(
+            logln!(
                 "[perf] #{capture_id}: hotkey → visible {:.1}ms (first: overlay {monitor_index})",
                 ms(t)
             );
@@ -886,7 +886,7 @@ fn commit_window(app: &AppHandle, capture_id: CaptureId, index: u32) {
     let activated = winenum::activate(window.hwnd);
     match state.window_capturer.capture_window(window.hwnd) {
         Ok(image) => {
-            eprintln!(
+            logln!(
                 "[perf] #{capture_id}: window {}×{} by {} in {:.1}ms ({} frames, settled {:.1}ms, activated: {activated})",
                 image.width,
                 image.height,
@@ -898,7 +898,7 @@ fn commit_window(app: &AppHandle, capture_id: CaptureId, index: u32) {
             deliver_window(app, capture_id, window.rect, image, started);
         }
         Err(e) => {
-            eprintln!("[capture] window capture failed ({e}); cutting it from the frozen screen");
+            logln!("[capture] window capture failed ({e}); cutting it from the frozen screen");
             commit_now(app, capture_id, CaptureTarget::Window { index });
         }
     }
@@ -1149,7 +1149,7 @@ fn finish(
             let doc = output::CaptureDoc::new(capture, rect, None);
             output::deliver(app, image, doc, started, output::Already::default());
         }
-        None => eprintln!("[capture] #{}: empty selection {rect:?}", capture.id),
+        None => logln!("[capture] #{}: empty selection {rect:?}", capture.id),
     }
 }
 
