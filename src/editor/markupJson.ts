@@ -60,10 +60,10 @@ export function readMarkup(text: string): ReadMarkup {
   try {
     data = JSON.parse(text);
   } catch {
-    return { ok: false, reason: "the clipboard has no Vandal markup" };
+    return { ok: false, reason: "the clipboard has no Vandal marks" };
   }
   if (!isObject(data) || data.kind !== MARKUP_KIND) {
-    return { ok: false, reason: "the clipboard has no Vandal markup" };
+    return { ok: false, reason: "the clipboard has no Vandal marks" };
   }
   if (data.version !== DOC_VERSION) {
     return { ok: false, reason: `it's version ${String(data.version)}, not ${DOC_VERSION}` };

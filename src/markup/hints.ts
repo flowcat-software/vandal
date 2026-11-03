@@ -16,7 +16,7 @@ import { TOOLS, type ToolId } from "./toolStore";
 
 /** Hints for controls, by the id in their `data-hint` attribute. */
 export const CONTROL_HINTS = {
-  "tool.select": "{select} Select and move objects · [Esc] steps back to Select",
+  "tool.select": "{select} Select and move marks · [Esc] steps back to Select",
   "tool.pen": "{pen} Draw freehand · [Shift] straight line",
   "tool.highlighter": "{highlighter} Highlight freehand · [Shift] straight line",
   "tool.line": "{line} Draw a line · [Shift] 45° steps",

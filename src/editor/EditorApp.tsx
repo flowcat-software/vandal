@@ -541,13 +541,13 @@ function fileName(path: string): string {
 
 type Notify = (notice: Notice) => void;
 
-/** Copy the whole markup as JSON (the hidden shortcut, and the menu's Copy All Markup). */
+/** Copy the whole markup as JSON (the hidden shortcut, and the menu's Copy All Marks). */
 async function copyMarkup(notify: Notify): Promise<void> {
   try {
     await navigator.clipboard.writeText(markupToJson(docStore.getState().doc));
-    notify({ text: "Markup copied", success: true });
+    notify({ text: "All marks copied", success: true });
   } catch (e) {
-    notify({ text: `Markup not copied: ${errorText(e)}`, error: true });
+    notify({ text: `Marks not copied: ${errorText(e)}`, error: true });
   }
 }
 
@@ -559,7 +559,7 @@ async function copySelection(notify: Notify): Promise<void> {
   try {
     await navigator.clipboard.writeText(markupToJson({ ...doc, annotations }));
     const n = annotations.length;
-    notify({ text: n === 1 ? "Object copied" : `${n} objects copied`, success: true });
+    notify({ text: n === 1 ? "Mark copied" : `${n} marks copied`, success: true });
   } catch (e) {
     notify({ text: `Not copied: ${errorText(e)}`, error: true });
   }
@@ -576,23 +576,23 @@ async function clipboardText(notify: Notify): Promise<string | null> {
   if (read.status === "ok") return read.data;
   if (await commands.clipboardHasImage()) {
     notify({
-      text: "The clipboard has an image. To duplicate objects: Ctrl+D, or Ctrl+Shift+C then Ctrl+V",
+      text: "The clipboard has an image. To duplicate marks: Ctrl+D, or Ctrl+Shift+C then Ctrl+V",
     });
-  } else notify({ text: `Markup not pasted: ${read.error}`, error: true });
+  } else notify({ text: `Marks not pasted: ${read.error}`, error: true });
   return null;
 }
 
-/** The menu's Paste Markup: the clipboard's objects join the document, in front (PLAN 3R). */
+/** The menu's Paste Marks: the clipboard's objects join the document, in front (PLAN 3R). */
 async function pasteMarkup(notify: Notify): Promise<void> {
   const text = await clipboardText(notify);
   if (text === null) return;
   const read = readMarkup(text);
   if (!read.ok) {
-    notify({ text: `Markup not pasted: ${read.reason}`, error: true });
+    notify({ text: `Marks not pasted: ${read.reason}`, error: true });
     return;
   }
   const n = addCopies(placePasted(read.markup, docStore.getState().doc.crop)).length;
-  notify({ text: n === 1 ? "1 object pasted" : `${n} objects pasted`, success: true });
+  notify({ text: n === 1 ? "1 mark pasted" : `${n} marks pasted`, success: true });
 }
 
 /** The hidden shortcut's paste: the clipboard's markup in place of the document's. */

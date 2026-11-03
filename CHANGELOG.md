@@ -25,6 +25,9 @@ All notable changes to Vandal are listed here. The format follows
   colors are a dropdown, which takes less room than a row of swatches; lines go up to 30 px;
   callouts end in a dot, with their own 1-20 px width slider; the spotlight's darkness is a
   slider from 30 to 85 %; and step markers come in 72 px too.
+- **Copying and pasting say "marks".** The right-click menu's Copy Object, Copy All Markup and
+  Paste Markup are now **Copy Mark**, **Copy All Marks** and **Paste Marks**, and the status
+  bar, hints and Settings call the things you draw marks throughout.
 - **Settings › About links to Flowcat Software's new address,
   [flowcat.studio](https://flowcat.studio).**
 

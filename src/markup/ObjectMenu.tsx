@@ -90,18 +90,18 @@ export function ObjectMenu({ at, onObject, onClose }: Props) {
       {clipboard && (
         <>
           <Row
-            label="Copy All Markup"
+            label="Copy All Marks"
             disabled={!hasObjects}
             onClick={run(() => clipboard.copyAll())}
           />
           <Row
-            label={selected > 1 ? `Copy ${selected} Objects` : "Copy Object"}
+            label={selected > 1 ? `Copy ${selected} Marks` : "Copy Mark"}
             keys="Ctrl+Shift+C"
             disabled={!onObject}
             onClick={run(() => clipboard.copySelection())}
           />
           <Row
-            label="Paste Markup"
+            label="Paste Marks"
             keys="Ctrl+V"
             disabled={!canPaste}
             onClick={run(() => clipboard.paste())}

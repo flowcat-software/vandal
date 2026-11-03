@@ -348,9 +348,9 @@ export const sections: Section[] = [
             id: "editor-drawing-tools-select",
             kind: "toggle",
             path: "editor.drawingToolsSelect",
-            label: "Drawing tools select objects under the pointer",
+            label: "Drawing tools select marks under the pointer",
             description:
-              "Off: drawing tools always draw, even over other objects, and you select with the Select tool. Hold Ctrl to do the opposite for one click.",
+              "Off: drawing tools always draw, even over other marks, and you select with the Select tool. Hold Ctrl to do the opposite for one click.",
             keywords: ["draw over", "click", "select", "move", "ctrl", "arrow", "overlap"],
           },
           {

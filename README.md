@@ -252,7 +252,8 @@ open, drop, paste (Ctrl+V) or capture an image into it.
 - **Copying marks:** Ctrl+Shift+C copies the selected marks and Ctrl+V pastes them, into the
   same editor or another one, in front and selected (Ctrl+C copies the image). They keep their
   place relative to the image's top-left corner, and slide in if they'd land outside it. The
-  right-click menu also has **Copy All Markup**, on a mark or on empty canvas.
+  right-click menu has **Copy Mark**, **Copy All Marks** (on a mark or on empty canvas) and
+  **Paste Marks**.
 - **Crop:** drag to draw the box (Ctrl+drag draws a new one anywhere), type an exact width and
   height, or keep a ratio such as 16:9 (with **Portrait** for 9:16). Enter applies, Esc cancels.
   Crop never throws pixels away: undo it, or choose **Show full capture** in crop mode to get
