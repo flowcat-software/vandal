@@ -7,6 +7,7 @@ import { initialDoc } from "./handoff";
 import { markupFromJson, markupToJson, placePasted, readMarkup } from "./markupJson";
 import { setMarkupClipboard } from "../markup/markupClipboard";
 import { addCopies } from "../markup/objectActions";
+import { setStyleNotify } from "../markup/pasteStyle";
 import { useRedactSource } from "../markup/redact";
 import { setTextRecognizer } from "../markup/textRedact";
 import {
@@ -151,7 +152,12 @@ export function EditorApp() {
         return markup.ok && markup.markup.annotations.length > 0;
       },
     });
-    return () => setMarkupClipboard(null);
+    // Copy Style says so in the status bar (PLAN 3V.7).
+    setStyleNotify((text) => setNotice({ text, success: true }));
+    return () => {
+      setMarkupClipboard(null);
+      setStyleNotify(null);
+    };
   }, []);
 
   // Tool styles carry over between windows (PLAN 2A.6d).

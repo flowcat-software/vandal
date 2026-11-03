@@ -3,6 +3,7 @@
 // the Esc ladder.
 // Host-specific keys (copy, save, zoom, close) live in the host.
 
+import { copyStyle, pasteStyle } from "./pasteStyle";
 import { useEffect, useRef } from "react";
 import { isTyping } from "../shared/dom";
 import { translateAnnotation } from "./geometry";
@@ -66,6 +67,11 @@ export function useMarkupKeys(active?: () => boolean): void {
           e.preventDefault();
           return;
         }
+      }
+      // Copy Style / Paste Style (PLAN 3V.7): Ctrl+Alt is never a tool's shortcut.
+      if (e.ctrlKey && e.altKey && !e.shiftKey && (e.code === "KeyC" || e.code === "KeyV")) {
+        if ((e.code === "KeyC" ? copyStyle : pasteStyle)()) e.preventDefault();
+        return;
       }
       if (e.altKey) {
         if (fontStep && stepFont(e.code === "ArrowDown" ? 1 : -1)) e.preventDefault();

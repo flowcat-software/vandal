@@ -254,6 +254,11 @@ open, drop, paste (Ctrl+V) or capture an image into it.
   place relative to the image's top-left corner, and slide in if they'd land outside it. The
   right-click menu has **Copy Mark**, **Copy All Marks** (on a mark or on empty canvas) and
   **Paste Marks**.
+- **Copying a style:** Ctrl+Alt+C (or **Copy Style** in the right-click menu) copies the selected
+  mark's style, and Ctrl+Alt+V (**Paste Style**) gives it to the selected marks: colors, width,
+  font and the rest. Another kind of mark takes what it has a place for (an arrow's color
+  becomes a rectangle's border; a text's background, a shape's fill). It works across editors
+  and quick edit.
 - **Crop:** drag to draw the box (Ctrl+drag draws a new one anywhere), type an exact width and
   height, or keep a ratio such as 16:9 (with **Portrait** for 9:16). Enter applies, Esc cancels.
   Crop never throws pixels away: undo it, or choose **Show full capture** in crop mode to get
@@ -419,6 +424,8 @@ printed on the pickers (you can hide them in Settings).
 | Alt+drag             | Drag a copy of the marks, leaving them in place                |
 | Ctrl+Shift+C         | Copy the selected marks (editor)                               |
 | Ctrl+V               | Paste copied marks (editor)                                    |
+| Ctrl+Alt+C           | Copy the selected mark's style                                 |
+| Ctrl+Alt+V           | Paste the copied style onto the selected marks                 |
 | Delete / Backspace   | Delete the selected marks                                      |
 | Arrow keys           | Move the selected marks by 1 pixel (Shift: 10)                 |
 | Ctrl+] / Ctrl+[      | Bring forward / send backward (with Shift: to front / to back) |

@@ -12,6 +12,11 @@ All notable changes to Vandal are listed here. The format follows
   in "…". Rest the pointer for a moment and it glides along to the end, then back. Turn it off
   in **Settings › Markup › Scroll long hints**; it stays still when Windows is set to reduce
   motion.
+- **Copy Style and Paste Style.** Ctrl+Alt+C (or **Copy Style** in the right-click menu) copies
+  the selected mark's style, and Ctrl+Alt+V (**Paste Style**) gives it to the selected marks:
+  colors, width, font and the rest. Another kind of mark takes what it has a place for, so an
+  arrow's color becomes a rectangle's border and a text's background a shape's fill. Works in
+  the editor and quick edit, and from one to the other.
 - **Reset to defaults.** **Settings › About › Reset** puts every setting back as installed, or
   only the markup styles (colors, widths, sizes and fonts). Either way the markup tools forget
   the styles they remembered. Each asks first.

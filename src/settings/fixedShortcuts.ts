@@ -23,6 +23,8 @@ export const MARKUP_KEYS: KeyEntry[] = [
   { keys: ["Ctrl+Y", "Ctrl+Shift+Z"], what: "Redo" },
   { keys: ["Ctrl+A"], what: "Select all" },
   { keys: ["Ctrl+D"], what: "Duplicate" },
+  { keys: ["Ctrl+Alt+C"], what: "Copy the selected mark's style" },
+  { keys: ["Ctrl+Alt+V"], what: "Paste the copied style onto the selected marks" },
   { keys: ["Del", "Backspace"], what: "Delete" },
   { keys: ["←↑↓→"], what: "Nudge (with Shift: 10 px)" },
   { keys: ["Ctrl+]", "Ctrl+["], what: "Bring forward, send backward" },

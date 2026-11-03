@@ -4,6 +4,7 @@ import { useMenuPlacement } from "./menuPlacement";
 import { docStore, useDoc } from "./model/store";
 import type { Reorder } from "./model/commands";
 import { canArrange, duplicateSelection } from "./objectActions";
+import { copiedStyle, copyStyle, pasteStyle } from "./pasteStyle";
 import styles from "./options.module.css";
 
 interface Props {
@@ -33,6 +34,7 @@ export function ObjectMenu({ at, onObject, onClose }: Props) {
   const hasObjects = useDoc((s) => s.doc.annotations.length > 0);
   const selected = useDoc((s) => s.selection.length);
   const clipboard = markupClipboard();
+  const hasStyle = copiedStyle() !== null;
   // Greyed until the clipboard has been read.
   const [canPaste, setCanPaste] = useState(false);
   useEffect(() => {
@@ -109,6 +111,19 @@ export function ObjectMenu({ at, onObject, onClose }: Props) {
           <div className={styles.menuSep} role="separator" />
         </>
       )}
+      <Row
+        label="Copy Style"
+        keys="Ctrl+Alt+C"
+        disabled={!onObject}
+        onClick={run(() => void copyStyle())}
+      />
+      <Row
+        label={selected > 1 ? `Paste Style to ${selected} Marks` : "Paste Style"}
+        keys="Ctrl+Alt+V"
+        disabled={!onObject || !hasStyle}
+        onClick={run(() => void pasteStyle())}
+      />
+      <div className={styles.menuSep} role="separator" />
       <Row label="Duplicate" keys="Ctrl+D" disabled={!onObject} onClick={run(duplicateSelection)} />
       <div className={styles.menuSep} role="separator" />
       {ARRANGE.map(({ how, label, keys }) => (
