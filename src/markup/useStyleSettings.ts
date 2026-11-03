@@ -10,6 +10,7 @@ export function applyStyleSettings(s: Settings): void {
     styles: s.styles,
     shareColor: s.editor.shareColor,
     showShortcutHints: s.editor.showShortcutHints,
+    scrollHints: s.editor.scrollHints,
     showButtonUnits: s.editor.showButtonUnits,
     drawingToolsSelect: s.editor.drawingToolsSelect,
     shortcuts: s.shortcuts,

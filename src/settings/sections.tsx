@@ -390,6 +390,15 @@ export const sections: Section[] = [
             keywords: ["shortcut", "hint", "badge", "number", "keyboard", "tooltip", "digit"],
           },
           {
+            id: "editor-scroll-hints",
+            kind: "toggle",
+            path: "editor.scrollHints",
+            label: "Scroll long hints",
+            description:
+              "When a hint is too long for the status bar, rest the pointer for a moment and it glides along to show the rest.",
+            keywords: ["hint", "status bar", "scroll", "marquee", "motion", "animation", "cut off"],
+          },
+          {
             id: "editor-button-units",
             kind: "toggle",
             path: "editor.showButtonUnits",

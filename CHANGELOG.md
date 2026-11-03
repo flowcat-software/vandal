@@ -6,6 +6,13 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Long hints scroll to show the rest.** In a narrow editor, the status bar's hint used to end
+  in "…". Rest the pointer for a moment and it glides along to the end, then back. Turn it off
+  in **Settings › Markup › Scroll long hints**; it stays still when Windows is set to reduce
+  motion.
+
 ### Changed
 
 - **Settings › About links to Flowcat Software's new address,

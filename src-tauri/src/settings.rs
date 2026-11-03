@@ -276,6 +276,9 @@ pub struct EditorSettings {
     pub share_color: bool,
     /// Slot-number badges and shortcut tooltips on the style pickers.
     pub show_shortcut_hints: bool,
+    /// A status-bar hint too long to fit glides to show the rest when the
+    /// pointer rests (PLAN 3V.1).
+    pub scroll_hints: bool,
     /// Number buttons in the options bar show their unit ("50%", "10px").
     /// Off by default: it adds clutter (Richard's call).
     pub show_button_units: bool,
@@ -314,6 +317,7 @@ impl Default for EditorSettings {
             on_close: EditorOnClose::default(),
             share_color: false,
             show_shortcut_hints: true,
+            scroll_hints: true,
             show_button_units: false,
             drawing_tools_select: true,
             remember_tool_styles: true,

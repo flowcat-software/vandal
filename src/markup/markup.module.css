@@ -111,6 +111,21 @@
   text-overflow: ellipsis;
 }
 
+/* Gliding to show the rest of a long hint (hintScroll.ts): no ellipsis, the
+   cut edges fade. */
+.hintLine[data-scrolling] {
+  text-overflow: clip;
+  /* The end stops clear of the fade. */
+  padding-right: 20px;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 16px,
+    #000 calc(100% - 16px),
+    transparent
+  );
+}
+
 .keys {
   white-space: nowrap;
 }

@@ -462,6 +462,11 @@ export type EditorSettings = {
 	/**  Slot-number badges and shortcut tooltips on the style pickers. */
 	showShortcutHints?: boolean,
 	/**
+	 *  A status-bar hint too long to fit glides to show the rest when the
+	 *  pointer rests (PLAN 3V.1).
+	 */
+	scrollHints?: boolean,
+	/**
 	 *  Number buttons in the options bar show their unit ("50%", "10px").
 	 *  Off by default: it adds clutter (Richard's call).
 	 */

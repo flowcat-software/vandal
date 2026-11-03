@@ -30,6 +30,8 @@ export interface StyleConfig {
   shareColor: boolean;
   /** Slot-number badges and shortcut tooltips on the pickers. */
   showShortcutHints: boolean;
+  /** A long status-bar hint scrolls when the pointer rests (`editor.scrollHints`). */
+  scrollHints: boolean;
   /** Number buttons show their unit (`editor.showButtonUnits`). */
   showButtonUnits: boolean;
   /** Drawing tools select an object pressed on (else they draw over it); Ctrl flips it. */
@@ -80,6 +82,7 @@ export const DEFAULT_STYLE_CONFIG: StyleConfig = {
   },
   shareColor: false,
   showShortcutHints: true,
+  scrollHints: true,
   showButtonUnits: false,
   drawingToolsSelect: true,
   fonts: [],

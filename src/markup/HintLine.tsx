@@ -1,5 +1,6 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useDoc } from "./model/store";
+import { useHintScroll } from "./hintScroll";
 import { chooseHint, parseHint, useHintSources, withShortcuts, type ControlHint } from "./hints";
 import { colorSlots, styleTarget, targetSections, targetValues } from "./restyle";
 import { useStyleConfig } from "./styles";
@@ -14,9 +15,11 @@ export function hint(id: ControlHint): { "data-hint": ControlHint } {
 
 /**
  * The status bar's hint line (PLAN 2A.6e): the keys that do something right
- * now. Off with `editor.showShortcutHints`.
+ * now. Off with `editor.showShortcutHints`. One too long to fit scrolls to
+ * show the rest when the pointer rests (`editor.scrollHints`, PLAN 3V.1).
  */
 export function HintLine() {
+  const line = useRef<HTMLSpanElement>(null);
   const { hover, drag, mode, overObject, overRedactedWord } = useHintSources();
   const tool = useToolStore((s) => s.tool);
   const typing = useToolStore((s) => s.editing !== null);
@@ -76,7 +79,6 @@ export function HintLine() {
     };
   }, []);
 
-  if (!config.showShortcutHints) return null;
   const text = withShortcuts(
     chooseHint({
       hover,
@@ -98,9 +100,11 @@ export function HintLine() {
     }),
     config.shortcuts,
   );
+  useHintScroll(line, text, config.scrollHints);
 
+  if (!config.showShortcutHints) return null;
   return (
-    <span className={styles.hintLine}>
+    <span ref={line} className={styles.hintLine}>
       {parseHint(text).map((part, i) =>
         "text" in part ? (
           <Fragment key={i}>{part.text}</Fragment>
