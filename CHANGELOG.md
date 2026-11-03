@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.16] - 2026-11-02
+
 ### Added
 
 - **Long hints scroll to show the rest.** In a narrow editor, the status bar's hint used to end
@@ -47,6 +49,12 @@ All notable changes to Vandal are listed here. The format follows
   with the spotlight's color.
 - **The toolbar's Select icon sits level with the other tools.** Its arrow was drawn a little
   high.
+
+### Security
+
+- **The secure connection used to check for and download updates is up to date** (rustls
+  0.23.46 and rustls-webpki 0.103.16), with fixes for certificate checks. Updates were always
+  signature-checked as well.
 
 ## [0.3.0-beta.15] - 2026-10-19
 
@@ -460,7 +468,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.15...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.16...HEAD
+[0.3.0-beta.16]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.15...v0.3.0-beta.16
 [0.3.0-beta.15]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.14...v0.3.0-beta.15
 [0.3.0-beta.14]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.13...v0.3.0-beta.14
 [0.3.0-beta.13]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.12...v0.3.0-beta.13
