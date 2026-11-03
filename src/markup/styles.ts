@@ -55,14 +55,14 @@ export const DEFAULT_STYLE_CONFIG: StyleConfig = {
       "#000000",
       "#ffffff",
     ],
-    colorControl: "swatches",
-    width: { control: "slider", min: 1, max: 20 },
+    colorControl: "dropdown",
+    width: { control: "slider", min: 1, max: 30 },
     font: { source: "system", fonts: [], control: "dropdown" },
     fontSize: { control: "dropdown", values: [8, 10, 12, 14, 16, 18, 20, 36, 48, 72] },
     pixelate: { control: "buttons", values: [6, 10, 16, 24] },
     blur: { control: "buttons", values: [3, 6, 10, 16] },
-    spotlight: { control: "buttons", values: [30, 50, 70, 85] },
-    stepSize: { control: "dropdown", values: [24, 32, 44, 60] },
+    spotlight: { control: "slider", min: 30, max: 85 },
+    stepSize: { control: "dropdown", values: [24, 32, 44, 60, 72] },
     // Never buttons, and 0 is always a choice (Rust keeps it so).
     cornerRadius: { control: "dropdown", values: [0, 5, 10, 15, 20] },
     stepFont: { source: "text", fonts: [], control: "dropdown" },
@@ -72,10 +72,10 @@ export const DEFAULT_STYLE_CONFIG: StyleConfig = {
         width: { control: "slider", min: 8, max: 40 },
         colorControl: null,
       },
-      // Compact beside its icon in a busy options bar (PLAN 3E.3).
+      // Its own thickness range (PLAN 3V.2).
       callout: {
         palette: null,
-        width: { control: "dropdown", values: [2, 4, 6, 10] },
+        width: { control: "slider", min: 1, max: 20 },
         colorControl: null,
       },
     },

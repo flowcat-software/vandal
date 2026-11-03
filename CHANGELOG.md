@@ -15,6 +15,10 @@ All notable changes to Vandal are listed here. The format follows
 
 ### Changed
 
+- **New default styles for the markup tools** (new installs; saved settings keep theirs):
+  colors are a dropdown, which takes less room than a row of swatches; lines go up to 30 px;
+  callouts end in a dot, with their own 1-20 px width slider; the spotlight's darkness is a
+  slider from 30 to 85 %; and step markers come in 72 px too.
 - **Settings › About links to Flowcat Software's new address,
   [flowcat.studio](https://flowcat.studio).**
 

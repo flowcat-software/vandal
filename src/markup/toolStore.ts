@@ -161,7 +161,8 @@ export const useToolStore = create<ToolState>((set) => ({
   calloutItalic: false,
   calloutAlign: "left",
   calloutTextColor: null,
-  calloutEnd: "line",
+  // A dot at the tip (PLAN 3V.2, from Razorcat).
+  calloutEnd: "dot",
   calloutShape: "box",
   editing: null,
   labelEditing: null,
