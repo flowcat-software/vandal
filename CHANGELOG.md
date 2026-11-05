@@ -12,6 +12,8 @@ All notable changes to Vandal are listed here. The format follows
   Appearance** used to be darkened in light mode and lightened in dark mode, which muted bright
   colors. It's now used as it is, in both themes. The Windows accent still comes with Windows'
   own shades.
+- **A rounded app icon.** Vandal's icon is a rounded tile with a soft shadow, as Windows 11's app
+  icons are: on the Desktop, the taskbar and the window's title bar.
 
 ## [0.3.0-beta.16] - 2026-11-02
 
