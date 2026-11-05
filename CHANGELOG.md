@@ -6,6 +6,13 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **The accent color you pick is the color you get.** A color picked in **Settings › General ›
+  Appearance** used to be darkened in light mode and lightened in dark mode, which muted bright
+  colors. It's now used as it is, in both themes. The Windows accent still comes with Windows'
+  own shades.
+
 ## [0.3.0-beta.16] - 2026-11-02
 
 ### Added

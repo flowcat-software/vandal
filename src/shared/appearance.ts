@@ -3,7 +3,7 @@
 // it in step with the setting while the window is open, and sets the accent.
 // theme.css does the rest.
 
-import { accentShades, onAccent, type AccentShades } from "./accent";
+import { onAccent, type AccentShades } from "./accent";
 import { commands, events, type Settings, type WindowsAccent } from "./ipc";
 
 type Appearance = Partial<Settings["appearance"]>;
@@ -19,8 +19,9 @@ function applyTheme(a: Appearance | undefined): void {
 /** Override theme.css's accent, or fall back to it (our blue) when there's none. */
 function applyAccent(): void {
   const style = document.documentElement.style;
+  // A picked accent as it is, in both themes; Windows' with its own shades.
   const shades: AccentShades | null =
-    accent === "windows" ? (windowsAccent ?? null) : accentShades(accent);
+    accent === "windows" ? (windowsAccent ?? null) : { light: accent, dark: accent };
   if (!shades) {
     style.removeProperty("--accent");
     style.removeProperty("--on-accent");
