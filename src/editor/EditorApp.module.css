@@ -249,19 +249,28 @@
   height: 48px;
   flex-shrink: 0;
   padding: 0 8px;
-  container-type: inline-size;
 }
 
-/* Narrow windows: the action buttons drop their labels (tooltips remain). */
-@container (max-width: 960px) {
-  .label {
-    display: none;
-  }
+/* Narrow windows (squeeze.ts): every child keeps its width, so what doesn't fit shows... */
+.commandBar > * {
+  flex-shrink: 0;
+}
 
-  .commandBar .button,
-  .commandBar .splitMain {
-    padding: 0 8px;
-  }
+/* ...and the bar squeezes instead: the action buttons drop their labels (tooltips remain) and
+   go square one at a time, Capture (1), Open (2), Copy (3), then Save (4), so each keeps its
+   label as long as there's room (Richard, as in Razorcat). */
+.commandBar:not([data-fit="0"]) .squeeze1,
+.commandBar:not([data-fit="0"], [data-fit="1"]) .squeeze2,
+.commandBar:not([data-fit="0"], [data-fit="1"], [data-fit="2"]) .squeeze3,
+.commandBar:not([data-fit="0"], [data-fit="1"], [data-fit="2"], [data-fit="3"]) .squeeze4 {
+  padding: 0 8px;
+}
+
+.commandBar:not([data-fit="0"]) .squeeze1 .label,
+.commandBar:not([data-fit="0"], [data-fit="1"]) .squeeze2 .label,
+.commandBar:not([data-fit="0"], [data-fit="1"], [data-fit="2"]) .squeeze3 .label,
+.commandBar:not([data-fit="0"], [data-fit="1"], [data-fit="2"], [data-fit="3"]) .squeeze4 .label {
+  display: none;
 }
 
 .commandBar svg {

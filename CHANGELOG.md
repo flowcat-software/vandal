@@ -14,6 +14,9 @@ All notable changes to Vandal are listed here. The format follows
   own shades.
 - **A rounded app icon.** Vandal's icon is a rounded tile with a soft shadow, as Windows 11's app
   icons are: on the Desktop, the taskbar and the window's title bar.
+- **The editor's buttons keep their labels longer.** As the window narrows, Capture, Open, Copy
+  and Save drop their labels one at a time, Capture first, each only once it no longer fits.
+  They used to lose them all at once.
 
 ## [0.3.0-beta.16] - 2026-11-02
 

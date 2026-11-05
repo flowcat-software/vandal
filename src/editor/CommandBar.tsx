@@ -1,6 +1,7 @@
 import { hint } from "../markup/HintLine";
 import { useEffect, useRef, useState } from "react";
 import { keySuffix } from "../markup/shortcuts";
+import { useSqueeze } from "./squeeze";
 import { useStyleConfig } from "../markup/styles";
 import { Toolbar } from "../markup/Toolbar";
 import markupStyles from "../markup/markup.module.css";
@@ -36,8 +37,11 @@ export function CommandBar({
   onSaveAs,
 }: Props) {
   const cropKey = keySuffix(useStyleConfig((s) => s.shortcuts.crop));
+  /** Narrow windows: the buttons drop their labels one at a time, Capture first, then Open, Copy
+   *  and Save (labels stay while they fit: Richard). */
+  const bar = useSqueeze(4);
   return (
-    <div className={styles.commandBar}>
+    <div ref={bar} className={styles.commandBar}>
       <Toolbar
         toolsActive={!cropping}
         onPickTool={onPickTool}
@@ -63,7 +67,7 @@ export function CommandBar({
       <span className={styles.spacer} />
       <button
         type="button"
-        className={styles.button}
+        className={`${styles.button} ${styles.squeeze1}`}
         {...hint("newCapture")}
         aria-label="Capture (Ctrl+N)"
         title="Capture (Ctrl+N)"
@@ -77,7 +81,7 @@ export function CommandBar({
       </button>
       <button
         type="button"
-        className={styles.button}
+        className={`${styles.button} ${styles.squeeze2}`}
         {...hint("open")}
         aria-label="Open image (Ctrl+O)"
         title="Open image (Ctrl+O)"
@@ -90,7 +94,7 @@ export function CommandBar({
       </button>
       <button
         type="button"
-        className={styles.button}
+        className={`${styles.button} ${styles.squeeze3}`}
         {...hint("copy")}
         aria-label="Copy (Ctrl+C)"
         title="Copy (Ctrl+C)"
@@ -143,7 +147,7 @@ function SaveButton({
     <div ref={ref} className={styles.split} {...hint("save")}>
       <button
         type="button"
-        className={styles.splitMain}
+        className={`${styles.splitMain} ${styles.squeeze4}`}
         aria-label="Save (Ctrl+S)"
         title="Save (Ctrl+S)"
         disabled={busy}
