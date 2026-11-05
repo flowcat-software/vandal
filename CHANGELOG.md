@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.17] - 2026-11-05
+
 ### Changed
 
 - **The accent color you pick is the color you get.** A color picked in **Settings › General ›
@@ -480,7 +482,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.16...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.17...HEAD
+[0.3.0-beta.17]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.16...v0.3.0-beta.17
 [0.3.0-beta.16]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.15...v0.3.0-beta.16
 [0.3.0-beta.15]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.14...v0.3.0-beta.15
 [0.3.0-beta.14]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.13...v0.3.0-beta.14
