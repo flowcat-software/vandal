@@ -178,6 +178,15 @@ describe("arrowGeometry", () => {
     expect(line(g)[2]).toBeCloseTo(2); // head is 80% of the length
   });
 
+  it("scales the head with an arrow under two head lengths, down to half size", () => {
+    const end = (len: number) => line(arrowGeometry(from, { x: len, y: 0 }, "filled", 4))[2];
+    expect(end(2 * length)).toBeCloseTo(length); // full size
+    expect(end(1.5 * length)).toBeCloseTo(0.75 * length); // in proportion
+    expect(end(length)).toBeCloseTo(0.5 * length); // the floor
+    const [left] = arrowGeometry(from, { x: length, y: 0 }, "filled", 4).heads[0];
+    expect(left.y).toBeCloseTo(halfWidth / 2); // width scales too
+  });
+
   it("puts a mirrored head on the tail of a two-ended arrow", () => {
     const g = arrowGeometry(from, to, "filled", 4, "both");
     expect(line(g)).toEqual([length, 0, 100 - length, 0]);

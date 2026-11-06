@@ -205,11 +205,30 @@ function headOutline(tip: Point, base: Point, hw: number): [Point, Point, Point]
   ];
 }
 
+/** Below this many head lengths of arrow (per head), the head scales down with it. */
+const HEAD_FULL_AT = 2;
+/** The smallest a head scales to while there's room for it, as a share of full size. */
+const HEAD_MIN_SCALE = 0.5;
+/** A head never takes more than this share of its arrow (or of its half, with two). */
+const HEAD_MAX_SHARE = 0.8;
+
+/**
+ * How much to scale a head of length `headLength` on `len` px of arrow (per
+ * head): full size down to `HEAD_FULL_AT` head lengths, then in proportion to
+ * the arrow so a short one keeps some shaft, but no smaller than
+ * `HEAD_MIN_SCALE` (it'd stop reading as an arrow) unless the arrow is too
+ * short even for that.
+ */
+function shortArrowScale(len: number, headLength: number): number {
+  const k = Math.max(HEAD_MIN_SCALE, len / (HEAD_FULL_AT * headLength));
+  return Math.min(1, k, (len * HEAD_MAX_SHARE) / headLength);
+}
+
 /**
  * Where to draw a line or arrow, straight or bent into a curve. A filled
  * head's shaft stops at the head's base (along the curve, when bent) so a round
- * cap never pokes through the tip. Heads shrink on arrows too short for them
- * (to 80% of the length, or 40% each with two).
+ * cap never pokes through the tip. Heads scale down on short arrows
+ * (`shortArrowScale`).
  */
 export function arrowGeometry(
   from: Point,
@@ -234,7 +253,7 @@ export function arrowGeometry(
 
   const both = ends === "both";
   const size = arrowHeadSize(width);
-  const k = Math.min(1, (len * (both ? 0.4 : 0.8)) / size.length);
+  const k = shortArrowScale(len / (both ? 2 : 1), size.length);
   const hl = size.length * k;
   const hw = size.halfWidth * k;
   const filled = head === "filled";
