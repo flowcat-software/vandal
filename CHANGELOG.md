@@ -6,6 +6,12 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- **The updater's archive handling is up to date** (tauri-plugin-updater 2.14.1 with zip 9),
+  with fixes for crafted archives. Vandal's updates are signed installers, not archives, and are
+  signature-checked before anything is run.
+
 ## [0.3.0-beta.17] - 2026-11-05
 
 ### Changed
