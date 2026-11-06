@@ -4,9 +4,11 @@
 # tokens; when the pool runs dry it renders "invalid" or a token error, and
 # GitHub's image proxy caches that for up to half an hour. Instead, this sums
 # download_count over the installers (*_x64-setup.exe) with our own token and
-# writes a shields.io endpoint file to the orphan badges branch:
-#   https://raw.githubusercontent.com/flowcat-software/vandal/badges/downloads.json
-# shields.io then only fetches that static file.
+# draws the badge itself (scripts/download-badge.mjs), on the orphan badges branch:
+#   https://raw.githubusercontent.com/flowcat-software/vandal/badges/downloads.svg
+# The README shows that file directly. It used to go through shields.io's endpoint
+# badge, which showed as a broken image whenever shields.io was slow or down;
+# downloads.json (that endpoint file) is still written, as a fallback.
 #
 # Only installers count: the .sig and SHA256SUMS files are fetched by the
 # updater and by people verifying a download, so counting them would count
@@ -52,7 +54,8 @@ jobs:
         run: |
           if git ls-remote --exit-code --heads origin badges > /dev/null; then
             git fetch --depth 1 origin badges
-            if [ "$(git show FETCH_HEAD:downloads.json | jq -r .message)" = "$TOTAL" ]; then
+            if [ "$(git show FETCH_HEAD:downloads.json | jq -r .message)" = "$TOTAL" ] \
+              && git cat-file -e FETCH_HEAD:downloads.svg 2> /dev/null; then
               echo "Count unchanged."
               exit 0
             fi
@@ -61,11 +64,13 @@ jobs:
           cd badges
           jq -n --arg n "$TOTAL" \
             '{schemaVersion: 1, label: "downloads", message: $n, color: "brightgreen"}' > downloads.json
+          node ../scripts/download-badge.mjs "$TOTAL" downloads.svg
           cat > README.md <<'EOF'
           # Vandal badges
 
           Written by `.github/workflows/download-badge.yml` on `main`; don't edit by hand.
-          The README's downloads badge reads `downloads.json` through shields.io's endpoint badge.
+          The README shows `downloads.svg`. `downloads.json` is the same count as a
+          shields.io endpoint file, kept as a fallback.
           EOF
           git add -A
           git -c user.name="github-actions[bot]" \

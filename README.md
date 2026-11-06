@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/flowcat-software/vandal/releases"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fflowcat-software%2Fvandal%2Fbadges%2Fdownloads.json&logo=github" alt="Downloads"></a>
+  <a href="https://github.com/flowcat-software/vandal/releases"><img src="https://raw.githubusercontent.com/flowcat-software/vandal/badges/downloads.svg" alt="Downloads"></a>
 </p>
 
 <p align="center">
