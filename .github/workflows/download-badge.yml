@@ -3,10 +3,14 @@
 # shields.io's own GitHub downloads badge borrows from a shared pool of donated
 # tokens; when the pool runs dry it renders "invalid" or a token error, and
 # GitHub's image proxy caches that for up to half an hour. Instead, this sums
-# download_count over every release asset with our own token and writes a
-# shields.io endpoint file to the orphan badges branch:
+# download_count over the installers (*_x64-setup.exe) with our own token and
+# writes a shields.io endpoint file to the orphan badges branch:
 #   https://raw.githubusercontent.com/flowcat-software/vandal/badges/downloads.json
 # shields.io then only fetches that static file.
+#
+# Only installers count: the .sig and SHA256SUMS files are fetched by the
+# updater and by people verifying a download, so counting them would count
+# one download two or three times.
 #
 # The branch holds a single commit, replaced on each change, so it doesn't grow.
 #
@@ -38,7 +42,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           total=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-            --jq '.[].assets[].download_count' | awk '{ s += $1 } END { print s + 0 }')
+            --jq '.[].assets[] | select(.name | endswith("_x64-setup.exe")) | .download_count' | awk '{ s += $1 } END { print s + 0 }')
           echo "Total downloads: $total"
           echo "total=$total" >> "$GITHUB_OUTPUT"
 
