@@ -243,6 +243,10 @@ open, drop, paste (Ctrl+V) or capture an image into it.
     themselves.
   - **Lines and arrows** bend: drag the diamond handle on a selected one. Rectangles can have
     rounded corners.
+  - **Arrow heads** come filled or open, regular or narrow (for a technical-drawing look). Make
+    your own in **Settings › Markup › Arrows**: name a style, choose filled or open, and set its
+    width and length, with a preview as you type. Arrows you've drawn keep their heads when you
+    change a style. Heads shrink with very short arrows.
 - **Styles:** the options bar shows the current tool's colors, width, fill, font, size, and so
   on. Changing a style while a mark is selected restyles that mark. Where there are two colors
   (fill and border, text and its box), **X** swaps them.
@@ -586,6 +590,7 @@ policy is at [vandalscreenshot.com/privacy](https://vandalscreenshot.com/privacy
   step markers
 - Detect text: select words in the image to redact them, as in a document
 - Curved lines and arrows, rounded corners, and two colors with a one-key swap
+- Arrow head styles of your own: filled or open, narrow or wide
 - Quick edit: draw right on the frozen screen, without opening a window
 - Full editor with zoom, pan, fit to width, 200 levels of undo, and crop that never throws
   pixels away

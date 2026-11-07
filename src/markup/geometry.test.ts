@@ -200,6 +200,27 @@ describe("arrowGeometry", () => {
     expect(open.heads[0][0].y).toBeCloseTo(2 + 4 * 0.5 + 3 * 0.75);
   });
 
+  it("keeps every allowed shape sane at any line width and arrow length", () => {
+    const shapes = [
+      { width: 25, length: 50 },
+      { width: 25, length: 100 },
+      { width: 200, length: 50 },
+      { width: 200, length: 250 },
+      { width: 62.5, length: 250 },
+    ];
+    for (const shape of shapes)
+      for (const head of ["filled", "open"] as const)
+        for (const w of [1, 2, 5, 10, 20, 30])
+          for (const len of [1, 3, 10, 30, 100, 400]) {
+            const g = arrowGeometry(from, { x: len, y: 0 }, head, w, "end", undefined, shape);
+            const [l, tip] = g.heads[0];
+            const where = `${head} ${shape.width}/${shape.length}, ${w} px line, ${len} px long`;
+            expect(Number.isFinite(l.x) && Number.isFinite(l.y), where).toBe(true);
+            expect(l.y, where).toBeGreaterThanOrEqual(w / 2 - 1e-9); // never narrower than the line
+            expect(tip.x - l.x, where).toBeLessThanOrEqual(len + 1e-9); // never longer than the arrow
+          }
+  });
+
   it("puts a mirrored head on the tail of a two-ended arrow", () => {
     const g = arrowGeometry(from, to, "filled", 4, "both");
     expect(line(g)).toEqual([length, 0, 100 - length, 0]);

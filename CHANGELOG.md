@@ -6,6 +6,21 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Arrow head styles.** The arrow tool's head picker offers Regular and Narrow heads, filled or
+  open; Narrow suits technical drawings. **Settings › Markup › Arrows** lets you add your own:
+  a name, filled or open, and the head's width and length as a percentage of the regular one,
+  previewed on thin, medium and thick lines as you type. Reorder them with the arrow buttons to
+  change the picker's order. Arrows you've already drawn keep their heads when you change or
+  remove a style. The Arrow's own colors and widths moved to the same group.
+
+### Changed
+
+- **Heads on short arrows shrink with them.** A very short arrow used to be nearly all head. Now
+  the head scales down along with the arrow, though never so far that it stops looking like an
+  arrow.
+
 ### Security
 
 - **The updater's archive handling is up to date** (tauri-plugin-updater 2.14.1 with zip 9),
