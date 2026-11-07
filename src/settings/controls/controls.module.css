@@ -1052,3 +1052,101 @@
   gap: 8px;
   margin-top: 12px;
 }
+
+/* ---- arrow head styles (PLAN 3W) ---- */
+
+.headStyles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* A card per style: the preview on the left; its name and the buttons on
+   top, the head and its proportions below. */
+.headRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "preview label buttons"
+    "preview shape shape";
+  align-items: center;
+  gap: 6px 12px;
+  align-self: stretch;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--control-bg);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.headPreview {
+  grid-area: preview;
+  width: 220px;
+  height: 44px;
+  fill: none;
+  stroke: var(--text);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.headPreview .headFill {
+  fill: var(--text);
+  stroke: none;
+}
+
+.headLabel {
+  grid-area: label;
+  height: 30px;
+}
+
+.headButtons {
+  grid-area: buttons;
+}
+
+.headShapeFields {
+  grid-area: shape;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.headPercent {
+  width: 84px;
+  cursor: text;
+}
+
+.headPercent .unit:first-child {
+  margin-right: 4px;
+}
+
+/* Red, as the other remove buttons. */
+.headRemove:hover:not(:disabled) {
+  background: var(--danger);
+  box-shadow: none;
+  color: #fff;
+}
+
+.headAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--button-bg);
+  box-shadow: inset 0 0 0 1px var(--control-border);
+  color: var(--text);
+  font: inherit;
+  cursor: default;
+}
+
+.headAdd:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.headAdd:disabled {
+  color: var(--text-3);
+}

@@ -21,6 +21,9 @@ export const HEAD_WIDTH = { min: 25, max: 200 };
 export const HEAD_LENGTH = { min: 50, max: 250 };
 /** Neither side more than this many times the other, compared with the standard head. */
 export const HEAD_MAX_RATIO = 4;
+/** At most this many styles, and this many characters in a label (as Rust keeps them). */
+export const MAX_HEAD_STYLES = 10;
+export const MAX_HEAD_LABEL = 20;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 

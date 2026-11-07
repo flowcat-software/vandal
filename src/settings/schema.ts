@@ -106,6 +106,12 @@ export interface FontPickerItem extends BaseItem {
   path: "styles.font" | "styles.stepFont";
 }
 
+/** The arrow's head styles (PLAN 3W): a list of label, filled/open, width and length. */
+export interface ArrowHeadsItem extends BaseItem {
+  kind: "arrowHeads";
+  path: "styles.arrowHeads";
+}
+
 /** The accent color: the Windows accent, a preset or a custom color (PLAN 3A.2). */
 export interface AccentItem extends BaseItem {
   kind: "accent";
@@ -171,6 +177,7 @@ export type Item =
   | PaletteItem
   | ToolStyleItem
   | FontPickerItem
+  | ArrowHeadsItem
   | AccentItem
   | HotkeyItem
   | ShortcutItem

@@ -586,6 +586,47 @@ export const sections: Section[] = [
         ],
       },
       {
+        title: "Arrows",
+        description:
+          "The arrow's head styles, listed in the arrow tool's options in this order, and its own colors or widths.",
+        items: [
+          {
+            id: "arrow-heads",
+            kind: "arrowHeads",
+            path: "styles.arrowHeads",
+            label: "Head styles",
+            keywords: [
+              "arrow",
+              "head",
+              "arrowhead",
+              "narrow",
+              "wide",
+              "filled",
+              "open",
+              "technical",
+              "proportions",
+            ],
+          },
+          {
+            id: "tool-style-arrow",
+            kind: "toolStyle",
+            tool: "arrow",
+            label: "Arrow",
+            widths: true,
+            keywords: [
+              "own",
+              "custom",
+              "override",
+              "per tool",
+              "palette",
+              "color",
+              "width",
+              "arrow",
+            ],
+          },
+        ],
+      },
+      {
         title: "Per-tool styles",
         description:
           "Give a tool its own colors, widths or way of showing colors instead of the ones above. The highlighter comes with its own colors.",
@@ -611,14 +652,6 @@ export const sections: Section[] = [
             kind: "toolStyle",
             tool: "line",
             label: "Line",
-            widths: true,
-            keywords: ["own", "custom", "override", "per tool", "palette", "color", "width"],
-          },
-          {
-            id: "tool-style-arrow",
-            kind: "toolStyle",
-            tool: "arrow",
-            label: "Arrow",
             widths: true,
             keywords: ["own", "custom", "override", "per tool", "palette", "color", "width"],
           },
