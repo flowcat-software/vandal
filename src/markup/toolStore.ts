@@ -3,18 +3,20 @@
 
 import { create } from "zustand";
 import { docStore } from "./model/store";
-import type {
-  AnnotationId,
-  CalloutEnd,
-  CalloutShape,
-  ArrowEnds,
-  ArrowHead,
-  RedactMode,
-  ShapeFill,
-  SpotlightShape,
-  StepFormat,
-  StepShape,
-  TextAlign,
+import {
+  STANDARD_HEAD,
+  type AnnotationId,
+  type HeadShape,
+  type CalloutEnd,
+  type CalloutShape,
+  type ArrowEnds,
+  type ArrowHead,
+  type RedactMode,
+  type ShapeFill,
+  type SpotlightShape,
+  type StepFormat,
+  type StepShape,
+  type TextAlign,
 } from "./model/types";
 
 /** Tools built so far; the list grows one tool per increment. */
@@ -70,6 +72,8 @@ export interface ToolState {
   /** Which color the swatches set when there are two (the chip's top or bottom). */
   colorSlot: "first" | "second";
   arrowHead: ArrowHead;
+  /** The head's proportions (PLAN 3W). */
+  arrowHeadShape: HeadShape;
   arrowEnds: ArrowEnds;
   /** Text: font family and size in pt, once picked. */
   fontFamily: string | null;
@@ -134,6 +138,7 @@ export const useToolStore = create<ToolState>((set) => ({
   customSecondColors: {},
   colorSlot: "first",
   arrowHead: "filled",
+  arrowHeadShape: STANDARD_HEAD,
   arrowEnds: "end",
   fontFamily: null,
   fontSize: null,

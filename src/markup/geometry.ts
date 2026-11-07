@@ -10,7 +10,17 @@ import {
   subCubic,
   type Cubic,
 } from "./bend";
-import type { Annotation, ArrowEnds, ArrowHead, Bend, Point, Rect } from "./model/types";
+import {
+  STANDARD_HEAD,
+  type Annotation,
+  type ArrowEnds,
+  type ArrowHead,
+  type Bend,
+  type HeadShape,
+  type Point,
+  type Rect,
+} from "./model/types";
+import { clampHeadShape } from "./headStyles";
 import { textBoxPadding } from "./textMeasure";
 
 /** Rect spanned by a drag from `a` to `b`. With `square`, the shorter side grows to match. */
@@ -169,10 +179,33 @@ export function snapAngle(anchor: Point, p: Point, stepDeg = 45): Point {
   return { x: anchor.x + len * Math.cos(angle), y: anchor.y + len * Math.sin(angle) };
 }
 
-/** Arrow head size for a line width: length along the shaft and half its width. */
-export function arrowHeadSize(width: number): { length: number; halfWidth: number } {
-  return { length: 6 + 3 * width, halfWidth: 4 + 1.25 * width };
+/**
+ * Arrow head size for a line width: length along the shaft and half its width,
+ * for the standard head or one in proportion to it (PLAN 3W): `shape.width`
+ * is a % of how far the standard head sticks out past the line.
+ */
+export function arrowHeadSize(
+  width: number,
+  shape: HeadShape = STANDARD_HEAD,
+  head: ArrowHead = "filled",
+): { length: number; halfWidth: number } {
+  // Pasted or hand-edited markup may hold any numbers.
+  if (shape !== STANDARD_HEAD) shape = clampHeadShape(shape);
+  // The width % scales what sticks out past the line, not the whole head: a
+  // narrow head on a thick line still clears it as far, in proportion.
+  const line = width / 2;
+  const k = shape.width / 100;
+  // An open head's strokes are as thick as the line and fill in a narrow V,
+  // so the part that grows with the line narrows only half as much.
+  const kThick = head === "open" && k < 1 ? k + (1 - k) * OPEN_NARROWS_LESS : k;
+  return {
+    length: ((6 + 3 * width) * shape.length) / 100,
+    halfWidth: line + 4 * k + 0.75 * width * kThick,
+  };
 }
+
+/** How much of a narrowing an open head gives back on thick lines (see arrowHeadSize). */
+const OPEN_NARROWS_LESS = 0.5;
 
 /** The line to stroke: straight, or a cubic Bézier when bent (PLAN 3D.6). */
 export type Shaft =
@@ -237,10 +270,11 @@ export function arrowGeometry(
   width: number,
   ends: ArrowEnds = "end",
   bend?: Bend,
+  shape?: HeadShape,
 ): ArrowGeometry {
   // A head at the start is an arrow drawn the other way.
   if (ends === "start") {
-    const g = arrowGeometry(to, from, head, width, "end", reverseBend(bend));
+    const g = arrowGeometry(to, from, head, width, "end", reverseBend(bend), shape);
     return { shaft: reverseShaft(g.shaft), heads: g.heads };
   }
   const curve = bentCurve(from, to, bend);
@@ -252,10 +286,11 @@ export function arrowGeometry(
   if (head === "none" || len === 0) return { shaft: whole, heads: [] };
 
   const both = ends === "both";
-  const size = arrowHeadSize(width);
+  const size = arrowHeadSize(width, shape, head === "open" ? "open" : "filled");
   const k = shortArrowScale(len / (both ? 2 : 1), size.length);
   const hl = size.length * k;
-  const hw = size.halfWidth * k;
+  // Narrower too, though never narrower than the line.
+  const hw = width / 2 + (size.halfWidth - width / 2) * k;
   const filled = head === "filled";
 
   if (!curve || !measured) {

@@ -8,6 +8,7 @@ import type {
   CalloutEnd,
   CalloutShape,
   ArrowHead,
+  HeadShape,
   RedactMode,
   ShapeFill,
   SpotlightShape,
@@ -15,6 +16,7 @@ import type {
   StepShape,
   TextAlign,
 } from "./model/types";
+import { clampHeadShape } from "./headStyles";
 import { isTool, useToolStore, type PaletteKey, type ToolId } from "./toolStore";
 
 /** Bumped only if a field changes meaning; new fields just appear. */
@@ -30,6 +32,8 @@ export interface ToolMemory {
   customColors: Partial<Record<PaletteKey, string>>;
   customSecondColors: Partial<Record<PaletteKey, string>>;
   arrowHead: ArrowHead;
+  /** Absent before PLAN 3W: the standard head. */
+  arrowHeadShape: HeadShape;
   arrowEnds: ArrowEnds;
   fontFamily: string | null;
   fontSize: number | null;
@@ -72,6 +76,7 @@ export function snapshotToolMemory(): ToolMemory {
     customColors: t.customColors,
     customSecondColors: t.customSecondColors,
     arrowHead: t.arrowHead,
+    arrowHeadShape: t.arrowHeadShape,
     arrowEnds: t.arrowEnds,
     fontFamily: t.fontFamily,
     fontSize: t.fontSize,
@@ -122,6 +127,8 @@ function perTool<T, K extends string = never>(
   ) as Partial<Record<ToolId | K, T>>;
 }
 
+const isHeadShape = (v: unknown): v is HeadShape =>
+  !!v && typeof v === "object" && isSize((v as HeadShape).width) && isSize((v as HeadShape).length);
 const isRedactMode = oneOf<RedactMode>("solid", "pixelate", "blur");
 
 /** Each redact mode's strength, where valid. */
@@ -156,6 +163,9 @@ export function restoreToolMemory(stored: unknown): void {
     customColors: perTool(s.customColors, isColor, ["shared"]),
     customSecondColors: perTool(s.customSecondColors, isColor, ["shared"]),
     arrowHead: pick("arrowHead", oneOf<ArrowHead>("filled", "open"), t.arrowHead),
+    arrowHeadShape: isHeadShape(s.arrowHeadShape)
+      ? clampHeadShape(s.arrowHeadShape)
+      : t.arrowHeadShape,
     arrowEnds: pick("arrowEnds", oneOf<ArrowEnds>("end", "start", "both"), t.arrowEnds),
     fontFamily: pick(
       "fontFamily",

@@ -12,6 +12,7 @@ import type {
   CalloutShape,
   ArrowEnds,
   ArrowHead,
+  HeadShape,
   Doc,
   RedactMode,
   ShapeFill,
@@ -22,6 +23,7 @@ import type {
 } from "./model/types";
 import { growCallout } from "./callout";
 import { textPx } from "./geometry";
+import { headShapeOf, storedShape } from "./headStyles";
 import { measureTextWidth } from "./textMeasure";
 import {
   rememberColor,
@@ -87,6 +89,8 @@ export interface TargetValues {
   /** The fill color with `fill: "both"`. */
   fillColor: string | null;
   head: ArrowHead | null;
+  /** With `head`. */
+  headShape: HeadShape | null;
   ends: ArrowEnds | null;
   /** Text and callouts (a callout has no background box). */
   text: {
@@ -121,6 +125,7 @@ export function targetValues(target: StyleTarget, doc: Doc): TargetValues {
       fill: null,
       fillColor: null,
       head: null,
+      headShape: null,
       ends: null,
       text: {
         fontFamily: c.fontFamily,
@@ -171,6 +176,7 @@ function styleValues(
       fill: t === "rect" || t === "ellipse" ? toolFill(t).fill : null,
       fillColor: t === "rect" || t === "ellipse" ? (toolFill(t).color ?? toolColor(t)) : null,
       head: t === "arrow" ? tools.arrowHead : null,
+      headShape: t === "arrow" ? tools.arrowHeadShape : null,
       ends: t === "arrow" ? tools.arrowEnds : null,
       text:
         t === "text"
@@ -196,6 +202,7 @@ function styleValues(
       fill: null,
       fillColor: null,
       head: null,
+      headShape: null,
       ends: null,
       text: null,
       redact: null,
@@ -218,6 +225,7 @@ function styleValues(
       fill: null,
       fillColor: null,
       head: null,
+      headShape: null,
       ends: null,
       text: null,
       redact: null,
@@ -232,6 +240,7 @@ function styleValues(
       fill: null,
       fillColor: null,
       head: null,
+      headShape: null,
       ends: null,
       text: null,
       redact: { mode: a.mode, strength: a.strength },
@@ -245,6 +254,7 @@ function styleValues(
     fill: a.kind === "rect" || a.kind === "ellipse" ? a.fill : null,
     fillColor: a.kind === "rect" || a.kind === "ellipse" ? a.fillColor : null,
     head: a.kind === "arrow" ? a.head : null,
+    headShape: a.kind === "arrow" ? headShapeOf(a) : null,
     ends: a.kind === "arrow" ? a.ends : null,
     text:
       a.kind === "text"
@@ -359,6 +369,7 @@ export interface StylePatch {
   fill?: ShapeFill;
   fillColor?: string;
   head?: ArrowHead;
+  headShape?: HeadShape;
   ends?: ArrowEnds;
   fontFamily?: string;
   fontSize?: number;
@@ -484,6 +495,8 @@ export function patchAnnotation(a: Annotation, p: StylePatch): Annotation {
     if (p.fillColor !== undefined) next = { ...next, fillColor: p.fillColor };
   }
   if (p.head !== undefined && next.kind === "arrow") next = { ...next, head: p.head };
+  if (p.headShape !== undefined && next.kind === "arrow")
+    next = { ...next, headShape: storedShape(p.headShape) };
   if (p.ends !== undefined && next.kind === "arrow") next = { ...next, ends: p.ends };
   return next;
 }
@@ -578,6 +591,8 @@ export function applyStyle(patch: StylePatch, target = styleTarget()): void {
     }
     if (patch.head !== undefined && tool === "arrow")
       useToolStore.setState({ arrowHead: patch.head });
+    if (patch.headShape !== undefined && tool === "arrow")
+      useToolStore.setState({ arrowHeadShape: patch.headShape });
     if (patch.ends !== undefined && tool === "arrow")
       useToolStore.setState({ arrowEnds: patch.ends });
   }

@@ -4,15 +4,18 @@ import { useRef, type ReactNode } from "react";
 import { Dropdown } from "./Dropdown";
 import { useDoc } from "./model/store";
 import { FontPickerControl } from "./FontPickerControl";
-import type {
-  ArrowHead,
-  CalloutEnd,
-  CalloutShape,
-  RedactMode,
-  ShapeFill,
-  SpotlightShape,
-  TextAlign,
+import {
+  STANDARD_HEAD,
+  type ArrowHead,
+  type CalloutEnd,
+  type CalloutShape,
+  type HeadShape,
+  type RedactMode,
+  type ShapeFill,
+  type SpotlightShape,
+  type TextAlign,
 } from "./model/types";
+import { DEFAULT_HEAD_STYLES, headIcon, matchingStyle } from "./headStyles";
 import { NumberPickerControl } from "./NumberPickerControl";
 import {
   BLOCK_SIZE_ICON,
@@ -37,29 +40,6 @@ import { useToolStore } from "./toolStore";
 import { useHeldKeys } from "./useHeldKeys";
 import { useLineStarts } from "./useLineStarts";
 import styles from "./options.module.css";
-
-const HEADS: { id: ArrowHead; label: string; icon: ReactNode }[] = [
-  {
-    id: "filled",
-    label: "Filled",
-    icon: (
-      <>
-        <path d="M3 12h13" />
-        <path d="M14 7l6 5-6 5z" className={styles.solid} />
-      </>
-    ),
-  },
-  {
-    id: "open",
-    label: "Open",
-    icon: (
-      <>
-        <path d="M3 12h17" />
-        <path d="M14 7l6 5-6 5" />
-      </>
-    ),
-  },
-];
 
 const ALIGNS: { id: TextAlign; label: string; path: string }[] = [
   { id: "left", label: "Align left", path: "M4 6h16M4 10h10M4 14h16M4 18h10" },
@@ -550,7 +530,7 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
       {show.head && values.head !== null && (
         <div className={styles.section}>
           <span className={styles.hintArea} {...hint("head")}>
-            <HeadPicker head={values.head} />
+            <HeadPicker head={values.head} shape={values.headShape ?? STANDARD_HEAD} />
           </span>
           <div className={styles.group}>
             <button
@@ -595,37 +575,46 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function HeadPicker({ head }: { head: ArrowHead }) {
-  const current = HEADS.find((h) => h.id === head) ?? HEADS[0];
+/** A head style's icon, in its true proportions. */
+function HeadIcon({ head, shape }: { head: ArrowHead; shape: HeadShape }) {
+  const d = headIcon(head, shape);
+  return (
+    <svg className={styles.headIcon} viewBox="0 0 24 24" aria-hidden>
+      <path d={d.shaft} />
+      <path d={d.head} className={head === "filled" ? styles.solid : undefined} />
+    </svg>
+  );
+}
+
+function HeadPicker({ head, shape }: { head: ArrowHead; shape: HeadShape }) {
+  const list = DEFAULT_HEAD_STYLES;
+  const current = matchingStyle(list, head, shape);
   return (
     <Dropdown
       className={styles.dropdown}
       title="Arrow head"
       button={
         <>
-          <svg className={styles.headIcon} viewBox="0 0 24 24" aria-hidden>
-            {current.icon}
-          </svg>
-          <span>{current.label}</span>
+          <HeadIcon head={head} shape={shape} />
+          {/* An arrow whose style was changed or removed in Settings. */}
+          <span>{current?.label ?? "Custom"}</span>
         </>
       }
     >
       {(close) =>
-        HEADS.map((h) => (
+        list.map((h, i) => (
           <button
-            key={h.id}
+            key={i}
             type="button"
             role="menuitemradio"
-            aria-checked={h.id === head}
+            aria-checked={h === current}
             className={styles.menuRow}
             onClick={() => {
-              applyStyle({ head: h.id });
+              applyStyle({ head: h.head, headShape: { width: h.width, length: h.length } });
               close();
             }}
           >
-            <svg className={styles.headIcon} viewBox="0 0 24 24" aria-hidden>
-              {h.icon}
-            </svg>
+            <HeadIcon head={h.head} shape={h} />
             <span className={styles.menuLabel}>{h.label}</span>
           </button>
         ))

@@ -95,6 +95,7 @@ import { markTaken } from "./pressRouting";
 import { ObjectMenu } from "./ObjectMenu";
 import { insertCopies } from "./objectActions";
 import { markupClipboard } from "./markupClipboard";
+import { storedShape } from "./headStyles";
 import { useToolStore } from "./toolStore";
 import styles from "./markup.module.css";
 
@@ -694,13 +695,21 @@ export function MarkupLayer({
       drag = { mode: "place", id };
     } else {
       const style = toolStroke(tool);
-      const { arrowHead, arrowEnds } = useToolStore.getState();
+      const { arrowHead, arrowHeadShape, arrowEnds } = useToolStore.getState();
       const shapeFill = toolFill(tool);
       store.select([]);
       store.beginGesture();
       const id =
         tool === "arrow"
-          ? store.add({ kind: "arrow", from: p, to: p, head: arrowHead, ends: arrowEnds, style })
+          ? store.add({
+              kind: "arrow",
+              from: p,
+              to: p,
+              head: arrowHead,
+              headShape: storedShape(arrowHeadShape),
+              ends: arrowEnds,
+              style,
+            })
           : tool === "line"
             ? store.add({ kind: "line", from: p, to: p, style })
             : store.add({
@@ -2106,7 +2115,8 @@ function SegmentShape({ a, hitSlop }: { a: ArrowAnnotation | LineAnnotation; hit
       hitStrokeWidth={width + hitSlop}
       perfectDrawEnabled={false}
       sceneFunc={(ctx, shape) => {
-        const g = arrowGeometry(a.from, a.to, head, width, ends, a.bend);
+        const headShape = a.kind === "arrow" ? a.headShape : undefined;
+        const g = arrowGeometry(a.from, a.to, head, width, ends, a.bend, headShape);
         const s = g.shaft;
         ctx.beginPath();
         if (s.kind === "curve") {

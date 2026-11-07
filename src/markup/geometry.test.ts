@@ -184,7 +184,20 @@ describe("arrowGeometry", () => {
     expect(end(1.5 * length)).toBeCloseTo(0.75 * length); // in proportion
     expect(end(length)).toBeCloseTo(0.5 * length); // the floor
     const [left] = arrowGeometry(from, { x: length, y: 0 }, "filled", 4).heads[0];
-    expect(left.y).toBeCloseTo(halfWidth / 2); // width scales too
+    expect(left.y).toBeCloseTo(2 + (halfWidth - 2) / 2); // past the 4 px line, width scales too
+  });
+
+  it("draws a head in proportion to the standard one", () => {
+    const g = arrowGeometry(from, to, "filled", 4, "end", undefined, { width: 50, length: 125 });
+    expect(line(g)[2]).toBeCloseTo(100 - 1.25 * length);
+    // The width % scales what sticks out past the 4 px line (2 px each side).
+    expect(g.heads[0][0].y).toBeCloseTo(2 + (halfWidth - 2) / 2);
+    // Out-of-range shapes (pasted markup) are clamped.
+    const huge = arrowGeometry(from, to, "open", 4, "end", undefined, { width: 9999, length: 100 });
+    expect(huge.heads[0][0].y).toBeCloseTo(2 + 2 * (halfWidth - 2));
+    // An open head narrows less in the part that grows with the line (0.75 px per px).
+    const open = arrowGeometry(from, to, "open", 4, "end", undefined, { width: 50, length: 125 });
+    expect(open.heads[0][0].y).toBeCloseTo(2 + 4 * 0.5 + 3 * 0.75);
   });
 
   it("puts a mirrored head on the tail of a two-ended arrow", () => {

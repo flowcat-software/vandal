@@ -10,6 +10,7 @@
 
 import { docStore } from "./model/store";
 import type { Annotation } from "./model/types";
+import { headShapeOf } from "./headStyles";
 import { patchAnnotation, styleTarget, type StylePatch } from "./restyle";
 
 /** What an item's style says, by role rather than by field. */
@@ -81,7 +82,7 @@ function ownOf(a: Annotation): StylePatch {
     case "ellipse":
       return { fill: a.fill, fillColor: a.fillColor };
     case "arrow":
-      return { head: a.head, ends: a.ends };
+      return { head: a.head, headShape: headShapeOf(a), ends: a.ends };
     case "redact":
       return { redactMode: a.mode, strength: a.strength };
     case "spotlight":

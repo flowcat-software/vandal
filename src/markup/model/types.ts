@@ -68,6 +68,18 @@ export interface LineAnnotation extends Base {
 /** No-head arrows are lines: the line tool draws them. */
 export type ArrowHead = "filled" | "open";
 
+/**
+ * An arrow head's proportions (PLAN 3W): its width and length in % of the
+ * standard head for the arrow's line width.
+ */
+export interface HeadShape {
+  width: number;
+  length: number;
+}
+
+/** The standard head: what an arrow without `headShape` has. */
+export const STANDARD_HEAD: HeadShape = { width: 100, length: 100 };
+
 /** Where the heads go: `to` (where the drag ended), `from` (where it started) or both. */
 export type ArrowEnds = "end" | "start" | "both";
 
@@ -77,6 +89,8 @@ export interface ArrowAnnotation extends Base {
   /** The end with the head. */
   to: Point;
   head: ArrowHead;
+  /** Absent: the standard head. A copy of its style's shape, not a reference to it. */
+  headShape?: HeadShape;
   ends: ArrowEnds;
   /** Absent: straight. */
   bend?: Bend;

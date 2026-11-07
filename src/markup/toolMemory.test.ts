@@ -16,6 +16,7 @@ describe("tool memory", () => {
       customColors: { shared: "#123456", highlighter: "#abcdef" },
       customSecondColors: { shared: "#654321" },
       arrowEnds: "both",
+      arrowHeadShape: { width: 50, length: 125 },
       fontFamily: "Consolas",
       fontSize: 36,
       textBold: true,
@@ -63,6 +64,14 @@ describe("tool memory", () => {
     expect(t.arrowHead).toBe("open");
     expect(t.fontSize).toBeNull();
     expect(t.textAlign).toBe("center");
+  });
+
+  it("restores a head shape within the limits, and the standard head without one", () => {
+    restoreToolMemory({ version: 1, arrowHeadShape: { width: 1000, length: 100 } });
+    expect(useToolStore.getState().arrowHeadShape).toEqual({ width: 200, length: 100 });
+    useToolStore.setState(initial, true);
+    restoreToolMemory({ version: 1, arrowHead: "open" }); // saved before PLAN 3W
+    expect(useToolStore.getState().arrowHeadShape).toEqual({ width: 100, length: 100 });
   });
 
   it("ignores values from a newer version and non-objects", () => {
