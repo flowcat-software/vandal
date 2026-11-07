@@ -2,17 +2,13 @@
 // head. An arrow keeps a copy of its style's shape, so editing or removing a
 // style never changes arrows already drawn.
 
+import type { ArrowHeadStyle } from "../shared/ipc";
 import { STANDARD_HEAD, type ArrowAnnotation, type ArrowHead, type HeadShape } from "./model/types";
 
-export interface HeadStyle {
-  label: string;
-  head: ArrowHead;
-  /** % of the standard head's width and length. */
-  width: number;
-  length: number;
-}
+/** A style in Settings (`styles.arrowHeads`): `width` and `length` in % of the standard head. */
+export type HeadStyle = ArrowHeadStyle;
 
-/** Until Settings holds the list (PLAN 3W.2). */
+/** The ones the app comes with (Rust's `ArrowHeadStyle::defaults`). */
 export const DEFAULT_HEAD_STYLES: HeadStyle[] = [
   { label: "Regular Filled", head: "filled", width: 100, length: 100 },
   { label: "Narrow Filled", head: "filled", width: 50, length: 125 },
@@ -20,7 +16,7 @@ export const DEFAULT_HEAD_STYLES: HeadStyle[] = [
   { label: "Narrow Open", head: "open", width: 50, length: 125 },
 ];
 
-/** Limits, so a head still reads as one and never balloons (mirrored in Rust). */
+/** Limits, so a head still reads as one and never balloons (`styles.rs` keeps the setting within them). */
 export const HEAD_WIDTH = { min: 25, max: 200 };
 export const HEAD_LENGTH = { min: 50, max: 250 };
 /** Neither side more than this many times the other, compared with the standard head. */

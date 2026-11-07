@@ -186,6 +186,95 @@ pub enum ColorControl {
     Dropdown,
 }
 
+/// An arrow head's look (PLAN 3W): a filled triangle or an open chevron.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum ArrowHead {
+    Filled,
+    Open,
+}
+
+/// An arrow head style in the options bar's list (PLAN 3W). `width` and
+/// `length` are % of the standard head; the width scales only what sticks out
+/// past the line (`geometry.ts` › `arrowHeadSize`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ArrowHeadStyle {
+    pub label: String,
+    pub head: ArrowHead,
+    pub width: f64,
+    pub length: f64,
+}
+
+/// Head style limits, so a head still reads as one and never balloons
+/// (mirrored in `headStyles.ts`).
+pub const HEAD_WIDTH: (f64, f64) = (25.0, 200.0);
+pub const HEAD_LENGTH: (f64, f64) = (50.0, 250.0);
+/// Neither side more than this many times the other, compared with the standard head.
+pub const HEAD_MAX_RATIO: f64 = 4.0;
+pub const MAX_HEAD_STYLES: usize = 10;
+pub const MAX_HEAD_LABEL: usize = 20;
+
+impl ArrowHeadStyle {
+    fn new(label: &str, head: ArrowHead, width: f64, length: f64) -> Self {
+        Self {
+            label: label.to_string(),
+            head,
+            width,
+            length,
+        }
+    }
+
+    /// The four that come with the app: Regular and Narrow, filled and open.
+    pub fn defaults() -> Vec<Self> {
+        use ArrowHead::{Filled, Open};
+        vec![
+            Self::new("Regular Filled", Filled, 100.0, 100.0),
+            Self::new("Narrow Filled", Filled, 50.0, 125.0),
+            Self::new("Regular Open", Open, 100.0, 100.0),
+            Self::new("Narrow Open", Open, 50.0, 125.0),
+        ]
+    }
+
+    /// Within the limits; a blank label becomes "Style n" (`n` from 1).
+    fn normalized(self, n: usize) -> Self {
+        let fine = |v: f64| if v.is_finite() { v } else { 100.0 };
+        let width = fine(self.width).clamp(HEAD_WIDTH.0, HEAD_WIDTH.1);
+        // Width's range allows every length, so clamping length settles the ratio.
+        let length = fine(self.length)
+            .clamp(HEAD_LENGTH.0, HEAD_LENGTH.1)
+            .clamp(width / HEAD_MAX_RATIO, width * HEAD_MAX_RATIO);
+        let label: String = self.label.trim().chars().take(MAX_HEAD_LABEL).collect();
+        let label = label.trim_end().to_string();
+        Self {
+            label: if label.is_empty() {
+                format!("Style {n}")
+            } else {
+                label
+            },
+            head: self.head,
+            width,
+            length,
+        }
+    }
+}
+
+/// Each style within the limits, at most [`MAX_HEAD_STYLES`]; the defaults if
+/// none are left (the options bar always has one).
+fn normalize_head_styles(list: Vec<ArrowHeadStyle>) -> Vec<ArrowHeadStyle> {
+    let out: Vec<_> = list
+        .into_iter()
+        .take(MAX_HEAD_STYLES)
+        .enumerate()
+        .map(|(i, h)| h.normalized(i + 1))
+        .collect();
+    if out.is_empty() {
+        ArrowHeadStyle::defaults()
+    } else {
+        out
+    }
+}
+
 /// A tool's own palette, width picker and/or color control, used instead of
 /// the global ones.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
@@ -224,6 +313,8 @@ pub struct Styles {
     pub step_font: FontPicker,
     /// Per-tool overrides, keyed by tool id (`"highlighter"`, ...).
     pub tools: BTreeMap<String, ToolStyles>,
+    /// The arrow's head styles, in the options bar's order (PLAN 3W).
+    pub arrow_heads: Vec<ArrowHeadStyle>,
 }
 
 impl Default for Styles {
@@ -281,6 +372,7 @@ impl Default for Styles {
                 ),
                 ("callout".to_string(), ToolStyles::callout_default()),
             ]),
+            arrow_heads: ArrowHeadStyle::defaults(),
         }
     }
 }
@@ -369,6 +461,7 @@ impl Styles {
                     o.palette.is_some() || o.width.is_some() || o.color_control.is_some()
                 })
                 .collect(),
+            arrow_heads: normalize_head_styles(self.arrow_heads),
         }
     }
 }
@@ -624,6 +717,59 @@ mod tests {
             json!({ "control": "slider", "min": 1.0, "max": 20.0 })
         );
         assert_eq!(Styles::default().normalized(), Styles::default());
+    }
+
+    #[test]
+    fn head_styles_default_to_regular_and_narrow() {
+        let v = serde_json::to_value(Styles::default()).unwrap();
+        assert_eq!(
+            v["arrowHeads"][1],
+            json!({ "label": "Narrow Filled", "head": "filled", "width": 50.0, "length": 125.0 })
+        );
+        assert_eq!(v["arrowHeads"].as_array().unwrap().len(), 4);
+        // Settings from before PLAN 3W get them too.
+        let old: Styles = serde_json::from_value(json!({ "palette": ["#000000"] })).unwrap();
+        assert_eq!(old.arrow_heads, ArrowHeadStyle::defaults());
+    }
+
+    #[test]
+    fn head_styles_are_kept_within_limits() {
+        let h = |label: &str, width: f64, length: f64| {
+            ArrowHeadStyle::new(label, ArrowHead::Open, width, length)
+        };
+        let s = Styles {
+            arrow_heads: vec![
+                h("  Huge  ", 1000.0, 1.0),
+                h("", 5.0, 1000.0),
+                h("Thin", 30.0, 250.0), // longer than 4 × its width
+                h(
+                    "A label well over twenty characters",
+                    f64::NAN,
+                    f64::INFINITY,
+                ),
+            ],
+            ..Styles::default()
+        }
+        .normalized();
+        assert_eq!(
+            s.arrow_heads,
+            vec![
+                h("Huge", 200.0, 50.0),
+                h("Style 2", 25.0, 100.0),
+                h("Thin", 30.0, 120.0),
+                h("A label well over tw", 100.0, 100.0),
+            ]
+        );
+        let many = Styles {
+            arrow_heads: vec![h("x", 100.0, 100.0); 15],
+            ..Styles::default()
+        };
+        assert_eq!(many.normalized().arrow_heads.len(), MAX_HEAD_STYLES);
+        let none = Styles {
+            arrow_heads: vec![],
+            ..Styles::default()
+        };
+        assert_eq!(none.normalized().arrow_heads, ArrowHeadStyle::defaults());
     }
 
     #[test]

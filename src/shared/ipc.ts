@@ -23,6 +23,7 @@ type NumberNotNull<T> = [T] extends [number | null] ? (null extends T ? number :
 export type Settings = Complete<SettingsWire>;
 export type StyleSettings = Settings["styles"];
 export type NumberPicker = StyleSettings["width"];
+export type ArrowHeadStyle = StyleSettings["arrowHeads"][number];
 
 /**
  * The color picker's eyedropper (PLAN 3U): pick a pixel anywhere on screen,

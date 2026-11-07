@@ -394,6 +394,21 @@ export type Appearance = {
 	accent?: string,
 };
 
+/**  An arrow head's look (PLAN 3W): a filled triangle or an open chevron. */
+export type ArrowHead = "filled" | "open";
+
+/**
+ *  An arrow head style in the options bar's list (PLAN 3W). `width` and
+ *  `length` are % of the standard head; the width scales only what sticks out
+ *  past the line (`geometry.ts` › `arrowHeadSize`).
+ */
+export type ArrowHeadStyle = {
+	label: string,
+	head: ArrowHead,
+	width: number | null,
+	length: number | null,
+};
+
 /**  What the user chose on the overlay. */
 export type CaptureTarget = 
 /**  Virtual-desktop physical pixels. */
@@ -962,6 +977,8 @@ export type Styles = {
 	stepFont?: FontPicker,
 	/**  Per-tool overrides, keyed by tool id (`"highlighter"`, ...). */
 	tools?: { [key in string]: ToolStyles },
+	/**  The arrow's head styles, in the options bar's order (PLAN 3W). */
+	arrowHeads?: ArrowHeadStyle[],
 };
 
 /**  Light, dark, or following Windows. */

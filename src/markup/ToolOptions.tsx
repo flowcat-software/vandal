@@ -15,7 +15,7 @@ import {
   type SpotlightShape,
   type TextAlign,
 } from "./model/types";
-import { DEFAULT_HEAD_STYLES, headIcon, matchingStyle } from "./headStyles";
+import { headIcon, matchingStyle } from "./headStyles";
 import { NumberPickerControl } from "./NumberPickerControl";
 import {
   BLOCK_SIZE_ICON,
@@ -587,7 +587,7 @@ function HeadIcon({ head, shape }: { head: ArrowHead; shape: HeadShape }) {
 }
 
 function HeadPicker({ head, shape }: { head: ArrowHead; shape: HeadShape }) {
-  const list = DEFAULT_HEAD_STYLES;
+  const list = useStyleConfig((c) => c.styles.arrowHeads);
   const current = matchingStyle(list, head, shape);
   return (
     <Dropdown

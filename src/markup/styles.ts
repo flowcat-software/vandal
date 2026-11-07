@@ -18,6 +18,7 @@ import type {
   StrokeStyle,
   TextAlign,
 } from "./model/types";
+import { DEFAULT_HEAD_STYLES } from "./headStyles";
 import { nearestValue } from "./pickers";
 import type { ColorKey } from "./restyle";
 import { contrastingText, stepsOf, type StepStyle } from "./steps";
@@ -79,6 +80,7 @@ export const DEFAULT_STYLE_CONFIG: StyleConfig = {
         colorControl: null,
       },
     },
+    arrowHeads: DEFAULT_HEAD_STYLES,
   },
   shareColor: false,
   showShortcutHints: true,
