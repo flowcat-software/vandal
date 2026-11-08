@@ -12,15 +12,10 @@ import { PlusIcon } from "../icons";
 import type { ArrowHeadsItem } from "../schema";
 import { useSettingsStore } from "../store";
 import type { ControlProps } from "./index";
-import { Segmented } from "./Segmented";
+import { Switch } from "./Switch";
 import { moved, RowButtons, typedNumber, ValueField } from "./StyleList";
 import { useDraft } from "./useDraft";
 import styles from "./controls.module.css";
-
-const FILLS = [
-  { value: "filled", label: "Filled" },
-  { value: "open", label: "Open" },
-] as const;
 
 /**
  * The arrow's head styles (PLAN 3W): the options bar's list, in its order.
@@ -120,49 +115,56 @@ function HeadRow({
   const name = style.label || `Style ${index + 1}`;
 
   return (
-    <div className={styles.headRow}>
+    <div className={styles.styleRow}>
       <HeadPreview head={style.head} shape={shape} />
-      <input
-        className={`${styles.input} ${styles.headLabel}`}
-        value={label}
-        maxLength={MAX_HEAD_LABEL}
-        aria-label={`Style ${index + 1}: name`}
-        spellCheck={false}
-        disabled={disabled}
-        onChange={(e) => setLabel(e.target.value)}
-        onBlur={commit}
-        onKeyDown={keys}
-      />
-      <span className={styles.headShapeFields}>
-        <Segmented
-          label={`${name}: head`}
-          options={FILLS}
-          value={style.head}
+      <span className={styles.styleMain}>
+        <input
+          className={`${styles.input} ${styles.styleLabel}`}
+          value={label}
+          maxLength={MAX_HEAD_LABEL}
+          aria-label={`Style ${index + 1}: name`}
+          spellCheck={false}
           disabled={disabled}
-          onChange={(head) => onChange({ head })}
-        />
-        <ValueField
-          label="W"
-          unit="%"
-          title={`Width (${HEAD_WIDTH.min}–${HEAD_WIDTH.max}%)`}
-          ariaLabel={`${name}: width in percent`}
-          value={width}
-          disabled={disabled}
-          onChange={setWidth}
-          onCommit={commit}
+          onChange={(e) => setLabel(e.target.value)}
+          onBlur={commit}
           onKeyDown={keys}
         />
-        <ValueField
-          label="L"
-          unit="%"
-          title={`Length (${HEAD_LENGTH.min}–${HEAD_LENGTH.max}%)`}
-          ariaLabel={`${name}: length in percent`}
-          value={length}
-          disabled={disabled}
-          onChange={setLength}
-          onCommit={commit}
-          onKeyDown={keys}
-        />
+        <span className={styles.styleFields}>
+          <label className={styles.headOpen}>
+            Open
+            <Switch
+              checked={style.head === "open"}
+              showState={false}
+              disabled={disabled}
+              label={`${name}: open head`}
+              onChange={(open) => onChange({ head: open ? "open" : "filled" })}
+            />
+          </label>
+          <span className={styles.styleFieldGroup}>
+            <ValueField
+              label="W"
+              unit="%"
+              title={`Width (${HEAD_WIDTH.min}–${HEAD_WIDTH.max}%)`}
+              ariaLabel={`${name}: width in percent`}
+              value={width}
+              disabled={disabled}
+              onChange={setWidth}
+              onCommit={commit}
+              onKeyDown={keys}
+            />
+            <ValueField
+              label="L"
+              unit="%"
+              title={`Length (${HEAD_LENGTH.min}–${HEAD_LENGTH.max}%)`}
+              ariaLabel={`${name}: length in percent`}
+              value={length}
+              disabled={disabled}
+              onChange={setLength}
+              onCommit={commit}
+              onKeyDown={keys}
+            />
+          </span>
+        </span>
       </span>
       <RowButtons
         name={name}
@@ -178,50 +180,50 @@ function HeadRow({
   );
 }
 
+/** The preview: one arrow on a medium line (the options bar shows the rest). */
+const PREVIEW_WIDTH = 4;
+const PREVIEW_LENGTH = 64;
+
+function previewArrow(head: ArrowHead, shape: HeadShape) {
+  return arrowGeometry(
+    { x: PREVIEW_WIDTH / 2, y: 0 },
+    { x: PREVIEW_LENGTH - PREVIEW_WIDTH / 2, y: 0 },
+    head,
+    PREVIEW_WIDTH,
+    "end",
+    undefined,
+    shape,
+  );
+}
+
 /**
- * The preview's line width and arrow length: long enough for most heads to
- * show at full size, not scaled down for a short arrow. One medium arrow
- * (Richard): the options bar is where to try a style on other widths.
+ * Half the preview's height: room for the widest head allowed (open heads'
+ * strokes included), so every style shows at the same scale.
  */
-const PREVIEW_ARROWS = [{ width: 5, length: 80 }];
-const PREVIEW_GAP = 16;
-/** Tall enough for the widest head allowed on the thickest line. */
-const PREVIEW_HEIGHT = 58;
+const PREVIEW_HALF = Math.max(
+  ...(["filled", "open"] as const).flatMap((head) =>
+    previewArrow(head, { width: HEAD_WIDTH.max, length: 100 }).heads.flatMap((pts) =>
+      pts.map((p) => Math.abs(p.y) + PREVIEW_WIDTH / 2),
+    ),
+  ),
+);
 
 /** The style drawn by the canvas's own geometry, so it looks as it will. */
 function HeadPreview({ head, shape }: { head: ArrowHead; shape: HeadShape }) {
-  const starts = PREVIEW_ARROWS.map((_, i) =>
-    PREVIEW_ARROWS.slice(0, i).reduce((x, a) => x + a.length + PREVIEW_GAP, 0),
-  );
-  const w = starts[starts.length - 1] + PREVIEW_ARROWS[PREVIEW_ARROWS.length - 1].length;
-  const y = PREVIEW_HEIGHT / 2;
+  const g = previewArrow(head, shape);
+  if (g.shaft.kind !== "line") return null;
+  const [x1, y1, x2, y2] = g.shaft.points;
+  const wings = g.heads.map(([l, t, r]) => `M${l.x} ${l.y}L${t.x} ${t.y}L${r.x} ${r.y}`);
+  const h = Math.ceil(PREVIEW_HALF);
   return (
     <svg
-      className={`${styles.headPreview} ${styles.arrowPreview}`}
-      viewBox={`0 0 ${w} ${PREVIEW_HEIGHT}`}
+      className={styles.stylePreview}
+      viewBox={`0 ${-h} ${PREVIEW_LENGTH} ${2 * h}`}
+      strokeWidth={PREVIEW_WIDTH}
       aria-hidden
     >
-      {PREVIEW_ARROWS.map(({ width: lw, length }, i) => {
-        const x = starts[i];
-        const g = arrowGeometry(
-          { x: x + lw / 2, y },
-          { x: x + length, y },
-          head,
-          lw,
-          "end",
-          undefined,
-          shape,
-        );
-        if (g.shaft.kind !== "line") return null;
-        const [x1, y1, x2, y2] = g.shaft.points;
-        const wings = g.heads.map(([l, t, r]) => `M${l.x} ${l.y}L${t.x} ${t.y}L${r.x} ${r.y}`);
-        return (
-          <g key={lw} strokeWidth={lw}>
-            <path d={`M${x1} ${y1}L${x2} ${y2}${head === "open" ? wings.join("") : ""}`} />
-            {head === "filled" && <path className={styles.headFill} d={`${wings.join("Z")}Z`} />}
-          </g>
-        );
-      })}
+      <path d={`M${x1} ${y1}L${x2} ${y2}${head === "open" ? wings.join("") : ""}`} />
+      {head === "filled" && <path className={styles.headFill} d={`${wings.join("Z")}Z`} />}
     </svg>
   );
 }

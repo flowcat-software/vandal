@@ -6,16 +6,20 @@ interface Props {
   disabled?: boolean;
   /** For screen readers when no <label> points at it. */
   label?: string;
+  /** Write "On" / "Off" beside it (not where its own label says what it is). */
+  showState?: boolean;
   onChange: (checked: boolean) => void;
 }
 
 /** An on/off switch with its state written beside it. */
-export function Switch({ id, checked, disabled, label, onChange }: Props) {
+export function Switch({ id, checked, disabled, label, showState = true, onChange }: Props) {
   return (
     <div className={styles.toggleWrap}>
-      <span className={styles.toggleState} aria-hidden>
-        {checked ? "On" : "Off"}
-      </span>
+      {showState && (
+        <span className={styles.toggleState} aria-hidden>
+          {checked ? "On" : "Off"}
+        </span>
+      )}
       <button
         id={id}
         type="button"

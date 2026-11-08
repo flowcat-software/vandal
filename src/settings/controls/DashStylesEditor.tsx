@@ -128,11 +128,11 @@ function DashRow({
   const name = style.label || `Style ${index + 1}`;
 
   return (
-    <div className={styles.dashRow}>
+    <div className={styles.styleRow}>
       <DashPreview pattern={pattern} />
-      <span className={styles.dashMain}>
+      <span className={styles.styleMain}>
         <input
-          className={`${styles.input} ${styles.dashLabel}`}
+          className={`${styles.input} ${styles.styleLabel}`}
           value={label}
           maxLength={MAX_DASH_LABEL}
           aria-label={`Style ${index + 1}: name`}
@@ -142,7 +142,7 @@ function DashRow({
           onBlur={commit}
           onKeyDown={keys}
         />
-        <span className={styles.dashFields}>
+        <span className={styles.styleFields}>
           <ValueField
             label="Dash"
             title={`Dash length in line widths (${DASH_LENGTH.min}–${DASH_LENGTH.max}; 1 is a dot)`}
@@ -181,7 +181,7 @@ function DashRow({
 /** The style on one medium line (the options bar shows it at every width). */
 function DashPreview({ pattern }: { pattern: DashPattern }) {
   return (
-    <svg className={styles.dashPreview} viewBox="0 0 64 12" aria-hidden>
+    <svg className={styles.stylePreview} viewBox="0 0 64 12" aria-hidden>
       <path d="M2 6H62" strokeWidth={3} strokeDasharray={svgDash(pattern, 3)} />
     </svg>
   );

@@ -88,7 +88,10 @@ export function ValueField({
   onKeyDown: (e: React.KeyboardEvent) => void;
 }) {
   return (
-    <label className={`${styles.valueChip} ${styles.headPercent}`} title={title}>
+    <label
+      className={`${styles.valueChip} ${styles.headPercent} ${unit ? styles.withUnit : ""}`}
+      title={title}
+    >
       <span className={styles.chipValue}>
         <span className={styles.unit}>{label}</span>
         <input
