@@ -33,13 +33,18 @@ export function ToolStyleSetting({ item, id, disabled }: ControlProps<ToolStyleI
   const settings = useSettingsStore((s) => s.settings!);
   const set = useSettingsStore((s) => s.set);
   const tools = settings.styles.tools;
-  const own: ToolStyles = tools[item.tool] ?? { palette: null, width: null, colorControl: null };
+  const own: ToolStyles = tools[item.tool] ?? {
+    palette: null,
+    width: null,
+    colorControl: null,
+    dashes: null,
+  };
   const shipped = DEFAULT_STYLE_CONFIG.styles.tools[item.tool];
 
   const update = (patch: Partial<ToolStyles>) => {
     const next = { ...own, ...patch };
     const all = { ...tools };
-    if (next.palette || next.width || next.colorControl) all[item.tool] = next;
+    if (next.palette || next.width || next.colorControl || next.dashes) all[item.tool] = next;
     else delete all[item.tool];
     // The map of overrides is an object, which typed leaf paths don't reach.
     void set("styles.tools" as never, all as never);

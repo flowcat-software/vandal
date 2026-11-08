@@ -24,6 +24,7 @@ export type Settings = Complete<SettingsWire>;
 export type StyleSettings = Settings["styles"];
 export type NumberPicker = StyleSettings["width"];
 export type ArrowHeadStyle = StyleSettings["arrowHeads"][number];
+export type DashStyleSetting = StyleSettings["dashes"][number];
 
 /**
  * The color picker's eyedropper (PLAN 3U): pick a pixel anywhere on screen,

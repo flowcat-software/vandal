@@ -426,6 +426,17 @@ export type ColorControl =
 /**  A button per color that opens the palette. */
 "dropdown";
 
+/**
+ *  A dashed or dotted line style in the options bar's list (PLAN 3X). Dash and
+ *  gap are in line widths, with round ends: a dash of 1 is a dot. Solid isn't
+ *  one: it's always the first choice.
+ */
+export type DashStyle = {
+	label: string,
+	dash: number | null,
+	gap: number | null,
+};
+
 /**  Settings › About › Debugging (PLAN 3V.8). */
 export type Debugging = {
 	/**
@@ -979,19 +990,23 @@ export type Styles = {
 	tools?: { [key in string]: ToolStyles },
 	/**  The arrow's head styles, in the options bar's order (PLAN 3W). */
 	arrowHeads?: ArrowHeadStyle[],
+	/**  Dash styles, in the options bar's order after Solid (PLAN 3X). */
+	dashes?: DashStyle[],
 };
 
 /**  Light, dark, or following Windows. */
 export type ThemeMode = "system" | "light" | "dark";
 
 /**
- *  A tool's own palette, width picker and/or color control, used instead of
- *  the global ones.
+ *  A tool's own palette, width picker, color control and/or dash styles
+ *  ("Custom styles"), used instead of the global ones.
  */
 export type ToolStyles = {
 	palette?: string[] | null,
 	width?: NumberPicker | null,
 	colorControl?: ColorControl | null,
+	/**  Lines, arrows, rectangles, ellipses and callouts (PLAN 3X). */
+	dashes?: DashStyle[] | null,
 };
 
 /**

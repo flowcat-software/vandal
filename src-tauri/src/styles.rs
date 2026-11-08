@@ -275,14 +275,81 @@ fn normalize_head_styles(list: Vec<ArrowHeadStyle>) -> Vec<ArrowHeadStyle> {
     }
 }
 
-/// A tool's own palette, width picker and/or color control, used instead of
-/// the global ones.
+/// A dashed or dotted line style in the options bar's list (PLAN 3X). Dash and
+/// gap are in line widths, with round ends: a dash of 1 is a dot. Solid isn't
+/// one: it's always the first choice.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct DashStyle {
+    pub label: String,
+    pub dash: f64,
+    pub gap: f64,
+}
+
+/// Dash style limits (mirrored in `dashStyles.ts`).
+pub const DASH_LENGTH: (f64, f64) = (1.0, 20.0);
+pub const DASH_GAP: (f64, f64) = (0.5, 20.0);
+pub const MAX_DASH_STYLES: usize = 10;
+pub const MAX_DASH_LABEL: usize = 20;
+
+impl DashStyle {
+    fn new(label: &str, dash: f64, gap: f64) -> Self {
+        Self {
+            label: label.to_string(),
+            dash,
+            gap,
+        }
+    }
+
+    /// The three that come with the app.
+    pub fn defaults() -> Vec<Self> {
+        vec![
+            Self::new("Dashed", 3.0, 2.0),
+            Self::new("Dotted", 1.0, 1.5),
+            Self::new("Long dash", 6.0, 3.0),
+        ]
+    }
+
+    /// Within the limits, to a tenth; a blank label becomes "Style n" (`n` from 1).
+    fn normalized(self, n: usize) -> Self {
+        let fit = |v: f64, (lo, hi): (f64, f64), fallback: f64| {
+            let v = if v.is_finite() { v } else { fallback };
+            ((v * 10.0).round() / 10.0).clamp(lo, hi)
+        };
+        let label: String = self.label.trim().chars().take(MAX_DASH_LABEL).collect();
+        let label = label.trim_end().to_string();
+        Self {
+            label: if label.is_empty() {
+                format!("Style {n}")
+            } else {
+                label
+            },
+            dash: fit(self.dash, DASH_LENGTH, 3.0),
+            gap: fit(self.gap, DASH_GAP, 2.0),
+        }
+    }
+}
+
+/// Each style within the limits, at most [`MAX_DASH_STYLES`]. May be empty:
+/// then lines are solid only.
+fn normalize_dash_styles(list: Vec<DashStyle>) -> Vec<DashStyle> {
+    list.into_iter()
+        .take(MAX_DASH_STYLES)
+        .enumerate()
+        .map(|(i, d)| d.normalized(i + 1))
+        .collect()
+}
+
+/// A tool's own palette, width picker, color control and/or dash styles
+/// ("Custom styles"), used instead of the global ones.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
 #[serde(default, rename_all = "camelCase")]
 pub struct ToolStyles {
     pub palette: Option<Vec<String>>,
     pub width: Option<NumberPicker>,
     pub color_control: Option<ColorControl>,
+    /// Lines, arrows, rectangles, ellipses and callouts (PLAN 3X).
+    pub dashes: Option<Vec<DashStyle>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
@@ -315,6 +382,8 @@ pub struct Styles {
     pub tools: BTreeMap<String, ToolStyles>,
     /// The arrow's head styles, in the options bar's order (PLAN 3W).
     pub arrow_heads: Vec<ArrowHeadStyle>,
+    /// Dash styles, in the options bar's order after Solid (PLAN 3X).
+    pub dashes: Vec<DashStyle>,
 }
 
 impl Default for Styles {
@@ -367,12 +436,13 @@ impl Default for Styles {
                             min: 8.0,
                             max: 40.0,
                         }),
-                        color_control: None,
+                        ..ToolStyles::default()
                     },
                 ),
                 ("callout".to_string(), ToolStyles::callout_default()),
             ]),
             arrow_heads: ArrowHeadStyle::defaults(),
+            dashes: DashStyle::defaults(),
         }
     }
 }
@@ -387,7 +457,7 @@ impl ToolStyles {
                 min: 1.0,
                 max: 20.0,
             }),
-            color_control: None,
+            ..Self::default()
         }
     }
 }
@@ -454,14 +524,19 @@ impl Styles {
                         palette: o.palette.and_then(normalize_palette),
                         width: o.width.and_then(NumberPicker::normalized),
                         color_control: o.color_control,
+                        dashes: o.dashes.map(normalize_dash_styles),
                     };
                     (tool, o)
                 })
                 .filter(|(_, o)| {
-                    o.palette.is_some() || o.width.is_some() || o.color_control.is_some()
+                    o.palette.is_some()
+                        || o.width.is_some()
+                        || o.color_control.is_some()
+                        || o.dashes.is_some()
                 })
                 .collect(),
             arrow_heads: normalize_head_styles(self.arrow_heads),
+            dashes: normalize_dash_styles(self.dashes),
         }
     }
 }
@@ -773,6 +848,71 @@ mod tests {
     }
 
     #[test]
+    fn dash_styles_default_and_old_settings_get_them() {
+        let v = serde_json::to_value(Styles::default()).unwrap();
+        assert_eq!(
+            v["dashes"][1],
+            json!({ "label": "Dotted", "dash": 1.0, "gap": 1.5 })
+        );
+        let old: Styles = serde_json::from_value(json!({ "palette": ["#000000"] })).unwrap();
+        assert_eq!(old.dashes, DashStyle::defaults());
+        // Removing them all is allowed: lines are solid only.
+        let none = Styles {
+            dashes: vec![],
+            ..Styles::default()
+        };
+        assert!(none.normalized().dashes.is_empty());
+    }
+
+    #[test]
+    fn dash_styles_are_kept_within_limits() {
+        let d = DashStyle::new;
+        let s = Styles {
+            dashes: vec![
+                d("  Big  ", 100.0, 0.0),
+                d("", 2.34, 1.26),
+                d(
+                    "A label well over twenty characters",
+                    f64::NAN,
+                    f64::INFINITY,
+                ),
+            ],
+            ..Styles::default()
+        }
+        .normalized();
+        assert_eq!(
+            s.dashes,
+            vec![
+                d("Big", 20.0, 0.5),
+                d("Style 2", 2.3, 1.3),
+                d("A label well over tw", 3.0, 2.0),
+            ]
+        );
+        let many = Styles {
+            dashes: vec![d("x", 2.0, 2.0); 15],
+            ..Styles::default()
+        };
+        assert_eq!(many.normalized().dashes.len(), MAX_DASH_STYLES);
+    }
+
+    #[test]
+    fn a_tools_own_dash_styles_are_kept_even_empty() {
+        let s: Styles = serde_json::from_value(json!({
+            "tools": {
+                "rect": { "dashes": [{ "label": "", "dash": 0.0, "gap": 3.0 }] },
+                "line": { "dashes": [] },
+            }
+        }))
+        .unwrap();
+        let s = s.normalized();
+        assert_eq!(
+            s.tools["rect"].dashes,
+            Some(vec![DashStyle::new("Style 1", 1.0, 3.0)])
+        );
+        assert_eq!(s.tools["line"].dashes, Some(vec![]));
+    }
+
+    #[test]
     fn lists_are_sorted_deduped_and_capped() {
         let p = NumberPicker::Dropdown {
             values: vec![6.0, 2.0, 2.0, -1.0, f64::NAN, 4.0],
@@ -874,8 +1014,7 @@ mod tests {
                 "pen".to_string(),
                 ToolStyles {
                     palette: Some(vec![]),
-                    width: None,
-                    color_control: None,
+                    ..ToolStyles::default()
                 },
             )]),
             ..Styles::default()

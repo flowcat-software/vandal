@@ -3,18 +3,14 @@
 // its look at any width; a dash of 1 is a dot (the ends are round). A mark
 // keeps a copy of its pattern, so editing a style never changes marks drawn.
 
+import type { DashStyleSetting } from "../shared/ipc";
 import type { Annotation, DashPattern } from "./model/types";
 import type { ToolId } from "./toolStore";
 
-export interface DashStyle {
-  label: string;
-  /** In line widths: 1 is a dot. */
-  dash: number;
-  /** The space between, in line widths. */
-  gap: number;
-}
+/** A style in Settings (`styles.dashes`, or a tool's own): dash and gap in line widths. */
+export type DashStyle = DashStyleSetting;
 
-/** Until Settings holds the list (PLAN 3X.2). Solid isn't in it: it's always first. */
+/** The ones the app comes with (Rust's `DashStyle::defaults`). Solid isn't one: it's always first. */
 export const DEFAULT_DASH_STYLES: DashStyle[] = [
   { label: "Dashed", dash: 3, gap: 2 },
   { label: "Dotted", dash: 1, gap: 1.5 },

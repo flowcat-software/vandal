@@ -16,7 +16,7 @@ import {
   type SpotlightShape,
   type TextAlign,
 } from "./model/types";
-import { DEFAULT_DASH_STYLES, matchingDash, svgDash } from "./dashStyles";
+import { matchingDash, svgDash, type DashStyle } from "./dashStyles";
 import { headIcon, matchingStyle } from "./headStyles";
 import { NumberPickerControl } from "./NumberPickerControl";
 import {
@@ -37,7 +37,13 @@ import {
   targetSections,
   targetValues,
 } from "./restyle";
-import { fontChoices, strengthPickerFor, useStyleConfig, widthPickerFor } from "./styles";
+import {
+  dashStylesFor,
+  fontChoices,
+  strengthPickerFor,
+  useStyleConfig,
+  widthPickerFor,
+} from "./styles";
 import { useToolStore } from "./toolStore";
 import { useHeldKeys } from "./useHeldKeys";
 import { useLineStarts } from "./useLineStarts";
@@ -190,6 +196,9 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
   const values = targetValues(target, doc);
   const show = targetSections(target);
   const widthPicker = widthPickerFor(target.tool, config);
+  // With no dash styles, only a dashed mark needs the picker (to go solid).
+  const dashList = show.dash ? dashStylesFor(target.tool, config) : [];
+  const dashes = (dashList.length > 0 || values.dash) && dashList;
   const strengthPicker = values.redact && strengthPickerFor(values.redact.mode, config);
   const text = values.text;
   const step = show.step ? values.step : null;
@@ -377,9 +386,9 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
               onDragEnd={endStyleDrag}
             />
           </span>
-          {show.dash && (
+          {dashes && (
             <span className={styles.hintArea} {...hint("dash")}>
-              <DashPicker dash={values.dash} />
+              <DashPicker dash={values.dash} list={dashes} />
             </span>
           )}
           {corner}
@@ -593,8 +602,7 @@ function DashIcon({ dash }: { dash: DashPattern | null }) {
 }
 
 /** Solid, then the dash styles; "Custom" for a pattern none of them has. */
-function DashPicker({ dash }: { dash: DashPattern | null }) {
-  const list = DEFAULT_DASH_STYLES;
+function DashPicker({ dash, list }: { dash: DashPattern | null; list: DashStyle[] }) {
   const current = matchingDash(list, dash);
   const label = dash ? (current?.label ?? "Custom") : "Solid";
   const row = (key: string, name: string, pattern: DashPattern | null, close: () => void) => (

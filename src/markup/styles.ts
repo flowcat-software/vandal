@@ -19,7 +19,7 @@ import type {
   StrokeStyle,
   TextAlign,
 } from "./model/types";
-import { isDashTool, storedDash } from "./dashStyles";
+import { DEFAULT_DASH_STYLES, isDashTool, storedDash, type DashStyle } from "./dashStyles";
 import { DEFAULT_HEAD_STYLES } from "./headStyles";
 import { nearestValue } from "./pickers";
 import type { ColorKey } from "./restyle";
@@ -74,15 +74,18 @@ export const DEFAULT_STYLE_CONFIG: StyleConfig = {
         palette: ["#ffeb3b", "#76ff03", "#ff4081", "#40c4ff", "#ffab40"],
         width: { control: "slider", min: 8, max: 40 },
         colorControl: null,
+        dashes: null,
       },
       // Its own thickness range (PLAN 3V.2).
       callout: {
         palette: null,
         width: { control: "slider", min: 1, max: 20 },
         colorControl: null,
+        dashes: null,
       },
     },
     arrowHeads: DEFAULT_HEAD_STYLES,
+    dashes: DEFAULT_DASH_STYLES,
   },
   shareColor: false,
   showShortcutHints: true,
@@ -137,6 +140,11 @@ export function colorControlFor(
 
 export function widthPickerFor(tool: ToolId, cfg = useStyleConfig.getState()): NumberPicker {
   return override(tool, cfg)?.width ?? cfg.styles.width;
+}
+
+/** The dash styles a tool offers after Solid: its own ("Custom styles"), else the shared ones. */
+export function dashStylesFor(tool: ToolId, cfg = useStyleConfig.getState()): DashStyle[] {
+  return override(tool, cfg)?.dashes ?? cfg.styles.dashes;
 }
 
 /** The color a tool draws with now. */

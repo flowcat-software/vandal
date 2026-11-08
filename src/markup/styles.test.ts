@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   colorControlFor,
+  dashStylesFor,
   DEFAULT_STYLE_CONFIG,
   drawnCornerRadius,
   setCustomColor,
@@ -118,7 +119,7 @@ describe("colorControlFor", () => {
           colorControl: "dropdown",
           tools: {
             ...DEFAULT_STYLE_CONFIG.styles.tools,
-            step: { palette: null, width: null, colorControl: "swatches" },
+            step: { palette: null, width: null, colorControl: "swatches", dashes: null },
           },
         },
       },
@@ -127,6 +128,26 @@ describe("colorControlFor", () => {
     expect(colorControlFor("pen")).toBe("dropdown");
     expect(colorControlFor("highlighter")).toBe("dropdown"); // own palette, no own choice
     expect(colorControlFor("step")).toBe("swatches");
+  });
+});
+
+describe("dashStylesFor (PLAN 3X)", () => {
+  it("uses a tool's own styles, even none, else the shared ones", () => {
+    const own = [{ label: "Fine", dash: 1, gap: 4 }];
+    const cfg = {
+      ...DEFAULT_STYLE_CONFIG,
+      styles: {
+        ...DEFAULT_STYLE_CONFIG.styles,
+        tools: {
+          ...DEFAULT_STYLE_CONFIG.styles.tools,
+          rect: { palette: null, width: null, colorControl: null, dashes: own },
+          line: { palette: null, width: null, colorControl: null, dashes: [] },
+        },
+      },
+    };
+    expect(dashStylesFor("rect", cfg)).toBe(own);
+    expect(dashStylesFor("line", cfg)).toEqual([]);
+    expect(dashStylesFor("ellipse", cfg)).toBe(DEFAULT_STYLE_CONFIG.styles.dashes);
   });
 });
 
