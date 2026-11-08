@@ -11,11 +11,32 @@ All notable changes to Vandal are listed here. The format follows
 - **Arrow head styles.** The arrow tool's head picker offers Regular and Narrow heads, filled or
   open; Narrow suits technical drawings. **Settings › Markup › Arrows** lets you add your own:
   a name, filled or open, and the head's width and length as a percentage of the regular one,
-  previewed on thin, medium and thick lines as you type. Reorder them with the arrow buttons to
+  previewed as you type. Reorder them with the arrow buttons to
   change the picker's order. Arrows you've already drawn keep their heads when you change or
   remove a style. The Arrow's own colors and widths moved to the same group.
+- **Dashed and dotted lines.** Lines, arrows (the shaft; heads stay solid), rectangle and ellipse
+  outlines, and callouts can be dashed or dotted: pick Solid, Dashed, Dotted or Long dash from
+  the new dropdown after the line width. Dash and gap are measured in line widths, so a style
+  looks the same at any width, and a dash of 1 makes round dots. On rectangles (rounded ones
+  too) and callout outlines the dashes are spaced so every corner gets an even dash, and
+  ellipses have no seam. **Settings › Markup › Line style** lets you add your own, and **Per-tool
+  styles** can give a tool its own list. Copy/Paste Style carries the dashes, each tool remembers
+  its style, and marks you've drawn keep theirs when you change a style.
 
 ### Changed
+
+- **Narrow arrow heads are a little wider** (70% wide and 150% long, from 50% and 125%), so they
+  read better on thick lines. If you've changed your head styles, yours are kept; the Arrows
+  group's Reset brings in the new ones.
+- **Settings › Markup is easier to scan.** The groups follow the options bar more closely (Line
+  width, Line style, Rounded corners, Text, Arrows, then Redact, Spotlight and Step markers), and
+  headings and Per-tool styles rows show the icon of the tool or control they set. Per-tool
+  styles uses a switch for each choice (custom color controls, colors, line widths and line
+  styles), with what it opens set in below it. Head and line style cards fit on one row. The
+  sidebar is narrower, leaving more room for the settings, and "When you close the editor" is
+  now "Closing the editor".
+- **The options bar is a little tighter:** a slider's value only takes the room its widest value
+  needs.
 
 - **Heads on short arrows shrink with them.** A very short arrow used to be nearly all head. Now
   the head scales down along with the arrow, though never so far that it stops looking like an
