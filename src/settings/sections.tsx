@@ -471,6 +471,48 @@ export const sections: Section[] = [
         ],
       },
       {
+        title: "Line style",
+        description:
+          "Dashed and dotted styles for lines, arrows, rectangles, ellipses and callouts, listed after Solid in their options in this order. A tool can have its own under Per-tool styles (the arrow's are under Arrows).",
+        items: [
+          {
+            id: "dash-styles",
+            kind: "dashStyles",
+            path: "styles.dashes",
+            label: "Line styles",
+            keywords: [
+              "dash",
+              "dashed",
+              "dotted",
+              "dots",
+              "dotted line",
+              "stroke",
+              "outline",
+              "border",
+              "line style",
+              "gap",
+            ],
+          },
+        ],
+      },
+      {
+        title: "Rounded corners",
+        items: [
+          {
+            id: "styles-corner-radius",
+            kind: "numberPicker",
+            path: "styles.cornerRadius",
+            label: "Corner radius choices",
+            description:
+              "The corner radii the rectangle and the spotlight's rectangle offer, in pixels. 0 (square corners) is always one of them. Alt+1–9 and Alt+0 pick them while you draw.",
+            unit: "px",
+            zero: true,
+            noButtons: true,
+            keywords: ["corner", "round", "rounded", "radius", "rectangle", "spotlight", "square"],
+          },
+        ],
+      },
+      {
         title: "Text",
         items: [
           {
@@ -490,6 +532,48 @@ export const sections: Section[] = [
             description: "The sizes the text tool offers, in points. Keys 1–9 and 0 pick them.",
             unit: "pt",
             keywords: ["font", "size", "text", "points", "pt", "picker"],
+          },
+        ],
+      },
+      {
+        title: "Arrows",
+        description:
+          "The arrow's head styles, listed in the arrow tool's options in this order, and its own colors, widths or line styles.",
+        items: [
+          {
+            id: "arrow-heads",
+            kind: "arrowHeads",
+            path: "styles.arrowHeads",
+            label: "Head styles",
+            keywords: [
+              "arrow",
+              "head",
+              "arrowhead",
+              "narrow",
+              "wide",
+              "filled",
+              "open",
+              "technical",
+              "proportions",
+            ],
+          },
+          {
+            id: "tool-style-arrow",
+            kind: "toolStyle",
+            tool: "arrow",
+            label: "Arrow",
+            widths: true,
+            dashes: true,
+            keywords: [
+              "own",
+              "custom",
+              "override",
+              "per tool",
+              "palette",
+              "color",
+              "width",
+              "arrow",
+            ],
           },
         ],
       },
@@ -545,23 +629,6 @@ export const sections: Section[] = [
         ],
       },
       {
-        title: "Rounded corners",
-        items: [
-          {
-            id: "styles-corner-radius",
-            kind: "numberPicker",
-            path: "styles.cornerRadius",
-            label: "Corner radius choices",
-            description:
-              "The corner radii the rectangle and the spotlight's rectangle offer, in pixels. 0 (square corners) is always one of them. Alt+1–9 and Alt+0 pick them while you draw.",
-            unit: "px",
-            zero: true,
-            noButtons: true,
-            keywords: ["corner", "round", "rounded", "radius", "rectangle", "spotlight", "square"],
-          },
-        ],
-      },
-      {
         title: "Step markers",
         items: [
           {
@@ -586,50 +653,9 @@ export const sections: Section[] = [
         ],
       },
       {
-        title: "Arrows",
-        description:
-          "The arrow's head styles, listed in the arrow tool's options in this order, and its own colors or widths.",
-        items: [
-          {
-            id: "arrow-heads",
-            kind: "arrowHeads",
-            path: "styles.arrowHeads",
-            label: "Head styles",
-            keywords: [
-              "arrow",
-              "head",
-              "arrowhead",
-              "narrow",
-              "wide",
-              "filled",
-              "open",
-              "technical",
-              "proportions",
-            ],
-          },
-          {
-            id: "tool-style-arrow",
-            kind: "toolStyle",
-            tool: "arrow",
-            label: "Arrow",
-            widths: true,
-            keywords: [
-              "own",
-              "custom",
-              "override",
-              "per tool",
-              "palette",
-              "color",
-              "width",
-              "arrow",
-            ],
-          },
-        ],
-      },
-      {
         title: "Per-tool styles",
         description:
-          "Give a tool its own colors, widths or way of showing colors instead of the ones above. The highlighter comes with its own colors.",
+          "Give a tool its own colors, widths, line styles or way of showing colors instead of the ones above. The highlighter comes with its own colors.",
         items: [
           {
             id: "tool-style-pen",
@@ -653,6 +679,7 @@ export const sections: Section[] = [
             tool: "line",
             label: "Line",
             widths: true,
+            dashes: true,
             keywords: ["own", "custom", "override", "per tool", "palette", "color", "width"],
           },
           {
@@ -661,6 +688,7 @@ export const sections: Section[] = [
             tool: "rect",
             label: "Rectangle",
             widths: true,
+            dashes: true,
             keywords: ["own", "custom", "override", "per tool", "palette", "color", "width"],
           },
           {
@@ -669,6 +697,7 @@ export const sections: Section[] = [
             tool: "ellipse",
             label: "Ellipse",
             widths: true,
+            dashes: true,
             keywords: ["own", "custom", "override", "per tool", "palette", "color", "width"],
           },
           {
@@ -685,6 +714,7 @@ export const sections: Section[] = [
             tool: "callout",
             label: "Callout",
             widths: true,
+            dashes: true,
             keywords: ["own", "custom", "override", "per tool", "palette", "color", "pointer"],
           },
           {

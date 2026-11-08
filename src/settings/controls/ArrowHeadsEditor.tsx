@@ -8,11 +8,12 @@ import {
   type HeadStyle,
 } from "../../markup/headStyles";
 import type { ArrowHead, HeadShape } from "../../markup/model/types";
-import { PlusIcon, RemoveIcon } from "../icons";
+import { PlusIcon } from "../icons";
 import type { ArrowHeadsItem } from "../schema";
 import { useSettingsStore } from "../store";
 import type { ControlProps } from "./index";
 import { Segmented } from "./Segmented";
+import { moved, RowButtons, typedNumber, ValueField } from "./StyleList";
 import { useDraft } from "./useDraft";
 import styles from "./controls.module.css";
 
@@ -32,11 +33,7 @@ export function ArrowHeadsSetting({ item, id, disabled }: ControlProps<ArrowHead
   const update = (next: HeadStyle[]) => void set(item.path as never, next as never);
   const change = (i: number, patch: Partial<HeadStyle>) =>
     update(list.map((h, j) => (j === i ? { ...h, ...patch } : h)));
-  const move = (i: number, by: number) => {
-    const next = [...list];
-    [next[i], next[i + by]] = [next[i + by], next[i]];
-    update(next);
-  };
+  const move = (i: number, by: number) => update(moved(list, i, by));
 
   return (
     <div id={id} className={styles.headStyles}>
@@ -97,10 +94,7 @@ function HeadRow({
   const [label, setLabel] = useDraft(style.label);
   const [width, setWidth] = useDraft(String(style.width));
   const [length, setLength] = useDraft(String(style.length));
-  const num = (text: string, fallback: number) => {
-    const n = Number(text.trim().replace(/%$/, ""));
-    return text.trim() !== "" && Number.isFinite(n) ? n : fallback;
-  };
+  const num = (text: string, fallback: number) => typedNumber(text, fallback, "%");
   // The preview follows what's typed, within the limits Rust will apply.
   const shape = clampHeadShape({
     width: num(width, style.width),
@@ -147,8 +141,9 @@ function HeadRow({
           disabled={disabled}
           onChange={(head) => onChange({ head })}
         />
-        <PercentField
+        <ValueField
           label="W"
+          unit="%"
           title={`Width (${HEAD_WIDTH.min}–${HEAD_WIDTH.max}%)`}
           ariaLabel={`${name}: width in percent`}
           value={width}
@@ -157,8 +152,9 @@ function HeadRow({
           onCommit={commit}
           onKeyDown={keys}
         />
-        <PercentField
+        <ValueField
           label="L"
+          unit="%"
           title={`Length (${HEAD_LENGTH.min}–${HEAD_LENGTH.max}%)`}
           ariaLabel={`${name}: length in percent`}
           value={length}
@@ -168,95 +164,26 @@ function HeadRow({
           onKeyDown={keys}
         />
       </span>
-      <span className={`${styles.fontOrder} ${styles.headButtons}`}>
-        <button
-          type="button"
-          className={styles.orderButton}
-          aria-label={`Move ${name} up`}
-          title="Move up"
-          disabled={disabled || index === 0}
-          onClick={() => onMove(-1)}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <path d="M6 15l6-6 6 6" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          className={styles.orderButton}
-          aria-label={`Move ${name} down`}
-          title="Move down"
-          disabled={disabled || index === count - 1}
-          onClick={() => onMove(1)}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          className={`${styles.orderButton} ${styles.headRemove}`}
-          aria-label={`Remove ${name}`}
-          title={count === 1 ? "The list needs at least one style" : "Remove"}
-          disabled={disabled || count === 1}
-          onClick={onRemove}
-        >
-          <RemoveIcon size={10} />
-        </button>
-      </span>
+      <RowButtons
+        name={name}
+        index={index}
+        count={count}
+        disabled={disabled}
+        canRemove={count > 1}
+        removeTitle="The list needs at least one style"
+        onMove={onMove}
+        onRemove={onRemove}
+      />
     </div>
   );
 }
 
-function PercentField({
-  label,
-  title,
-  ariaLabel,
-  value,
-  disabled,
-  onChange,
-  onCommit,
-  onKeyDown,
-}: {
-  label: string;
-  title: string;
-  ariaLabel: string;
-  value: string;
-  disabled: boolean;
-  onChange: (text: string) => void;
-  onCommit: () => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
-}) {
-  return (
-    <label className={`${styles.valueChip} ${styles.headPercent}`} title={title}>
-      <span className={styles.chipValue}>
-        <span className={styles.unit}>{label}</span>
-        <input
-          className={styles.valueInput}
-          value={value}
-          inputMode="decimal"
-          aria-label={ariaLabel}
-          disabled={disabled}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onCommit}
-          onKeyDown={onKeyDown}
-        />
-        <span className={styles.unit}>%</span>
-      </span>
-    </label>
-  );
-}
-
 /**
- * Line widths the preview shows, thin to thick, and how long each arrow is:
- * long enough for most heads to show at full size, not scaled down for a
- * short arrow.
+ * The preview's line width and arrow length: long enough for most heads to
+ * show at full size, not scaled down for a short arrow. One medium arrow
+ * (Richard): the options bar is where to try a style on other widths.
  */
-const PREVIEW_ARROWS = [
-  { width: 2, length: 48 },
-  { width: 5, length: 80 },
-  { width: 10, length: 130 },
-];
+const PREVIEW_ARROWS = [{ width: 5, length: 80 }];
 const PREVIEW_GAP = 16;
 /** Tall enough for the widest head allowed on the thickest line. */
 const PREVIEW_HEIGHT = 58;
@@ -269,7 +196,11 @@ function HeadPreview({ head, shape }: { head: ArrowHead; shape: HeadShape }) {
   const w = starts[starts.length - 1] + PREVIEW_ARROWS[PREVIEW_ARROWS.length - 1].length;
   const y = PREVIEW_HEIGHT / 2;
   return (
-    <svg className={styles.headPreview} viewBox={`0 0 ${w} ${PREVIEW_HEIGHT}`} aria-hidden>
+    <svg
+      className={`${styles.headPreview} ${styles.arrowPreview}`}
+      viewBox={`0 0 ${w} ${PREVIEW_HEIGHT}`}
+      aria-hidden
+    >
       {PREVIEW_ARROWS.map(({ width: lw, length }, i) => {
         const x = starts[i];
         const g = arrowGeometry(

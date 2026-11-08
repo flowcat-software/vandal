@@ -95,6 +95,8 @@ export interface ToolStyleItem extends BaseItem {
   tool: ToolId;
   /** The tool draws lines, so a width override applies. */
   widths: boolean;
+  /** Its strokes can be dashed, so it can have its own dash styles (PLAN 3X). */
+  dashes?: boolean;
 }
 
 /**
@@ -110,6 +112,12 @@ export interface FontPickerItem extends BaseItem {
 export interface ArrowHeadsItem extends BaseItem {
   kind: "arrowHeads";
   path: "styles.arrowHeads";
+}
+
+/** The dash styles (PLAN 3X): a list of label, dash and gap, in line widths. */
+export interface DashStylesItem extends BaseItem {
+  kind: "dashStyles";
+  path: "styles.dashes";
 }
 
 /** The accent color: the Windows accent, a preset or a custom color (PLAN 3A.2). */
@@ -178,6 +186,7 @@ export type Item =
   | ToolStyleItem
   | FontPickerItem
   | ArrowHeadsItem
+  | DashStylesItem
   | AccentItem
   | HotkeyItem
   | ShortcutItem

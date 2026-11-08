@@ -463,6 +463,20 @@
   gap: 10px;
 }
 
+/* A tool's own colors or widths, on a panel under their switch, as the line
+   styles' cards are. */
+.overridePanel {
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--control-bg);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* What a switch opens sits in a little, so the switches' labels scan as a column. */
+.override > :not(.overrideSwitch) {
+  margin-left: 12px;
+}
+
 /* An open editor gets more room below it: 25px to the next switch. */
 .override:has(> :nth-child(2)):not(:last-child) {
   padding-bottom: 15px;
@@ -475,9 +489,10 @@
   color: var(--text);
 }
 
-/* The same width for both labels, so the switches line up. */
+/* The same width for every label, the longest ("Custom color controls")
+   included, so the switches line up. */
 .overrideLabel {
-  min-width: 110px;
+  min-width: 160px;
 }
 
 /* ---- fonts: installed ⇄ custom list ---- */
@@ -1087,6 +1102,11 @@
   stroke: var(--text);
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* One arrow, at the same scale as the dash previews' lines. */
+.headPreview.arrowPreview {
+  width: 64px;
 }
 
 .headPreview .headFill {

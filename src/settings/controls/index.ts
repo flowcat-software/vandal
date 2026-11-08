@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import type { Item, ItemKind } from "../schema";
 import { AccentPicker } from "./AccentPicker";
 import { ArrowHeadsSetting } from "./ArrowHeadsEditor";
+import { DashStylesSetting } from "./DashStylesEditor";
 import { Choice } from "./Choice";
 import { FolderInput } from "./FolderInput";
 import { HotkeyField } from "./HotkeyField";
@@ -51,6 +52,7 @@ export const controls: Registry = {
   toolStyle: { component: ToolStyleSetting, layout: "stacked" },
   fontPicker: { component: FontPickerSetting, layout: "stacked" },
   arrowHeads: { component: ArrowHeadsSetting, layout: "stacked" },
+  dashStyles: { component: DashStylesSetting, layout: "stacked" },
   accent: { component: AccentPicker, layout: "stacked" },
   hotkey: { component: HotkeyField, layout: "stacked" },
   shortcut: { component: ShortcutField, layout: "inline" },
