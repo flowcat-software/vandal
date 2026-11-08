@@ -194,6 +194,9 @@ before the release itself (`0.3.0`). Every release must have a new, higher numbe
   `beta10` sorts as text, before `beta9`.
 
 1. As you work, add changes under `## [Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md).
+   **Changed** is only for what users of an earlier release would notice: existing, released
+   features behaving differently. Tweaks to a feature that hasn't shipped yet (its defaults, its
+   layout) aren't changes to anyone: describe the feature as it ships, under Added.
 2. Before bumping, check security:
    - `npm run security` passes (the release workflow runs it too and won't build if it fails).
    - Tauri's [security advisories](https://github.com/tauri-apps/tauri/security/advisories)
