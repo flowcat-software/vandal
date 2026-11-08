@@ -11,9 +11,9 @@ export type HeadStyle = ArrowHeadStyle;
 /** The ones the app comes with (Rust's `ArrowHeadStyle::defaults`). */
 export const DEFAULT_HEAD_STYLES: HeadStyle[] = [
   { label: "Regular Filled", head: "filled", width: 100, length: 100 },
-  { label: "Narrow Filled", head: "filled", width: 50, length: 125 },
+  { label: "Narrow Filled", head: "filled", width: 70, length: 150 },
   { label: "Regular Open", head: "open", width: 100, length: 100 },
-  { label: "Narrow Open", head: "open", width: 50, length: 125 },
+  { label: "Narrow Open", head: "open", width: 70, length: 150 },
 ];
 
 /** Limits, so a head still reads as one and never balloons (`styles.rs` keeps the setting within them). */

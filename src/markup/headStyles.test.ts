@@ -24,9 +24,9 @@ describe("head styles", () => {
   });
 
   it("finds the style a head matches, by fill and shape", () => {
-    const narrowOpen = matchingStyle(DEFAULT_HEAD_STYLES, "open", { width: 50, length: 125 });
+    const narrowOpen = matchingStyle(DEFAULT_HEAD_STYLES, "open", { width: 70, length: 150 });
     expect(narrowOpen?.label).toBe("Narrow Open");
-    expect(matchingStyle(DEFAULT_HEAD_STYLES, "open", { width: 60, length: 125 })).toBeUndefined();
+    expect(matchingStyle(DEFAULT_HEAD_STYLES, "open", { width: 60, length: 150 })).toBeUndefined();
   });
 
   it("draws icons in the head's proportions, a filled head's shaft stopping at its base", () => {

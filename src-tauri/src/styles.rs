@@ -230,9 +230,9 @@ impl ArrowHeadStyle {
         use ArrowHead::{Filled, Open};
         vec![
             Self::new("Regular Filled", Filled, 100.0, 100.0),
-            Self::new("Narrow Filled", Filled, 50.0, 125.0),
+            Self::new("Narrow Filled", Filled, 70.0, 150.0),
             Self::new("Regular Open", Open, 100.0, 100.0),
-            Self::new("Narrow Open", Open, 50.0, 125.0),
+            Self::new("Narrow Open", Open, 70.0, 150.0),
         ]
     }
 
@@ -799,7 +799,7 @@ mod tests {
         let v = serde_json::to_value(Styles::default()).unwrap();
         assert_eq!(
             v["arrowHeads"][1],
-            json!({ "label": "Narrow Filled", "head": "filled", "width": 50.0, "length": 125.0 })
+            json!({ "label": "Narrow Filled", "head": "filled", "width": 70.0, "length": 150.0 })
         );
         assert_eq!(v["arrowHeads"].as_array().unwrap().len(), 4);
         // Settings from before PLAN 3W get them too.
