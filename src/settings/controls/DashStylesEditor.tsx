@@ -1,5 +1,3 @@
-import type { PathSink } from "../../markup/dashCorners";
-import { traceDashedRect } from "../../markup/dashCorners";
 import {
   clampDash,
   DASH_GAP,
@@ -130,40 +128,42 @@ function DashRow({
   const name = style.label || `Style ${index + 1}`;
 
   return (
-    <div className={styles.headRow}>
+    <div className={styles.dashRow}>
       <DashPreview pattern={pattern} />
-      <input
-        className={`${styles.input} ${styles.headLabel}`}
-        value={label}
-        maxLength={MAX_DASH_LABEL}
-        aria-label={`Style ${index + 1}: name`}
-        spellCheck={false}
-        disabled={disabled}
-        onChange={(e) => setLabel(e.target.value)}
-        onBlur={commit}
-        onKeyDown={keys}
-      />
-      <span className={styles.headShapeFields}>
-        <ValueField
-          label="Dash"
-          title={`Dash length in line widths (${DASH_LENGTH.min}–${DASH_LENGTH.max}; 1 is a dot)`}
-          ariaLabel={`${name}: dash length in line widths`}
-          value={dash}
+      <span className={styles.dashMain}>
+        <input
+          className={`${styles.input} ${styles.dashLabel}`}
+          value={label}
+          maxLength={MAX_DASH_LABEL}
+          aria-label={`Style ${index + 1}: name`}
+          spellCheck={false}
           disabled={disabled}
-          onChange={setDash}
-          onCommit={commit}
+          onChange={(e) => setLabel(e.target.value)}
+          onBlur={commit}
           onKeyDown={keys}
         />
-        <ValueField
-          label="Gap"
-          title={`Gap in line widths (${DASH_GAP.min}–${DASH_GAP.max})`}
-          ariaLabel={`${name}: gap in line widths`}
-          value={gap}
-          disabled={disabled}
-          onChange={setGap}
-          onCommit={commit}
-          onKeyDown={keys}
-        />
+        <span className={styles.dashFields}>
+          <ValueField
+            label="Dash"
+            title={`Dash length in line widths (${DASH_LENGTH.min}–${DASH_LENGTH.max}; 1 is a dot)`}
+            ariaLabel={`${name}: dash length in line widths`}
+            value={dash}
+            disabled={disabled}
+            onChange={setDash}
+            onCommit={commit}
+            onKeyDown={keys}
+          />
+          <ValueField
+            label="Gap"
+            title={`Gap in line widths (${DASH_GAP.min}–${DASH_GAP.max})`}
+            ariaLabel={`${name}: gap in line widths`}
+            value={gap}
+            disabled={disabled}
+            onChange={setGap}
+            onCommit={commit}
+            onKeyDown={keys}
+          />
+        </span>
       </span>
       <RowButtons
         name={name}
@@ -178,32 +178,11 @@ function DashRow({
   );
 }
 
-/** Builds an SVG path from what `traceDashedRect` draws. */
-function svgPath(): { sink: PathSink; d: () => string } {
-  const parts: string[] = [];
-  const n = (v: number) => +v.toFixed(2);
-  return {
-    sink: {
-      moveTo: (x, y) => parts.push(`M${n(x)} ${n(y)}`),
-      lineTo: (x, y) => parts.push(`L${n(x)} ${n(y)}`),
-      arc: (cx, cy, r, a0, a1) => {
-        const p = (a: number) => `${n(cx + r * Math.cos(a))} ${n(cy + r * Math.sin(a))}`;
-        parts.push(`L${p(a0)}A${n(r)} ${n(r)} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${p(a1)}`);
-      },
-    },
-    d: () => parts.join(""),
-  };
-}
-
-/** The style on a thin and a thicker line, and on a rounded box's corners, as the canvas draws them. */
+/** The style on one medium line (the options bar shows it at every width). */
 function DashPreview({ pattern }: { pattern: DashPattern }) {
-  const box = svgPath();
-  traceDashedRect(box.sink, 150, 7, 64, 30, 6, pattern, 3);
   return (
-    <svg className={styles.headPreview} viewBox="0 0 220 44" aria-hidden>
-      <path d="M4 14H134" strokeWidth={2} strokeDasharray={svgDash(pattern, 2)} />
-      <path d="M5 31H133" strokeWidth={5} strokeDasharray={svgDash(pattern, 5)} />
-      <path d={box.d()} strokeWidth={3} strokeLinejoin="miter" />
+    <svg className={styles.dashPreview} viewBox="0 0 64 12" aria-hidden>
+      <path d="M2 6H62" strokeWidth={3} strokeDasharray={svgDash(pattern, 3)} />
     </svg>
   );
 }

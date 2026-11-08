@@ -1104,6 +1104,78 @@
   stroke-linejoin: round;
 }
 
+/* A dash style on one row: the preview like a bullet, then the name
+   (taking the room left) with dash and gap at its right, then the buttons,
+   which stay top right. In a narrow window dash and gap wrap under the
+   name, lined up with it. */
+.dashRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  align-self: stretch;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--control-bg);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* As tall as a row of controls, so the line sits level with the name. */
+.dashPreview {
+  width: 64px;
+  height: 30px;
+  fill: none;
+  stroke: var(--text);
+  stroke-linecap: round;
+}
+
+.dashMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  min-width: 0;
+}
+
+/* At least room for a short name; it takes whatever the row has spare. */
+.dashMain .dashLabel {
+  flex: 1 1 150px;
+  width: auto;
+  height: 30px;
+}
+
+.dashFields {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The label at each field's left, the number centred in the room after it,
+   so down the list the labels and the numbers each make a column. */
+.dashFields .chipValue {
+  justify-content: flex-start;
+  padding-left: 10px;
+}
+
+.dashFields .unit:first-child {
+  margin-right: 6px;
+}
+
+.dashFields .valueInput {
+  flex: 1;
+  field-sizing: fixed;
+  max-width: none;
+  text-align: center;
+}
+
+/* Not the head cards' named area, which this grid hasn't got (it made a row of its own). */
+.dashRow .headButtons {
+  grid-area: auto;
+  height: 30px;
+  align-items: center;
+}
+
 /* One arrow, at the same scale as the dash previews' lines. */
 .headPreview.arrowPreview {
   width: 64px;
