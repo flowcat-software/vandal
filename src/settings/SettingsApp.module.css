@@ -257,6 +257,48 @@
   line-height: 22px;
 }
 
+/* A group's icon (its tool's, or the options bar's for what it sets), as a
+   setting's below but sized to the heading. */
+.groupIcon {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+  vertical-align: -4px;
+  opacity: 0.55;
+}
+
+.groupIcon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The options bar's icons are drawn on 16 px, not 24: finer lines to match. */
+.groupIcon svg[viewBox="0 0 16 16"] {
+  stroke-width: 1.1;
+}
+
+/* A tool's toolbar icon before its name (Per-tool styles), drawn as there.
+   Every icon is the same width, so the names all start at the same x. */
+.labelIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  vertical-align: -3px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Quieter than the name beside it. */
+  opacity: 0.55;
+}
+
 .description {
   margin: 2px 0 0;
   color: var(--text-2);

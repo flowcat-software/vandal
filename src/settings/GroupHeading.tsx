@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ToolIcon } from "../markup/toolIcons";
 import { commands } from "../shared/ipc";
 import { Alert } from "./controls/Alert";
 import { ConfirmDialog } from "./controls/ConfirmDialog";
@@ -57,7 +58,18 @@ export function GroupHeading({
   return (
     <>
       <div className={styles.groupHead}>
-        {group.title ? <h2 className={styles.groupTitle}>{group.title}</h2> : <span />}
+        {group.title ? (
+          <h2 className={styles.groupTitle}>
+            {(group.tool || group.icon) && (
+              <span className={styles.groupIcon}>
+                {group.tool ? <ToolIcon tool={group.tool} /> : group.icon}
+              </span>
+            )}
+            {group.title}
+          </h2>
+        ) : (
+          <span />
+        )}
         {shown && (
           <button
             type="button"

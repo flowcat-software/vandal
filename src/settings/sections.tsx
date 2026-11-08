@@ -3,10 +3,12 @@
 // Pages follow the capture flow (PLAN §4.7): General (the app itself),
 // Capture (taking the shot), Copy & save (where the image goes), Markup (tools
 // and styles, shared by quick edit and the editor), Keyboard shortcuts, About.
+import { CORNER_ICON, LINE_STYLE_ICON, LINE_WIDTH_ICON } from "../markup/pickerIcons";
 import { SHORTCUT_NAMES, type ShortcutId } from "../markup/shortcuts";
 import { commands } from "../shared/ipc";
 import { EDITOR_KEYS, MARKUP_KEYS, QUICK_EDIT_KEYS } from "./fixedShortcuts";
 import {
+  PALETTE_ICON,
   AboutIcon,
   CaptureIcon,
   GeneralIcon,
@@ -411,6 +413,7 @@ export const sections: Section[] = [
       },
       {
         title: "Colors",
+        icon: PALETTE_ICON,
         items: [
           {
             id: "styles-palette",
@@ -447,6 +450,7 @@ export const sections: Section[] = [
       },
       {
         title: "Line width",
+        icon: LINE_WIDTH_ICON,
         items: [
           {
             id: "styles-width",
@@ -472,6 +476,7 @@ export const sections: Section[] = [
       },
       {
         title: "Line style",
+        icon: LINE_STYLE_ICON,
         description:
           "Dashed and dotted styles for lines, arrows, rectangles, ellipses and callouts, listed after Solid in their options in this order. A tool can have its own under Per-tool styles (the arrow's are under Arrows).",
         items: [
@@ -497,6 +502,7 @@ export const sections: Section[] = [
       },
       {
         title: "Rounded corners",
+        icon: CORNER_ICON,
         items: [
           {
             id: "styles-corner-radius",
@@ -514,6 +520,7 @@ export const sections: Section[] = [
       },
       {
         title: "Text",
+        tool: "text",
         items: [
           {
             id: "styles-fonts",
@@ -537,6 +544,7 @@ export const sections: Section[] = [
       },
       {
         title: "Arrows",
+        tool: "arrow",
         description:
           "The arrow's head styles, listed in the arrow tool's options in this order, and its own colors, widths or line styles.",
         items: [
@@ -579,6 +587,7 @@ export const sections: Section[] = [
       },
       {
         title: "Redact",
+        tool: "redact",
         items: [
           {
             id: "styles-pixelate",
@@ -615,6 +624,7 @@ export const sections: Section[] = [
       },
       {
         title: "Spotlight",
+        tool: "spotlight",
         items: [
           {
             id: "styles-spotlight",
@@ -630,6 +640,7 @@ export const sections: Section[] = [
       },
       {
         title: "Step markers",
+        tool: "step",
         items: [
           {
             id: "styles-step-size",

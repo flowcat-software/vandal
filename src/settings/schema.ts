@@ -3,7 +3,7 @@
 // To add a setting, add an item to a group in `sections.tsx`. To add a new
 // kind of control, add an item type to `Item` below and a component to the
 // registry in `controls/index.ts` (TypeScript will insist on both).
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { ShortcutId } from "../markup/shortcuts";
 import type { KeyEntry } from "./fixedShortcuts";
 import type { ToolId } from "../markup/toolStore";
@@ -201,6 +201,10 @@ export type ItemKind = Item["kind"];
 
 export interface Group {
   title?: string;
+  /** The toolbar tool it's about: its icon goes before the title. */
+  tool?: ToolId;
+  /** Or the options bar's icon for what it sets (`pickerIcons.tsx`). */
+  icon?: ReactNode;
   description?: string;
   items: Item[];
 }

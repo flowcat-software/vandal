@@ -14,6 +14,7 @@ import { SearchIcon } from "./icons";
 import { matchesQuery, type Group, type Item, type Section } from "./schema";
 import { sections } from "./sections";
 import { useSettingsStore } from "./store";
+import { ToolIcon } from "../markup/toolIcons";
 import styles from "./SettingsApp.module.css";
 
 export function SettingsApp() {
@@ -279,6 +280,7 @@ function Row({ item, settings }: { item: Item; settings: Settings }) {
     >
       <div className={styles.rowText}>
         <label htmlFor={id} className={styles.label}>
+          {item.kind === "toolStyle" && <ToolIcon tool={item.tool} className={styles.labelIcon} />}
           {item.label}
         </label>
         {item.description && <p className={styles.description}>{item.description}</p>}

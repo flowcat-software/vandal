@@ -107,3 +107,19 @@ export function RemoveIcon({ size = 8 }: { size?: number }) {
     </svg>
   );
 }
+
+/**
+ * An artist's palette, before the Colors heading (24 × 24, drawn like the
+ * toolbar's icons; nothing in the bars stands for colors on its own).
+ */
+export const PALETTE_ICON = (
+  <svg viewBox="0 0 24 24" aria-hidden>
+    <path d="M12 3.5a8.5 8.5 0 0 0 0 17c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3s-.5-.8-.5-1.3c0-1 .8-1.8 1.8-1.8H17a3.5 3.5 0 0 0 3.5-3.5c0-4-3.8-7.3-8.5-7.3z" />
+    <g fill="currentColor" stroke="none">
+      <circle cx="7.6" cy="11.2" r="1.2" />
+      <circle cx="9.6" cy="7.4" r="1.2" />
+      <circle cx="14.2" cy="7" r="1.2" />
+      <circle cx="17.1" cy="10" r="1.2" />
+    </g>
+  </svg>
+);
