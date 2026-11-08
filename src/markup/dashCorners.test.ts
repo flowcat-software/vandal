@@ -13,14 +13,12 @@ function recorder() {
   const at = (x: number, y: number): [number, number] => [+x.toFixed(3), +y.toFixed(3)];
   const sink: PathSink = {
     moveTo: (x, y) => subpaths.push([at(x, y)]),
-    lineTo: (x, y) => subpaths.at(-1)!.push(at(x, y)),
+    lineTo: (x, y) => subpaths[subpaths.length - 1].push(at(x, y)),
     arc: (cx, cy, r, a0, a1) =>
-      subpaths
-        .at(-1)!
-        .push(
-          at(cx + r * Math.cos(a0), cy + r * Math.sin(a0)),
-          at(cx + r * Math.cos(a1), cy + r * Math.sin(a1)),
-        ),
+      subpaths[subpaths.length - 1].push(
+        at(cx + r * Math.cos(a0), cy + r * Math.sin(a0)),
+        at(cx + r * Math.cos(a1), cy + r * Math.sin(a1)),
+      ),
   };
   return { sink, subpaths };
 }
