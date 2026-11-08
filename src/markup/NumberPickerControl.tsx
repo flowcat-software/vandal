@@ -167,6 +167,8 @@ function Slider(props: Props) {
   const stops = picker.control === "stepped" ? picker.values : [];
   const shown =
     picker.control === "slider" ? Math.round(props.value) : nearestValue(picker, props.value);
+  // The value's room: its widest, so the bar doesn't shift as it changes.
+  const widest = picker.control === "slider" ? Math.round(picker.max) : Math.max(...stops);
 
   const valueAt = (clientX: number) => {
     const r = trackRef.current!.getBoundingClientRect();
@@ -231,7 +233,12 @@ function Slider(props: Props) {
         </span>
       </div>
       <span className={styles.value}>
-        {shown} {props.unit}
+        <span>
+          {shown} {props.unit}
+        </span>
+        <span className={styles.valueSizer} aria-hidden>
+          {widest} {props.unit}
+        </span>
       </span>
     </div>
   );

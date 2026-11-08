@@ -21,6 +21,15 @@ export const LINE_WIDTH_ICON = (
   </svg>
 );
 
+/** Line style (PLAN 3X): solid, dashed and dotted. */
+export const LINE_STYLE_ICON = (
+  <svg className={styles.pickerIcon} viewBox="0 0 16 16" aria-hidden>
+    <path d="M2 3.5h12" strokeWidth="1.5" />
+    <path d="M2 8h3M6.5 8h3M11 8h3" strokeWidth="1.5" />
+    <path d="M2.5 12.5h0M6 12.5h0M9.5 12.5h0M13 12.5h0" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
 /**
  * Corner radius: a rounded corner with an arrow pushing it in from outside
  * (Richard's idea), so it doesn't read as another shape button.

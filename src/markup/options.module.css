@@ -374,9 +374,19 @@
   background: var(--accent);
 }
 
+/* As wide as the widest value (the sizer under it), digits all one width. */
 .value {
-  min-width: 44px;
+  display: inline-grid;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.value > * {
+  grid-area: 1 / 1;
+}
+
+.valueSizer {
+  visibility: hidden;
 }
 
 /* ---- dropdowns ---- */
@@ -399,6 +409,11 @@
   color: var(--text);
   font: inherit;
   white-space: nowrap;
+}
+
+/* Just the pattern and the chevron: no room kept for a label. */
+.dropdown.dashDropdown {
+  min-width: 0;
 }
 
 .dropdown:hover {

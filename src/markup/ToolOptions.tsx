@@ -24,6 +24,7 @@ import {
   BLUR_RADIUS_ICON,
   CORNER_ICON,
   DARKNESS_ICON,
+  LINE_STYLE_ICON,
   LINE_WIDTH_ICON,
   TEXT_SIZE_ICON,
 } from "./pickerIcons";
@@ -388,7 +389,10 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
           </span>
           {dashes && (
             <span className={styles.hintArea} {...hint("dash")}>
-              <DashPicker dash={values.dash} list={dashes} />
+              <span className={styles.iconPicker}>
+                {LINE_STYLE_ICON}
+                <DashPicker dash={values.dash} list={dashes} />
+              </span>
             </span>
           )}
           {corner}
@@ -623,7 +627,7 @@ function DashPicker({ dash, list }: { dash: DashPattern | null; list: DashStyle[
   );
   return (
     <Dropdown
-      className={styles.dropdown}
+      className={`${styles.dropdown} ${styles.dashDropdown}`}
       title={`Line style: ${label}`}
       button={<DashIcon dash={dash} />}
     >
