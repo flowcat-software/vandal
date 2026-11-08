@@ -96,6 +96,7 @@ import { ObjectMenu } from "./ObjectMenu";
 import { insertCopies } from "./objectActions";
 import { markupClipboard } from "./markupClipboard";
 import { canvasDash } from "./dashStyles";
+import { ellipseDash, traceDashedRect, type PathSink } from "./dashCorners";
 import { storedShape } from "./headStyles";
 import { useToolStore } from "./toolStore";
 import styles from "./markup.module.css";
@@ -1731,24 +1732,58 @@ function AnnotationShape({
     opacity: style.opacity,
     stroke: a.fill === "solid" ? undefined : style.color,
     strokeWidth: style.width,
-    // Round ends make a dash of 1 a dot (PLAN 3X).
-    dash: canvasDash(style.dash, style.width),
+    // Round ends make a dash of 1 a dot (PLAN 3X). Rectangles place their
+    // own dashes and ellipses fit theirs, so the corners are even.
     lineCap: style.dash ? ("round" as const) : undefined,
     fill: a.fill === "none" ? undefined : a.fill === "solid" ? style.color : a.fillColor,
     hitStrokeWidth: style.width + hitSlop,
     perfectDrawEnabled: false,
   };
-  return a.kind === "rect" ? (
+  const dashed = style.dash && common.stroke ? style.dash : undefined;
+  if (a.kind === "ellipse") {
+    const fitted = dashed && ellipseDash(dashed, style.width, rect.width / 2, rect.height / 2);
+    return (
+      <Ellipse
+        {...common}
+        radiusX={rect.width / 2}
+        radiusY={rect.height / 2}
+        dash={fitted ? fitted.dash : undefined}
+        dashOffset={fitted ? fitted.offset : undefined}
+      />
+    );
+  }
+  const radius = drawnCornerRadius(a.cornerRadius, rect.width, rect.height);
+  const outline = (ctx: Konva.Context) => {
+    ctx.beginPath();
+    if (radius) Konva.Util.drawRoundedRectPath(ctx, rect.width, rect.height, radius);
+    else ctx.rect(0, 0, rect.width, rect.height);
+    ctx.closePath();
+  };
+  return (
     <KRect
       {...common}
       width={rect.width}
       height={rect.height}
       offsetX={rect.width / 2}
       offsetY={rect.height / 2}
-      cornerRadius={drawnCornerRadius(a.cornerRadius, rect.width, rect.height)}
+      cornerRadius={radius}
+      {...(dashed && {
+        sceneFunc: (ctx, shape) => {
+          if (common.fill) {
+            outline(ctx);
+            ctx.fillShape(shape);
+          }
+          ctx.beginPath();
+          traceDashedRect(ctx, 0, 0, rect.width, rect.height, radius, dashed, style.width);
+          ctx.strokeShape(shape);
+        },
+        // The whole outline, gaps too, is there to click.
+        hitFunc: (ctx, shape) => {
+          outline(ctx);
+          ctx.fillStrokeShape(shape);
+        },
+      })}
     />
-  ) : (
-    <Ellipse {...common} radiusX={rect.width / 2} radiusY={rect.height / 2} />
   );
 }
 
@@ -1850,21 +1885,26 @@ function CalloutShape({
           c.stroke();
           c.setLineDash([]);
         } else {
+          const radius = drawnCornerRadius(a.cornerRadius, box.width, box.height);
           c.beginPath();
-          c.roundRect(
-            box.x,
-            box.y,
-            box.width,
-            box.height,
-            drawnCornerRadius(a.cornerRadius, box.width, box.height),
-          );
+          // A dashed outline's dashes meet its corners, as on a rectangle.
+          if (a.shape === "outline" && a.dash) {
+            traceDashedRect(
+              c as PathSink,
+              box.x,
+              box.y,
+              box.width,
+              box.height,
+              radius,
+              a.dash,
+              a.lineWidth,
+            );
+          } else c.roundRect(box.x, box.y, box.width, box.height, radius);
           if (a.shape === "outline") {
             c.strokeStyle = a.color;
             c.lineWidth = a.lineWidth;
             if (dash) c.lineCap = "round";
-            c.setLineDash(dash ?? []);
             c.stroke();
-            c.setLineDash([]);
           } else {
             c.fillStyle = a.color;
             c.fill();
