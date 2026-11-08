@@ -245,7 +245,7 @@ export const sections: Section[] = [
         ],
       },
       {
-        title: "When you close the editor",
+        title: "Closing the editor",
         description: "Skipped if you already copied or saved since your last change.",
         items: [
           {
