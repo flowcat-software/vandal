@@ -8,6 +8,7 @@ import type {
   CalloutEnd,
   CalloutShape,
   ArrowHead,
+  DashPattern,
   HeadShape,
   RedactMode,
   ShapeFill,
@@ -16,6 +17,7 @@ import type {
   StepShape,
   TextAlign,
 } from "./model/types";
+import { clampDash, isDashPattern } from "./dashStyles";
 import { clampHeadShape } from "./headStyles";
 import { isTool, useToolStore, type PaletteKey, type ToolId } from "./toolStore";
 
@@ -27,6 +29,8 @@ export interface ToolMemory {
   sharedColor: string | null;
   colors: Partial<Record<ToolId, string>>;
   widths: Partial<Record<ToolId, number>>;
+  /** Absent before PLAN 3X: solid. */
+  dashes: Partial<Record<ToolId, DashPattern>>;
   fills: Partial<Record<ToolId, ShapeFill>>;
   fillColors: Partial<Record<ToolId, string>>;
   customColors: Partial<Record<PaletteKey, string>>;
@@ -71,6 +75,7 @@ export function snapshotToolMemory(): ToolMemory {
     sharedColor: t.sharedColor,
     colors: t.colors,
     widths: t.widths,
+    dashes: t.dashes,
     fills: t.fills,
     fillColors: t.fillColors,
     customColors: t.customColors,
@@ -158,6 +163,9 @@ export function restoreToolMemory(stored: unknown): void {
     sharedColor: pick("sharedColor", nullable(isColor), t.sharedColor),
     colors: perTool(s.colors, isColor),
     widths: perTool(s.widths, isSize),
+    dashes: Object.fromEntries(
+      Object.entries(perTool(s.dashes, isDashPattern)).map(([k, p]) => [k, clampDash(p!)]),
+    ),
     fills: perTool(s.fills, oneOf<ShapeFill>("none", "solid", "both")),
     fillColors: perTool(s.fillColors, isColor),
     customColors: perTool(s.customColors, isColor, ["shared"]),

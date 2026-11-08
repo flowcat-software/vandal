@@ -87,6 +87,7 @@ describe("Paste Style", () => {
       fill: "both",
       fillColor: "#00ff00",
       cornerRadius: 4,
+      dash: null,
     });
     expect(stylePatchFor(arrow, { ...arrow, id: "a2" })).toMatchObject({
       head: "open",
@@ -127,8 +128,14 @@ describe("Paste Style", () => {
   });
 
   it("gives a callout's box or a step marker a fill, else a line colour", () => {
-    expect(stylePatchFor(arrow, callout)).toEqual({ color: "#ff00ff", width: 5 });
-    expect(stylePatchFor(rect, callout)).toEqual({ color: "#00ff00", width: 8, cornerRadius: 4 });
+    // Solid strokes make the pointer solid too (PLAN 3X).
+    expect(stylePatchFor(arrow, callout)).toEqual({ color: "#ff00ff", width: 5, dash: null });
+    expect(stylePatchFor(rect, callout)).toEqual({
+      color: "#00ff00",
+      width: 8,
+      cornerRadius: 4,
+      dash: null,
+    });
     // A text's background is a step marker's fill.
     expect(stylePatchFor(text, step)).toEqual({
       color: "#ffff00",
@@ -146,22 +153,43 @@ describe("Paste Style", () => {
       width: 8,
       fill: "solid",
       fillColor: "#00ff00",
+      dash: null,
     });
     // A text's background, its colour not: the border stays.
     expect(stylePatchFor(text, ellipse)).toEqual({ fill: "both", fillColor: "#ffff00" });
     // A solid shape's colour is its fill.
-    expect(stylePatchFor(callout, solid)).toEqual({ color: "#0000ff", width: 3, cornerRadius: 6 });
+    expect(stylePatchFor(callout, solid)).toEqual({
+      color: "#0000ff",
+      width: 3,
+      cornerRadius: 6,
+      dash: null,
+    });
   });
 
   it("carries line colour and width between shapes and lines, and fills to text backgrounds", () => {
-    expect(stylePatchFor(rect, arrow)).toEqual({ color: "#ff0000", width: 8 });
-    expect(stylePatchFor(arrow, rect)).toEqual({ color: "#ff00ff", width: 5 });
+    expect(stylePatchFor(rect, arrow)).toEqual({ color: "#ff0000", width: 8, dash: null });
+    expect(stylePatchFor(arrow, rect)).toEqual({ color: "#ff00ff", width: 5, dash: null });
     // Text takes only a text colour: a shape's fill as its background, its border nothing.
     expect(stylePatchFor(rect, text)).toEqual({ background: true, backgroundColor: "#00ff00" });
     expect(stylePatchFor(arrow, text)).toEqual({});
     // Nor does a text's colour go to a line (its background would, as a fill).
     expect(stylePatchFor({ ...text, background: false } as Annotation, arrow)).toEqual({});
     expect(stylePatchFor(text, arrow)).toEqual({ color: "#ffff00" });
+  });
+});
+
+describe("Paste Style's dashes (PLAN 3X)", () => {
+  it("carries a pattern between lines, shapes and callouts, and not to the rest", () => {
+    const dashed = {
+      ...arrow,
+      style: { ...(arrow as { style: object }).style, dash: { dash: 1, gap: 1.5 } },
+    } as Annotation;
+    expect(stylePatchFor(dashed, rect).dash).toEqual({ dash: 1, gap: 1.5 });
+    expect(stylePatchFor(dashed, callout).dash).toEqual({ dash: 1, gap: 1.5 });
+    expect(stylePatchFor(dashed, step)).not.toHaveProperty("dash");
+    expect(stylePatchFor(dashed, text)).not.toHaveProperty("dash");
+    // Nothing to say about dashes: a step marker's style leaves a line's alone.
+    expect(stylePatchFor(step, dashed)).not.toHaveProperty("dash");
   });
 });
 

@@ -84,6 +84,7 @@ export const CONTROL_HINTS = {
   box: "A background box behind the text · [Ctrl+Shift+1…9] background color",
   align: "Align the lines of the text",
   head: "The shape of the arrow heads",
+  dash: "Solid, dashed or dotted · your own styles are in Settings › Markup",
   "ends.one": "Click again to flip the arrow",
   "ends.both": "Heads on both ends",
   newCapture: "[Ctrl+N] Capture a region, back into the editor",

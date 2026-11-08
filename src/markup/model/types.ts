@@ -18,6 +18,15 @@ export interface Rect {
 
 export type AnnotationId = string;
 
+/**
+ * A dashed or dotted stroke (PLAN 3X): dash and gap in line widths, a dash of
+ * 1 being a dot. A copy of its style's pattern, not a reference to it.
+ */
+export interface DashPattern {
+  dash: number;
+  gap: number;
+}
+
 export interface StrokeStyle {
   /** CSS color, e.g. "#e53935". */
   color: string;
@@ -25,6 +34,8 @@ export interface StrokeStyle {
   width: number;
   /** 0–1. */
   opacity: number;
+  /** Lines, arrows and shapes' outlines; absent: solid. */
+  dash?: DashPattern;
 }
 
 interface Base {
@@ -235,6 +246,8 @@ export interface CalloutAnnotation extends Base, TextBody {
   textColor: string;
   /** The pointer's thickness in source px, and an outline's or underline's. */
   lineWidth: number;
+  /** The pointer's, an outline's or an underline's dashes; absent: solid. */
+  dash?: DashPattern;
   /** The box's rounded corners, in source px. */
   cornerRadius: number;
   /**

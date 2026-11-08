@@ -17,6 +17,7 @@ describe("tool memory", () => {
       customSecondColors: { shared: "#654321" },
       arrowEnds: "both",
       arrowHeadShape: { width: 50, length: 125 },
+      dashes: { line: { dash: 1, gap: 1.5 }, callout: { dash: 3, gap: 2 } },
       fontFamily: "Consolas",
       fontSize: 36,
       textBold: true,
@@ -64,6 +65,14 @@ describe("tool memory", () => {
     expect(t.arrowHead).toBe("open");
     expect(t.fontSize).toBeNull();
     expect(t.textAlign).toBe("center");
+  });
+
+  it("restores dash patterns within the limits, for known tools only", () => {
+    restoreToolMemory({
+      version: 1,
+      dashes: { rect: { dash: 99, gap: 2 }, rocket: { dash: 3, gap: 2 }, line: "dotted" },
+    });
+    expect(useToolStore.getState().dashes).toEqual({ rect: { dash: 20, gap: 2 } });
   });
 
   it("restores a head shape within the limits, and the standard head without one", () => {

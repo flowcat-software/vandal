@@ -12,6 +12,7 @@ import type {
   CalloutShape,
   ArrowEnds,
   ArrowHead,
+  DashPattern,
   HeadShape,
   Doc,
   RedactMode,
@@ -23,6 +24,7 @@ import type {
 } from "./model/types";
 import { growCallout } from "./callout";
 import { textPx } from "./geometry";
+import { dashOf, isDashTool, storedDash } from "./dashStyles";
 import { headShapeOf, storedShape } from "./headStyles";
 import { measureTextWidth } from "./textMeasure";
 import {
@@ -91,6 +93,8 @@ export interface TargetValues {
   head: ArrowHead | null;
   /** With `head`. */
   headShape: HeadShape | null;
+  /** Lines, arrows, shapes and callouts (PLAN 3X): null for solid (and the rest). */
+  dash: DashPattern | null;
   ends: ArrowEnds | null;
   /** Text and callouts (a callout has no background box). */
   text: {
@@ -127,6 +131,7 @@ export function targetValues(target: StyleTarget, doc: Doc): TargetValues {
       head: null,
       headShape: null,
       ends: null,
+      dash: c.dash ?? null,
       text: {
         fontFamily: c.fontFamily,
         fontSize: c.fontSize,
@@ -177,6 +182,7 @@ function styleValues(
       fillColor: t === "rect" || t === "ellipse" ? (toolFill(t).color ?? toolColor(t)) : null,
       head: t === "arrow" ? tools.arrowHead : null,
       headShape: t === "arrow" ? tools.arrowHeadShape : null,
+      dash: isDashTool(t) ? (tools.dashes[t] ?? null) : null,
       ends: t === "arrow" ? tools.arrowEnds : null,
       text:
         t === "text"
@@ -204,6 +210,7 @@ function styleValues(
       head: null,
       headShape: null,
       ends: null,
+      dash: null,
       text: null,
       redact: null,
       spotlight: null,
@@ -227,6 +234,7 @@ function styleValues(
       head: null,
       headShape: null,
       ends: null,
+      dash: null,
       text: null,
       redact: null,
       spotlight: { shape: a.shape, dim: a.dim },
@@ -242,6 +250,7 @@ function styleValues(
       head: null,
       headShape: null,
       ends: null,
+      dash: null,
       text: null,
       redact: { mode: a.mode, strength: a.strength },
       spotlight: null,
@@ -255,6 +264,7 @@ function styleValues(
     fillColor: a.kind === "rect" || a.kind === "ellipse" ? a.fillColor : null,
     head: a.kind === "arrow" ? a.head : null,
     headShape: a.kind === "arrow" ? headShapeOf(a) : null,
+    dash: dashOf(a),
     ends: a.kind === "arrow" ? a.ends : null,
     text:
       a.kind === "text"
@@ -284,6 +294,9 @@ export function targetSections(target: StyleTarget) {
     ),
     fill: all((k) => k === "rect" || k === "ellipse"),
     head: all((k) => k === "arrow"),
+    dash: all(
+      (k) => k === "line" || k === "arrow" || k === "rect" || k === "ellipse" || k === "callout",
+    ),
     // Font, size, bold, italic and alignment: text and callouts.
     text: all((k) => k === "text" || k === "callout"),
     /** Text's own background box. */
@@ -370,6 +383,8 @@ export interface StylePatch {
   fillColor?: string;
   head?: ArrowHead;
   headShape?: HeadShape;
+  /** Null: solid. */
+  dash?: DashPattern | null;
   ends?: ArrowEnds;
   fontFamily?: string;
   fontSize?: number;
@@ -428,6 +443,7 @@ export function patchAnnotation(a: Annotation, p: StylePatch): Annotation {
       color: p.color ?? a.color,
       textColor: p.textColor ?? a.textColor,
       lineWidth: p.width ?? a.lineWidth,
+      dash: p.dash === undefined ? a.dash : storedDash(p.dash),
       cornerRadius: p.cornerRadius ?? a.cornerRadius,
       end: p.pointerEnd ?? a.end,
       fontFamily: p.fontFamily ?? a.fontFamily,
@@ -494,11 +510,31 @@ export function patchAnnotation(a: Annotation, p: StylePatch): Annotation {
     }
     if (p.fillColor !== undefined) next = { ...next, fillColor: p.fillColor };
   }
+  if (
+    p.dash !== undefined &&
+    (next.kind === "line" ||
+      next.kind === "arrow" ||
+      next.kind === "rect" ||
+      next.kind === "ellipse")
+  ) {
+    const style = { ...next.style };
+    delete style.dash;
+    const dash = storedDash(p.dash);
+    next = { ...next, style: dash ? { ...style, dash } : style };
+  }
   if (p.head !== undefined && next.kind === "arrow") next = { ...next, head: p.head };
   if (p.headShape !== undefined && next.kind === "arrow")
     next = { ...next, headShape: storedShape(p.headShape) };
   if (p.ends !== undefined && next.kind === "arrow") next = { ...next, ends: p.ends };
   return next;
+}
+
+/** The pattern `tool` draws with next (PLAN 3X); null: solid. */
+function rememberDash(tool: ToolId, dash: DashPattern | null): void {
+  const rest = { ...useToolStore.getState().dashes };
+  delete rest[tool];
+  const stored = storedDash(dash);
+  useToolStore.setState({ dashes: stored ? { ...rest, [tool]: stored } : rest });
 }
 
 /** A continuous change (a slider drag) in progress: its steps share one undo entry. */
@@ -533,6 +569,7 @@ export function applyStyle(patch: StylePatch, target = styleTarget()): void {
   for (const tool of tools) {
     if (patch.color !== undefined) rememberColor(tool, patch.color);
     if (patch.width !== undefined && widthTool(tool)) rememberWidth(tool, patch.width);
+    if (patch.dash !== undefined && isDashTool(tool)) rememberDash(tool, patch.dash);
     if (patch.cornerRadius !== undefined && cornerTool(tool))
       useToolStore.setState((t) => ({
         cornerRadii: { ...t.cornerRadii, [tool]: patch.cornerRadius },

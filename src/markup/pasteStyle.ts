@@ -9,7 +9,8 @@
 // place.
 
 import { docStore } from "./model/store";
-import type { Annotation } from "./model/types";
+import type { Annotation, DashPattern } from "./model/types";
+import { dashOf, isDashable } from "./dashStyles";
 import { headShapeOf } from "./headStyles";
 import { patchAnnotation, styleTarget, type StylePatch } from "./restyle";
 
@@ -22,12 +23,18 @@ interface Style {
   /** The colour text is in: a text's ink, a callout's or a step's label. */
   text?: string;
   width?: number;
+  /** A dashable stroke's pattern (PLAN 3X); null: solid. */
+  dash?: DashPattern | null;
   font?: { fontFamily: string; fontSize?: number; bold?: boolean; italic?: boolean };
   align?: StylePatch["align"];
   cornerRadius?: number;
 }
 
 function styleOf(a: Annotation): Style {
+  return isDashable(a) ? { ...kindStyle(a), dash: dashOf(a) } : kindStyle(a);
+}
+
+function kindStyle(a: Annotation): Style {
   switch (a.kind) {
     case "text":
       return {
@@ -125,6 +132,7 @@ export function stylePatchFor(source: Annotation, target: Annotation): StylePatc
     }
   } else color = s.line ?? s.fill;
   if (color !== undefined) patch.color = color;
+  if (s.dash !== undefined && isDashable(target)) patch.dash = s.dash;
   if (s.width !== undefined && t !== "text" && t !== "step" && t !== "redact" && t !== "spotlight")
     patch.width = s.width;
   if (s.font && (textual || t === "step")) {

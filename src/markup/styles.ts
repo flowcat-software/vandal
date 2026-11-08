@@ -10,6 +10,7 @@ import type {
   AnnotationKind,
   CalloutEnd,
   CalloutShape,
+  DashPattern,
   Doc,
   RedactMode,
   ShapeFill,
@@ -18,6 +19,7 @@ import type {
   StrokeStyle,
   TextAlign,
 } from "./model/types";
+import { isDashTool, storedDash } from "./dashStyles";
 import { DEFAULT_HEAD_STYLES } from "./headStyles";
 import { nearestValue } from "./pickers";
 import type { ColorKey } from "./restyle";
@@ -197,7 +199,8 @@ export function toolFill(tool: ToolId): { fill: ShapeFill; color: string | null 
 }
 
 export function toolStroke(tool: ToolId): StrokeStyle {
-  return { color: toolColor(tool), width: toolWidth(tool), opacity: 1 };
+  const dash = isDashTool(tool) ? storedDash(useToolStore.getState().dashes[tool]) : undefined;
+  return { color: toolColor(tool), width: toolWidth(tool), opacity: 1, ...(dash && { dash }) };
 }
 
 export function rememberColor(tool: ToolId, color: string): void {
@@ -364,6 +367,8 @@ export interface CalloutStyle {
   color: string;
   textColor: string;
   lineWidth: number;
+  /** Absent: solid. */
+  dash?: DashPattern;
   cornerRadius: number;
   end: CalloutEnd;
   fontFamily: string;
@@ -384,6 +389,7 @@ export function toolCalloutStyle(): CalloutStyle {
     // Until one is picked: black or white, whichever reads better on the callout color.
     textColor: t.calloutTextColor ?? contrastingText(color),
     lineWidth: toolWidth("callout"),
+    ...(t.dashes.callout && { dash: storedDash(t.dashes.callout) }),
     cornerRadius: toolCornerRadius("callout"),
     end: t.calloutEnd,
     fontFamily: t.calloutFont ?? font.family,

@@ -9,12 +9,14 @@ import {
   type ArrowHead,
   type CalloutEnd,
   type CalloutShape,
+  type DashPattern,
   type HeadShape,
   type RedactMode,
   type ShapeFill,
   type SpotlightShape,
   type TextAlign,
 } from "./model/types";
+import { DEFAULT_DASH_STYLES, matchingDash, svgDash } from "./dashStyles";
 import { headIcon, matchingStyle } from "./headStyles";
 import { NumberPickerControl } from "./NumberPickerControl";
 import {
@@ -375,6 +377,11 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
               onDragEnd={endStyleDrag}
             />
           </span>
+          {show.dash && (
+            <span className={styles.hintArea} {...hint("dash")}>
+              <DashPicker dash={values.dash} />
+            </span>
+          )}
           {corner}
         </div>
       )}
@@ -572,6 +579,51 @@ export function ToolOptions({ compact = false }: { compact?: boolean }) {
 
       {show.color && !callout && colors}
     </div>
+  );
+}
+
+/** A dash pattern on a short line; solid for null. */
+function DashIcon({ dash }: { dash: DashPattern | null }) {
+  // In the icon's own units: the 2.5 stroke the CSS gives it.
+  return (
+    <svg className={styles.dashIcon} viewBox="0 0 32 16" aria-hidden>
+      <path d="M3 8H29" strokeDasharray={svgDash(dash, 2.5)} />
+    </svg>
+  );
+}
+
+/** Solid, then the dash styles; "Custom" for a pattern none of them has. */
+function DashPicker({ dash }: { dash: DashPattern | null }) {
+  const list = DEFAULT_DASH_STYLES;
+  const current = matchingDash(list, dash);
+  const label = dash ? (current?.label ?? "Custom") : "Solid";
+  const row = (key: string, name: string, pattern: DashPattern | null, close: () => void) => (
+    <button
+      key={key}
+      type="button"
+      role="menuitemradio"
+      aria-checked={pattern ? pattern === current : !dash}
+      className={styles.menuRow}
+      onClick={() => {
+        applyStyle({ dash: pattern && { dash: pattern.dash, gap: pattern.gap } });
+        close();
+      }}
+    >
+      <DashIcon dash={pattern} />
+      <span className={styles.menuLabel}>{name}</span>
+    </button>
+  );
+  return (
+    <Dropdown
+      className={styles.dropdown}
+      title={`Line style: ${label}`}
+      button={<DashIcon dash={dash} />}
+    >
+      {(close) => [
+        row("solid", "Solid", null, close),
+        ...list.map((d, i) => row(String(i), d.label, d, close)),
+      ]}
+    </Dropdown>
   );
 }
 

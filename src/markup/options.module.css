@@ -416,6 +416,14 @@
   height: 16px;
 }
 
+/* A dash style's pattern, drawn thicker than the icons' strokes so dots read. */
+.options svg.dashIcon,
+.menu svg.dashIcon {
+  width: 32px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
 .menu {
   --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
   position: absolute;

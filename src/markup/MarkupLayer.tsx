@@ -95,6 +95,7 @@ import { markTaken } from "./pressRouting";
 import { ObjectMenu } from "./ObjectMenu";
 import { insertCopies } from "./objectActions";
 import { markupClipboard } from "./markupClipboard";
+import { canvasDash } from "./dashStyles";
 import { storedShape } from "./headStyles";
 import { useToolStore } from "./toolStore";
 import styles from "./markup.module.css";
@@ -1730,6 +1731,9 @@ function AnnotationShape({
     opacity: style.opacity,
     stroke: a.fill === "solid" ? undefined : style.color,
     strokeWidth: style.width,
+    // Round ends make a dash of 1 a dot (PLAN 3X).
+    dash: canvasDash(style.dash, style.width),
+    lineCap: style.dash ? ("round" as const) : undefined,
     fill: a.fill === "none" ? undefined : a.fill === "solid" ? style.color : a.fillColor,
     hitStrokeWidth: style.width + hitSlop,
     perfectDrawEnabled: false,
@@ -1800,6 +1804,8 @@ function CalloutShape({
         const t = shape as Konva.Text;
         const { box, under, pointer } = layout(t);
         const c = (ctx as unknown as { _context: CanvasRenderingContext2D })._context;
+        // The pointer's, outline's and underline's dashes (PLAN 3X); not the end's.
+        const dash = canvasDash(a.dash, a.lineWidth);
         c.save();
         if (pointer) {
           // Under a filled box the line starts at its centre: from the edge,
@@ -1813,7 +1819,9 @@ function CalloutShape({
           c.strokeStyle = a.color;
           c.lineWidth = a.lineWidth;
           c.lineCap = "round";
+          c.setLineDash(dash ?? []);
           c.stroke();
+          c.setLineDash([]);
           c.fillStyle = a.color;
           if (pointer.head) {
             const [l, tp, r] = pointer.head;
@@ -1838,7 +1846,9 @@ function CalloutShape({
           c.strokeStyle = a.color;
           c.lineWidth = a.lineWidth;
           c.lineCap = "round";
+          c.setLineDash(dash ?? []);
           c.stroke();
+          c.setLineDash([]);
         } else {
           c.beginPath();
           c.roundRect(
@@ -1851,7 +1861,10 @@ function CalloutShape({
           if (a.shape === "outline") {
             c.strokeStyle = a.color;
             c.lineWidth = a.lineWidth;
+            if (dash) c.lineCap = "round";
+            c.setLineDash(dash ?? []);
             c.stroke();
+            c.setLineDash([]);
           } else {
             c.fillStyle = a.color;
             c.fill();
@@ -2111,6 +2124,8 @@ function SegmentShape({ a, hitSlop }: { a: ArrowAnnotation | LineAnnotation; hit
       fill={head === "filled" ? color : undefined}
       lineCap="round"
       lineJoin="round"
+      // The shaft's (PLAN 3X); heads stay solid. Hits ignore it: the whole line grabs.
+      dash={canvasDash(a.style.dash, width)}
       opacity={opacity}
       hitStrokeWidth={width + hitSlop}
       perfectDrawEnabled={false}
@@ -2127,14 +2142,24 @@ function SegmentShape({ a, hitSlop }: { a: ArrowAnnotation | LineAnnotation; hit
           ctx.moveTo(s.points[0], s.points[1]);
           ctx.lineTo(s.points[2], s.points[3]);
         }
-        if (head === "open") {
+        const dashed = !!a.style.dash;
+        const chevrons = () => {
           for (const [l, t, r] of g.heads) {
             ctx.moveTo(l.x, l.y);
             ctx.lineTo(t.x, t.y);
             ctx.lineTo(r.x, r.y);
           }
-        }
+        };
+        if (head === "open" && !dashed) chevrons();
         ctx.strokeShape(shape);
+        if (head === "open" && dashed && g.heads.length) {
+          // Solid, with the stroke the shaft left set up (scene or hit).
+          const c = (ctx as unknown as { _context: CanvasRenderingContext2D })._context;
+          c.beginPath();
+          chevrons();
+          c.setLineDash([]);
+          c.stroke();
+        }
         if (head === "filled" && g.heads.length) {
           ctx.beginPath();
           for (const [l, t, r] of g.heads) {

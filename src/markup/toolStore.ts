@@ -8,6 +8,7 @@ import {
   type AnnotationId,
   type HeadShape,
   type CalloutEnd,
+  type DashPattern,
   type CalloutShape,
   type ArrowEnds,
   type ArrowHead,
@@ -58,6 +59,8 @@ export interface ToolState {
   colors: Partial<Record<ToolId, string>>;
   /** Each tool's line width, once picked. */
   widths: Partial<Record<ToolId, number>>;
+  /** Dash patterns, per tool that has them (PLAN 3X); absent: solid. */
+  dashes: Partial<Record<ToolId, DashPattern>>;
   /** Rectangle and ellipse: border, fill or both. */
   fills: Partial<Record<ToolId, ShapeFill>>;
   /** Rectangle and ellipse: the fill color for "both", once picked. */
@@ -132,6 +135,7 @@ export const useToolStore = create<ToolState>((set) => ({
   sharedColor: null,
   colors: {},
   widths: {},
+  dashes: {},
   fills: {},
   fillColors: {},
   customColors: {},
