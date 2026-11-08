@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.18] - 2026-11-08
+
 ### Added
 
 - **Arrow head styles.** The arrow tool's head picker offers Regular and Narrow heads, filled or
@@ -524,7 +526,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.17...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.18...HEAD
+[0.3.0-beta.18]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.17...v0.3.0-beta.18
 [0.3.0-beta.17]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.16...v0.3.0-beta.17
 [0.3.0-beta.16]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.15...v0.3.0-beta.16
 [0.3.0-beta.15]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.14...v0.3.0-beta.15
