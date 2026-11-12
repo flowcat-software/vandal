@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.20] - 2026-11-12
+
 ### Changed
 
 - **Vandal uses much less memory between captures.** It used to keep your last few screenshots
@@ -561,7 +563,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.19...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.20...HEAD
+[0.3.0-beta.20]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.19...v0.3.0-beta.20
 [0.3.0-beta.19]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.18...v0.3.0-beta.19
 [0.3.0-beta.18]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.17...v0.3.0-beta.18
 [0.3.0-beta.17]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.16...v0.3.0-beta.17

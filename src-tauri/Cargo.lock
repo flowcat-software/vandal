@@ -4846,7 +4846,7 @@ dependencies = [
 
 [[package]]
 name = "vandal"
-version = "0.3.0-beta.19"
+version = "0.3.0-beta.20"
 dependencies = [
  "arboard",
  "fast_image_resize",
