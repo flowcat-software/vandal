@@ -292,6 +292,11 @@ open, drop, paste (Ctrl+V) or capture an image into it.
   height, or keep a ratio such as 16:9 (with **Portrait** for 9:16). Enter applies, Esc cancels.
   Crop never throws pixels away: undo it, or choose **Show full capture** in crop mode to get
   the rest back.
+- **Resize:** the resize button after Crop (Ctrl+Alt+I) scales the image you see, in pixels or
+  percent, keeping its proportions unless you click the padlock. Enter or **Resize** applies it,
+  Esc cancels. Your marks scale with the image, so the picture looks the same, only bigger or
+  smaller, and Ctrl+Z puts the original back. Sides go up to 16,384 pixels and images up to 100
+  megapixels.
 - **Zoom and pan:** Ctrl+mouse wheel, Ctrl+= / Ctrl+−, Ctrl+0 to fit (again for Fit width, on a tall image), Ctrl+Shift+0 for actual
   size. Pan with the mouse wheel (Shift+wheel goes sideways), Space+drag or the middle mouse
   button.
@@ -473,6 +478,7 @@ printed on the pickers (you can hide them in Settings).
 | Ctrl+S                | Save (captures use your file-name pattern; opened files are overwritten) |
 | Ctrl+Shift+S          | Save As                                                                  |
 | Ctrl+O                | Open an image                                                            |
+| Ctrl+Alt+I            | Resize the image                                                         |
 | ← / →                 | Previous / next image in the folder (an image file, nothing selected)    |
 | Home / End            | First / last image in the folder                                         |
 | Ctrl+N                | Capture, back into the editor                                            |
@@ -621,8 +627,8 @@ policy is at [vandalscreenshot.com/privacy](https://vandalscreenshot.com/privacy
 - Arrow head styles of your own: filled or open, narrow or wide
 - Dashed and dotted lines and outlines, with dashes that meet the corners
 - Quick edit: draw right on the frozen screen, without opening a window
-- Full editor with zoom, pan, fit to width, 200 levels of undo, and crop that never throws
-  pixels away
+- Full editor with zoom, pan, fit to width, 200 levels of undo, crop that never throws
+  pixels away, and resizing (pixels or percent) that scales the marks with the image
 - Every mark stays editable: select, move, resize, restyle, duplicate, reorder or delete it,
   from the keyboard or a right-click menu
 - Copy and paste marks between images
