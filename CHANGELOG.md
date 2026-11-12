@@ -6,6 +6,23 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Color picker.** Press **Win+Alt+\`** (or **Pick a color** in the tray menu) anywhere in Windows,
+  point at any pixel, and click to copy its color. The magnifier shows the color in hex and RGB
+  as you move. Choose the format in **Settings › Capture › Color picker**: `#1e88e5`,
+  `#1E88E5`, `rgb(30, 136, 229)`, `30, 136, 229` or `hsl(208, 79%, 51%)`. A notification says
+  what was copied (it can be turned off).
+- **Eyedropper in the toolbar** (**I**), in quick edit and the editor: click a pixel anywhere for
+  the first color, right-click for the second (a shape's border, a text box, a marker). The color
+  lands on the custom swatch and on the selected marks. **The markup's eyedropper copies too**
+  also puts it on the clipboard.
+
+### Changed
+
+- The color picker's magnifier shows RGB next to the hex value.
+- The editor window's minimum width is 880 pixels (was 800), to fit the new toolbar buttons.
+
 ## [0.3.0-beta.18] - 2026-11-08
 
 ### Added

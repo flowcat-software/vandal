@@ -88,6 +88,7 @@ Vandal is built to save you time.
 - [Install](#install)
 - [Getting started](#getting-started)
 - [Capturing](#capturing)
+- [Color picker](#color-picker)
 - [Quick edit](#quick-edit)
 - [The editor](#the-editor)
 - [Opening images](#opening-images)
@@ -153,6 +154,7 @@ You can also left-click the tray icon to start a capture, or right-click it for 
 | Capture window      | Same as Win+Alt+F12                                                        |
 | Capture full screen | A whole screen, opened in the editor. With several, pick one from its list |
 | Capture all screens | Every screen as one image (shown with more than one screen)                |
+| Pick a color        | Same as Win+Alt+\`: copy the color of any pixel on screen                  |
 | New editor window   | An empty editor: open, paste or capture an image into it                   |
 | New from clipboard  | Open the image on the clipboard in the editor                              |
 | Open image…         | Open an image file in the editor                                           |
@@ -191,6 +193,23 @@ While you're selecting a region:
 
 With quick edit, F, W and A work only before you've drawn a selection. After that, A is the arrow
 tool. While picking a window, **W** or **Esc** goes back to selecting a region.
+
+## Color picker
+
+**Win+Alt+\`** (or **Pick a color** in the tray menu) freezes the screens and shows a magnifier
+with the color under the pointer, in hex and RGB. Click, or press Enter, to copy it. Arrow keys
+move the magnifier 1 pixel (Shift: 10), and Esc or right-click cancels.
+
+Choose what's copied in **Settings › Capture › Color picker**: `#1e88e5`, `#1E88E5`,
+`rgb(30, 136, 229)`, `30, 136, 229` or `hsl(208, 79%, 51%)`. A notification shows what was
+copied; you can turn it off there. Change the shortcut there or in **Settings › Keyboard
+shortcuts**.
+
+In quick edit and the editor, the **eyedropper** on the toolbar (**I**) picks into the markup's
+colors instead: click sets the first color (the only one, the fill, the text or the label),
+right-click the second (the border, box, marker or callout). It goes on that color's custom
+swatch, and selected marks take it too. To copy those colors as well, turn on **The markup's
+eyedropper copies too** in the same settings.
 
 ## Quick edit
 
@@ -254,7 +273,8 @@ open, drop, paste (Ctrl+V) or capture an image into it.
     all tools or one tool. Marks you've drawn keep their dashes when you change a style.
 - **Styles:** the options bar shows the current tool's colors, width, fill, font, size, and so
   on. Changing a style while a mark is selected restyles that mark. Where there are two colors
-  (fill and border, text and its box), **X** swaps them.
+  (fill and border, text and its box), **X** swaps them. The eyedropper (**I**) picks a color
+  from anywhere on screen: click for the first color, right-click for the second.
 - **Editing marks:** click a mark to select it, drag to move it, and drag its handles to reshape
   it. Hold Alt while dragging to drag a copy instead, leaving the original in place. Double-click text (or press Enter) to edit it. Right-click a mark for Duplicate, the
   stacking order (to front, forward one, back one, to back) and Delete.
@@ -361,10 +381,10 @@ setting by name.
 | Page               | What's there                                                                                                                                                                                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | General            | Theme (light, dark or follow Windows), accent color, launch on login, what the tray icon and opening Vandal do, notifications and their buttons                                                                                                         |
-| Capture            | Screen dimming, selection size readout, quick edit behavior                                                                                                                                                                                             |
+| Capture            | Screen dimming, selection size readout, quick edit behavior, the color picker (shortcut, copy format, notification)                                                                                                                                     |
 | Copy & save        | What happens after a capture and when the editor closes, save folder, file-name pattern, overwrite warning                                                                                                                                              |
 | Markup             | How tools behave (selecting under the pointer, one shared color, remembering styles), colors, line widths, fonts and font sizes, redact strengths, spotlight darkness, step markers, corner radii (also per tool), how the pickers look, shortcut hints |
-| Keyboard shortcuts | The capture shortcuts, each tool's key and swap colors, and a list of the shortcuts that can't be changed                                                                                                                                               |
+| Keyboard shortcuts | The capture and color picker shortcuts, each tool's key, swap colors and the eyedropper, and a list of the shortcuts that can't be changed                                                                                                              |
 | Updates            | Check now, install an update, automatic checks on or off, and the update channel (Beta or Stable)                                                                                                                                                       |
 | About              | Version, license, links to the website and the project, and a link to report a bug or suggest an idea                                                                                                                                                   |
 
@@ -405,6 +425,7 @@ Shift, in **Settings › Keyboard shortcuts**, which also lists every shortcut.
 | A   | Arrow       | S   | Spotlight          |
 | R   | Rectangle   | N   | Step marker        |
 | X   | Swap colors | C   | Crop (editor only) |
+| I   | Eyedropper  |     |                    |
 
 **Styles**
 
@@ -587,6 +608,7 @@ policy is at [vandalscreenshot.com/privacy](https://vandalscreenshot.com/privacy
 - Precise selection with handles, arrow keys and a size readout
 - Your own capture shortcuts (Win+F12, Win+Alt+F12 and Win+Shift+F12 by default), checked for
   conflicts, including PrintScreen
+- A color picker (Win+Alt+\`): copy any pixel's color as hex, `rgb()`, plain RGB or `hsl()`
 
 **Markup**
 
@@ -595,6 +617,7 @@ policy is at [vandalscreenshot.com/privacy](https://vandalscreenshot.com/privacy
   step markers
 - Detect text: select words in the image to redact them, as in a document
 - Curved lines and arrows, rounded corners, and two colors with a one-key swap
+- An eyedropper that picks either color from anywhere on screen
 - Arrow head styles of your own: filled or open, narrow or wide
 - Dashed and dotted lines and outlines, with dashes that meet the corners
 - Quick edit: draw right on the frozen screen, without opening a window
