@@ -459,6 +459,7 @@ export function OverlayApp() {
     pickWindow,
     pickColor,
     pickColorAt,
+    pickTwo,
   ]);
 
   // ---- pointer ----
