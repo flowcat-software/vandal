@@ -12,6 +12,9 @@ All notable changes to Vandal are listed here. The format follows
   in memory (about 25 MB each on a 1440p screen), so it grew to 100 MB or more after a few
   captures. Now a screenshot is freed as soon as it's copied or saved, unless its notification
   still needs it for **Edit** or **Save**.
+- **Only the latest capture's notification stays in Action Center.** A new capture's
+  notification replaces the previous one, and it goes away after 15 minutes. Dismissing it, or
+  clicking it, frees its screenshot right away.
 
 ## [0.3.0-beta.19] - 2026-11-12
 

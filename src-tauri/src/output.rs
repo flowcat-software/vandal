@@ -1,12 +1,11 @@
 //! Post-capture actions: clipboard, save to file, toast (PLAN §4.2, Phase 1.5).
 
-use std::collections::VecDeque;
 use std::fs::File;
 use std::io::BufWriter;
 use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use tauri::{AppHandle, Manager};
 use tauri_winrt_notification::Toast;
@@ -19,12 +18,27 @@ use crate::geometry::PhysicalRect;
 use crate::settings::{SaveSettings, Settings};
 use crate::state::AppState;
 
-/// The last few delivered images, so a notification's "Save" button can write
-/// one after the fact without holding pixels in the toast callback, and its
-/// "Edit" can reopen the capture still editable (PLAN 3D).
+/// How long a capture notification stays in Action Center, and so how long
+/// its image is kept for its Edit and Save (PLAN 3AA.2).
+const NOTIFICATION_LIFETIME: Duration = Duration::from_secs(15 * 60);
+
+/// The capture notification's tag: a newer one replaces the older.
+const CAPTURE_TAG: &str = "capture";
+
+/// The last delivered image whose notification is up, so its "Save" button
+/// can write it after the fact without holding pixels in the toast callback,
+/// and its "Edit" can reopen the capture still editable (PLAN 3D). Only the
+/// latest is kept, as its notification replaces the older one, and it goes
+/// with its notification: dismissed, clicked or expired (PLAN 3AA.2).
 pub struct RecentImages {
     next_id: u32,
-    items: VecDeque<(u32, Recent)>,
+    last: Option<Kept>,
+}
+
+struct Kept {
+    id: u32,
+    recent: Recent,
+    until: Instant,
 }
 
 /// A delivered image and the document it came from.
@@ -68,31 +82,60 @@ pub fn touched_frames(frames: &[Arc<MonitorFrame>], rect: PhysicalRect) -> Vec<A
 }
 
 impl RecentImages {
-    const KEEP: usize = 5;
-
     pub fn new() -> Self {
         Self {
             next_id: 1,
-            items: VecDeque::new(),
+            last: None,
         }
     }
 
-    pub fn push(&mut self, recent: Recent) -> u32 {
+    /// Keep `recent` in place of the last one, until `until`.
+    pub fn push(&mut self, recent: Recent, until: Instant) -> u32 {
         let id = self.next_id;
         self.next_id = self.next_id.wrapping_add(1).max(1);
-        self.items.push_back((id, recent));
-        while self.items.len() > Self::KEEP {
-            self.items.pop_front();
-        }
+        self.last = Some(Kept { id, recent, until });
         id
     }
 
     pub fn get(&self, id: u32) -> Option<Recent> {
-        self.items
-            .iter()
-            .find(|(i, _)| *i == id)
-            .map(|(_, recent)| recent.clone())
+        self.last
+            .as_ref()
+            .filter(|k| k.id == id)
+            .map(|k| k.recent.clone())
     }
+
+    /// A newer notification for the same image keeps it longer.
+    pub fn keep_until(&mut self, id: u32, until: Instant) {
+        if let Some(k) = self.last.as_mut().filter(|k| k.id == id) {
+            k.until = k.until.max(until);
+        }
+    }
+
+    /// Free `id` if it's still the one kept.
+    pub fn forget(&mut self, id: u32) {
+        if self.last.as_ref().is_some_and(|k| k.id == id) {
+            self.last = None;
+        }
+    }
+
+    /// Free `id` if its notification has expired by `now`.
+    pub fn expire(&mut self, id: u32, now: Instant) {
+        if self
+            .last
+            .as_ref()
+            .is_some_and(|k| k.id == id && now >= k.until)
+        {
+            self.last = None;
+        }
+    }
+}
+
+fn forget_recent(app: &AppHandle, id: u32) {
+    app.state::<AppState>()
+        .recent_images
+        .lock()
+        .unwrap()
+        .forget(id);
 }
 
 /// What quick edit already did with this image, so delivering doesn't repeat it.
@@ -154,15 +197,13 @@ pub fn deliver(
         if !wants_notification(&settings, copied, saved.is_some()) {
             return;
         }
-        let image_id = app
-            .state::<AppState>()
-            .recent_images
-            .lock()
-            .unwrap()
-            .push(Recent {
+        let image_id = app.state::<AppState>().recent_images.lock().unwrap().push(
+            Recent {
                 image: image.clone(),
                 doc,
-            });
+            },
+            Instant::now() + NOTIFICATION_LIFETIME,
+        );
         let preview = saved.clone().or_else(|| write_preview(&image).ok());
         notify_capture(
             &app,
@@ -199,7 +240,8 @@ fn save_recent(app: &AppHandle, image_id: u32) {
     let settings = state.settings.read().unwrap().clone();
     let save = settings.save;
     match save_with_template(&save, &image) {
-        Ok(_) if !settings.after_capture.notify_saved => {}
+        // No notification left to edit it from: done with it.
+        Ok(_) if !settings.after_capture.notify_saved => forget_recent(app, image_id),
         Ok(path) => notify_capture(
             app,
             CaptureToast {
@@ -213,7 +255,10 @@ fn save_recent(app: &AppHandle, image_id: u32) {
                 offer_edit: settings.editor.notification_edit_button,
             },
         ),
-        Err(e) => notify_error(app, "Couldn't save screenshot", &e),
+        Err(e) => {
+            forget_recent(app, image_id);
+            notify_error(app, "Couldn't save screenshot", &e);
+        }
     }
 }
 
@@ -568,40 +613,80 @@ fn notify_capture(app: &AppHandle, t: CaptureToast) {
         detail.push_str(&format!(" · {}", p.to_string_lossy()));
     }
 
-    let mut toast = Toast::new(&app_id(app))
-        .title(title)
-        .text1(&detail)
-        .sound(None);
-    if let Some(p) = &t.preview {
-        toast = toast.image(p, "Capture preview");
-    }
+    let mut buttons = Vec::new();
     if t.offer_edit {
-        toast = toast.add_button("Edit", "edit");
+        buttons.push(("Edit", "edit"));
     }
     if t.saved.is_some() {
-        toast = toast.add_button("Open folder", "open-folder");
+        buttons.push(("Open folder", "open-folder"));
     } else if t.offer_save {
-        toast = toast.add_button("Save", "save");
+        buttons.push(("Save", "save"));
     }
-    let app = app.clone();
-    let (image_id, saved) = (t.image_id, t.saved);
-    toast = toast.on_activated(move |action| {
-        match action.as_deref() {
-            // A click on the toast body (thumbnail included) edits, like the button.
-            None | Some("edit") => crate::editor::open_recent(&app, image_id),
-            Some("save") => save_recent(&app, image_id),
-            Some("open-folder") => {
-                if let Some(path) = &saved {
-                    reveal_in_explorer(path);
+    let image_id = t.image_id;
+    let app_id = app_id(app);
+    let spec = crate::toast::Spec {
+        app_id: &app_id,
+        title,
+        text: &detail,
+        image: t.preview.as_deref(),
+        buttons: &buttons,
+        tag: CAPTURE_TAG,
+        lifetime: NOTIFICATION_LIFETIME,
+    };
+    // Its image stays as long as it does (PLAN 3AA.2).
+    app.state::<AppState>()
+        .recent_images
+        .lock()
+        .unwrap()
+        .keep_until(image_id, Instant::now() + NOTIFICATION_LIFETIME);
+    let (on_click, on_dismiss) = (app.clone(), app.clone());
+    let saved = t.saved;
+    let shown = crate::toast::show(
+        &spec,
+        move |action| {
+            let app = &on_click;
+            match action.as_deref() {
+                // A click on the toast body (thumbnail included) edits, like the button.
+                None | Some("edit") => crate::editor::open_recent(app, image_id),
+                // Its "saved" notification takes over the image (or frees it).
+                Some("save") => return save_recent(app, image_id),
+                Some("open-folder") => {
+                    if let Some(path) = &saved {
+                        reveal_in_explorer(path);
+                    }
                 }
+                Some(other) => logln!("[output] unknown toast action {other:?}"),
             }
-            Some(other) => logln!("[output] unknown toast action {other:?}"),
+            // A clicked notification leaves Action Center.
+            forget_recent(app, image_id);
+        },
+        move |how| {
+            if how != crate::toast::Dismissed::IntoActionCenter {
+                forget_recent(&on_dismiss, image_id);
+            }
+        },
+    );
+    match shown {
+        Ok(()) => expire_later(app, image_id),
+        Err(e) => {
+            logln!("[output] toast failed: {e}");
+            forget_recent(app, image_id);
         }
-        Ok(())
-    });
-    if let Err(e) = toast.show() {
-        logln!("[output] toast failed: {e}");
     }
+}
+
+/// Free image `id` once its notification has expired (unless a later
+/// notification for it moved that on).
+fn expire_later(app: &AppHandle, id: u32) {
+    let app = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(NOTIFICATION_LIFETIME);
+        app.state::<AppState>()
+            .recent_images
+            .lock()
+            .unwrap()
+            .expire(id, Instant::now());
+    });
 }
 
 /// The color picker copied `text` (PLAN 3Y): a quiet toast saying what.
@@ -716,7 +801,7 @@ mod tests {
     }
 
     #[test]
-    fn recent_images_keeps_last_few() {
+    fn recent_images_keeps_only_the_last() {
         let img = || Recent {
             image: Arc::new(RgbaImage {
                 width: 1,
@@ -729,12 +814,46 @@ mod tests {
                 annotations: None,
             },
         };
+        let now = Instant::now();
         let mut recent = RecentImages::new();
-        let ids: Vec<u32> = (0..7).map(|_| recent.push(img())).collect();
-        assert!(recent.get(ids[0]).is_none());
-        assert!(recent.get(ids[1]).is_none());
-        assert!(recent.get(ids[2]).is_some());
-        assert!(recent.get(ids[6]).is_some());
+        let a = recent.push(img(), now);
+        let b = recent.push(img(), now);
+        assert!(recent.get(a).is_none(), "a newer capture replaces it");
+        assert!(recent.get(b).is_some());
+        // Freeing an image that's already been replaced leaves the newer one.
+        recent.forget(a);
+        assert!(recent.get(b).is_some());
+        recent.forget(b);
+        assert!(recent.get(b).is_none());
+    }
+
+    #[test]
+    fn recent_image_expires_with_its_last_notification() {
+        let img = || Recent {
+            image: Arc::new(RgbaImage {
+                width: 1,
+                height: 1,
+                rgba: vec![0; 4],
+            }),
+            doc: CaptureDoc {
+                frames: vec![],
+                rect: PhysicalRect::new(0, 0, 1, 1),
+                annotations: None,
+            },
+        };
+        let t0 = Instant::now();
+        let later = |s| t0 + Duration::from_secs(s);
+        let mut recent = RecentImages::new();
+        let id = recent.push(img(), later(900));
+        recent.expire(id, later(899));
+        assert!(recent.get(id).is_some(), "not yet");
+        // Its "saved" notification, shown later, keeps it longer.
+        recent.keep_until(id, later(1000));
+        recent.expire(id, later(900));
+        assert!(recent.get(id).is_some(), "the first timer doesn't free it");
+        recent.keep_until(id, later(950));
+        recent.expire(id, later(1000));
+        assert!(recent.get(id).is_none());
     }
 
     #[test]

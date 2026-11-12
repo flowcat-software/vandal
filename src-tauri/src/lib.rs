@@ -37,6 +37,7 @@ mod settings_window;
 mod shortcuts;
 mod state;
 mod styles;
+mod toast;
 mod tool_styles;
 mod tray;
 mod updater;
