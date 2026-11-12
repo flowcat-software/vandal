@@ -121,7 +121,7 @@ function ResizeBar({ base }: { base: Size }) {
           unit once at the end: one size, linked. */}
       <span className={styles.resizeSize}>
         <span className={styles.resizeLabel} aria-hidden>
-          W<span className={styles.resizeDim}>×</span>H
+          W × H
         </span>
         {field("width")}
         <button

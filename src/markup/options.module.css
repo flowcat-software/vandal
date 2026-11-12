@@ -1049,7 +1049,7 @@
   color: var(--text);
 }
 
-/* The quiet parts: the "×" in "W × H", the arrow in before → after. */
+/* The arrow in before → after: quieter than the sizes either side. */
 .resizeDim {
   margin: 0 4px;
   color: var(--text-3);
