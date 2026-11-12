@@ -8,7 +8,6 @@ import { markupFromJson, markupToJson, placePasted, readMarkup } from "./markupJ
 import { setMarkupClipboard } from "../markup/markupClipboard";
 import { addCopies } from "../markup/objectActions";
 import { setStyleNotify } from "../markup/pasteStyle";
-import { useRedactSource } from "../markup/redact";
 import { setTextRecognizer } from "../markup/textRedact";
 import {
   commands,
@@ -25,6 +24,7 @@ import { CommandBar } from "./CommandBar";
 import { CropOptions } from "./CropOptions";
 import { EmptyEditor } from "./EmptyEditor";
 import { applyCrop, beginCrop, cancelCrop, useCropStore } from "./cropStore";
+import { paintFrame, startImageVersions } from "./imageVersions";
 import { orientation } from "./orient";
 import { Stage } from "./Stage";
 import { useCropKeys } from "./useCropKeys";
@@ -76,12 +76,11 @@ export function EditorApp() {
     async (init: EditorInit, isCancelled: () => boolean = () => false) => {
       const pixels = await fetchPixels(init);
       if (isCancelled()) return;
-      // The whole frame, so the crop can grow back (the stage clips it).
-      paintFrame(canvasRef.current!, init, pixels);
-      // Redactions preview from these pixels (PLAN 3D.3).
-      useRedactSource.setState({
-        image: { x: 0, y: 0, width: init.width, height: init.height, data: pixels },
-      });
+      // The whole frame, so the crop can grow back (the stage clips it); a
+      // resize (PLAN 3Z) paints its versions over it.
+      const base = { width: init.width, height: init.height, pixels };
+      paintFrame(canvasRef.current!, base);
+      startImageVersions(canvasRef.current!, init.url, base);
       // Redact's Detect text toggle reads this image's words (PLAN 3J).
       setTextRecognizer(() =>
         commands.editorRecognizeText(docStore.getState().doc.imageVersion ?? 0),
@@ -525,18 +524,6 @@ async function decodeSource(
   } finally {
     bitmap.close();
   }
-}
-
-function paintFrame(
-  canvas: HTMLCanvasElement,
-  init: EditorInit,
-  pixels: Uint8ClampedArray<ArrayBuffer>,
-) {
-  canvas.width = init.width;
-  canvas.height = init.height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("No 2D canvas context.");
-  ctx.putImageData(new ImageData(pixels, init.width, init.height), 0, 0);
 }
 
 function errorText(e: unknown): string {

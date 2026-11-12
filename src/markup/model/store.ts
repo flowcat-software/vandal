@@ -16,6 +16,7 @@ import {
   updateAnnotation,
   type Reorder,
 } from "./commands";
+import { resizeDoc, type ResizedImage } from "./resize";
 import {
   emptyDoc,
   type Annotation,
@@ -49,6 +50,8 @@ export interface DocState {
   crop: (rect: Rect) => void;
   /** Swap in another Doc as one undo step (pasted markup). */
   replace: (doc: Doc) => void;
+  /** Move onto a resized image, marks scaled with it, as one undo step (PLAN 3Z). */
+  resize: (image: ResizedImage) => void;
 
   beginGesture: () => void;
   endGesture: () => void;
@@ -130,6 +133,7 @@ export function createDocStore(initial: Doc = emptyDoc({ width: 1, height: 1 }))
         apply(() => doc);
         pruneSelection();
       },
+      resize: (image) => apply((doc) => resizeDoc(doc, image)),
 
       beginGesture: () => {
         if (!get().gestureStart) set({ gestureStart: get().doc });

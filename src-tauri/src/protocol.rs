@@ -3,6 +3,7 @@
 //!
 //! - `GET /frame/{capture_id}/{monitor_index}?fmt=rgba|bmp`: a monitor frame (overlay)
 //! - `GET /editor/{editor_id}`: an editor's base image, raw RGBA
+//! - `GET /editor/{editor_id}/v/{version}`: a resized version of it (PLAN 3Z)
 //! - `GET /editor/{editor_id}/source`: its image file's bytes, when the page
 //!   can decode them itself (PLAN 3Q)
 //! - `POST /editor/{editor_id}/layer`, `…/highlights`: the editor's annotation
@@ -367,6 +368,8 @@ mod tests {
         assert_eq!(parse(&uri), frame(1, 0, TransferFormat::Rgba));
         let uri: tauri::http::Uri = editor_url(4).parse().unwrap();
         assert_eq!(parse(&uri), Some(Route::Editor(4)));
+        let uri: tauri::http::Uri = "http://capture.localhost/editor/4/v/2".parse().unwrap();
+        assert_eq!(parse(&uri), Some(Route::EditorVersion(4, 2)));
         let uri: tauri::http::Uri = editor_source_url(4).parse().unwrap();
         assert_eq!(parse(&uri), Some(Route::EditorSource(4)));
         for kind in [LayerKind::Annotations, LayerKind::Highlights] {
@@ -377,6 +380,9 @@ mod tests {
             "http://capture.localhost/editor",
             "http://capture.localhost/editor/x",
             "http://capture.localhost/editor/1/2",
+            "http://capture.localhost/editor/1/v",
+            "http://capture.localhost/editor/1/v/x",
+            "http://capture.localhost/editor/1/v/2?x=1",
             "http://capture.localhost/editor/1/layer/x",
             "http://capture.localhost/editor/1?fmt=bmp",
             "http://capture.localhost/editor/1/source?x=1",
