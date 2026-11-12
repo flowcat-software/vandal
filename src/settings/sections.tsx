@@ -25,6 +25,15 @@ const ICON_ACTIONS = [
   { value: "editor", label: "Open the editor" },
 ] as const;
 
+/** The color picker's copy formats (PLAN 3Y), as the color #1e88e5 would copy. */
+const COLOR_FORMATS = [
+  { value: "hexLower", label: "#1e88e5" },
+  { value: "hexUpper", label: "#1E88E5" },
+  { value: "rgb", label: "rgb(30, 136, 229)" },
+  { value: "rgbBare", label: "30, 136, 229" },
+  { value: "hsl", label: "hsl(208, 79%, 51%)" },
+] as const;
+
 export const sections: Section[] = [
   {
     id: "general",
@@ -147,7 +156,7 @@ export const sections: Section[] = [
     id: "capture",
     title: "Capture",
     icon: CaptureIcon,
-    description: "Taking a screenshot: the selection screen and quick edit.",
+    description: "Taking a screenshot: the selection screen and quick edit. Also the color picker.",
     groups: [
       {
         title: "Selection screen",
@@ -203,6 +212,46 @@ export const sections: Section[] = [
             description: "Save (Ctrl+S) also finishes the capture.",
             keywords: ["quick edit", "file"],
             disabled: (s) => !s.quickEdit.enabled,
+          },
+        ],
+      },
+      {
+        // PLAN 3Y.2
+        title: "Color picker",
+        description:
+          "Its shortcut or the tray's Pick a color freezes the screens: click any pixel to copy its color.",
+        items: [
+          {
+            id: "color-picker-hotkey",
+            kind: "hotkey",
+            path: "hotkeys.colorPicker",
+            label: "Shortcut",
+            keywords: ["hotkey", "keyboard", "key", "eyedropper", "color picker", "colour"],
+          },
+          {
+            id: "color-picker-format",
+            kind: "choice",
+            control: "select",
+            path: "colorPicker.copyFormat",
+            label: "Copy as",
+            options: COLOR_FORMATS,
+            keywords: [
+              "eyedropper",
+              "color picker",
+              "colour",
+              "hex",
+              "rgb",
+              "hsl",
+              "css",
+              "clipboard",
+            ],
+          },
+          {
+            id: "color-picker-notify",
+            kind: "toggle",
+            path: "colorPicker.notify",
+            label: "Notify when a color is copied",
+            keywords: ["eyedropper", "color picker", "colour", "toast", "popup", "quiet", "silent"],
           },
         ],
       },
@@ -780,6 +829,14 @@ export const sections: Section[] = [
             label: "Capture all screens",
             description: "Every screen as one image",
             keywords: ["hotkey", "shortcut", "keyboard", "key", "all monitors", "printscreen"],
+          },
+          {
+            id: "hotkey-color-picker",
+            kind: "hotkey",
+            path: "hotkeys.colorPicker",
+            label: "Pick a color",
+            description: "Copies the color of the pixel you click",
+            keywords: ["hotkey", "shortcut", "keyboard", "key", "eyedropper", "colour"],
           },
         ],
       },

@@ -886,16 +886,17 @@ fn copy_color(app: &AppHandle, hex: &str) {
         logln!("[color] not a color: {hex}");
         return;
     };
-    let format = app
+    let picker = app
         .state::<AppState>()
         .settings
         .read()
         .unwrap()
         .color_picker
-        .copy_format;
-    let text = color_format::format(rgb, format);
+        .clone();
+    let text = color_format::format(rgb, picker.copy_format);
     match output::copy_text(&text) {
-        Ok(()) => output::notify_color_copied(app, &text),
+        Ok(()) if picker.notify => output::notify_color_copied(app, &text),
+        Ok(()) => {}
         Err(e) => output::notify_error(app, "Couldn't copy the color", &e),
     }
 }

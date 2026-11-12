@@ -17,6 +17,7 @@ const ACTIONS: Record<string, string> = {
   window: "Capture a window",
   fullscreen: "Capture the full screen",
   allScreens: "Capture all screens",
+  colorPicker: "Pick a color",
 };
 
 /**

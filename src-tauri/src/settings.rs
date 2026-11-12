@@ -411,11 +411,22 @@ impl Default for ResetSettings {
 }
 
 /// The color picker (PLAN 3Y).
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(default, rename_all = "camelCase")]
 pub struct ColorPickerSettings {
     /// What its hotkey and tray item copy.
     pub copy_format: ColorFormat,
+    /// A "Color copied" toast after each copy (PLAN 3Y.2).
+    pub notify: bool,
+}
+
+impl Default for ColorPickerSettings {
+    fn default() -> Self {
+        Self {
+            copy_format: ColorFormat::default(),
+            notify: true,
+        }
+    }
 }
 
 /// Settings › About › Debugging (PLAN 3V.8).

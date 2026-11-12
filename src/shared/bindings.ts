@@ -448,6 +448,8 @@ export type ColorFormat =
 export type ColorPickerSettings = {
 	/**  What its hotkey and tray item copy. */
 	copyFormat?: ColorFormat,
+	/**  A "Color copied" toast after each copy (PLAN 3Y.2). */
+	notify?: boolean,
 };
 
 /**
