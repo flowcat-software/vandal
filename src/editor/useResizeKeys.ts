@@ -42,8 +42,9 @@ export function useResizeKeys(active?: () => boolean): void {
         endResize();
         return;
       }
-      // The fields' own typing, and Ctrl's editor shortcuts (copy, save, undo, zoom).
-      if (isTyping(e.target) || e.ctrlKey || e.code === "Space") return;
+      // The fields' own typing, moving between the bar's controls (Tab), and
+      // Ctrl's editor shortcuts (copy, save, undo, zoom).
+      if (isTyping(e.target) || e.ctrlKey || e.code === "Space" || e.code === "Tab") return;
       const id = shortcutOf(e, useStyleConfig.getState().shortcuts);
       e.stopImmediatePropagation();
       e.preventDefault();
