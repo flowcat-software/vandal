@@ -339,21 +339,29 @@ pub fn quick_focus_overlay(app: AppHandle, monitor_index: u32) {
 
 /// The color picker's eyedropper (PLAN 3U): capture the screens and pick a
 /// pixel on the overlays; the color comes back as `ScreenColorPicked`. False
-/// if it couldn't start (a capture is already on screen).
+/// if it couldn't start (a capture is already on screen). `two_colors`: the
+/// markup's eyedropper, where a right-click picks the second color (3Y.3).
 #[tauri::command]
 #[specta::specta]
-pub async fn pick_screen_color(app: AppHandle, window: WebviewWindow) -> bool {
-    tauri::async_runtime::spawn_blocking(move || session::start_color_pick(&app, window.label()))
-        .await
-        .unwrap_or(false)
+pub async fn pick_screen_color(app: AppHandle, window: WebviewWindow, two_colors: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || {
+        session::start_color_pick(&app, window.label(), two_colors)
+    })
+    .await
+    .unwrap_or(false)
 }
 
 /// Pick mode: the pixel at `point` (virtual-desktop physical px) is the
-/// color; None cancels the pick.
+/// color; None cancels the pick. `second`: for the second chip color.
 #[tauri::command]
 #[specta::specta]
-pub fn commit_color_pick(app: AppHandle, capture_id: CaptureId, point: Option<PhysicalPoint>) {
-    session::commit_color(&app, capture_id, point);
+pub fn commit_color_pick(
+    app: AppHandle,
+    capture_id: CaptureId,
+    point: Option<PhysicalPoint>,
+    second: bool,
+) {
+    session::commit_color(&app, capture_id, point, second);
 }
 
 /// Esc / right-click on an overlay.

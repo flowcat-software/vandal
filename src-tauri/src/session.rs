@@ -61,6 +61,9 @@ pub struct OverlayLoad {
     /// The pick is copied to the clipboard (the color picker's hotkey or tray
     /// item, PLAN 3Y), not sent to a window.
     pub pick_copies: bool,
+    /// The markup's eyedropper (PLAN 3Y.3): a right-click picks the second
+    /// color instead of cancelling.
+    pub pick_two: bool,
     /// Where the pointer was at capture time, so the loupe shows straight away.
     pub cursor: Option<PhysicalPoint>,
 }
@@ -70,6 +73,8 @@ pub struct OverlayLoad {
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 pub struct ScreenColorPicked {
     pub color: Option<String>,
+    /// Picked with a right-click (or Shift+Enter): the second color (PLAN 3Y.3).
+    pub second: bool,
 }
 
 /// Rust → overlays: quick edit's eyedropper (PLAN 3U.2) turns pick mode on
@@ -80,6 +85,8 @@ pub struct OverlayColorPick {
     pub capture_id: CaptureId,
     pub on: bool,
     pub cursor: Option<PhysicalPoint>,
+    /// As [`OverlayLoad::pick_two`].
+    pub two: bool,
 }
 
 /// An eyedropper pick on the overlays (PLAN 3U). `in_place`: quick edit's
@@ -94,8 +101,9 @@ struct ColorPick {
 /// Where a picked color goes.
 #[derive(Debug, Clone)]
 pub enum PickFor {
-    /// The window with this label, whose eyedropper asked (PLAN 3U).
-    Window(String),
+    /// The window with this label, whose eyedropper asked (PLAN 3U). `two`:
+    /// the markup's eyedropper, which picks either chip color (PLAN 3Y.3).
+    Window { label: String, two: bool },
     /// The clipboard, in Settings' format (the color picker, PLAN 3Y).
     Clipboard,
 }
@@ -413,16 +421,15 @@ pub fn start_region_into(app: &AppHandle, id: editor::EditorId) {
 /// [`ScreenColorPicked`]. The requester stays on screen, so it can be picked
 /// from too. From quick edit (an overlay), its capture switches to pick mode
 /// in place (3U.2). False if no pick started (another capture is on screen).
-pub fn start_color_pick(app: &AppHandle, requester: &str) -> bool {
+pub fn start_color_pick(app: &AppHandle, requester: &str, two: bool) -> bool {
     if overlay::is_overlay(requester) {
-        return pick_in_place(app, requester);
+        return pick_in_place(app, requester, two);
     }
-    start_region_for(
-        app,
-        None,
-        false,
-        Some(PickFor::Window(requester.to_string())),
-    )
+    let target = PickFor::Window {
+        label: requester.to_string(),
+        two,
+    };
+    start_region_for(app, None, false, Some(target))
 }
 
 /// The color picker's hotkey or tray item (PLAN 3Y): pick a pixel on the
@@ -431,7 +438,7 @@ pub fn start_color_picker(app: &AppHandle) {
     start_region_for(app, None, false, Some(PickFor::Clipboard));
 }
 
-fn pick_in_place(app: &AppHandle, requester: &str) -> bool {
+fn pick_in_place(app: &AppHandle, requester: &str, two: bool) -> bool {
     let state = app.state::<AppState>();
     let capture_id = {
         let mut guard = state.session.lock().unwrap();
@@ -439,7 +446,10 @@ fn pick_in_place(app: &AppHandle, requester: &str) -> bool {
             return false;
         };
         s.color_pick = Some(ColorPick {
-            target: PickFor::Window(requester.to_string()),
+            target: PickFor::Window {
+                label: requester.to_string(),
+                two,
+            },
             in_place: true,
         });
         s.capture_id
@@ -449,6 +459,7 @@ fn pick_in_place(app: &AppHandle, requester: &str) -> bool {
         capture_id,
         on: true,
         cursor,
+        two,
     }
     .emit(app);
     true
@@ -512,6 +523,7 @@ fn start_region_for(
             monitor_count: monitors.len() as u32,
             pick_color: color_for.is_some(),
             pick_copies: matches!(color_for, Some(PickFor::Clipboard)),
+            pick_two: matches!(color_for, Some(PickFor::Window { two: true, .. })),
             cursor,
         })
         .collect();
@@ -806,13 +818,19 @@ pub fn cancel(app: &AppHandle, capture_id: CaptureId) {
         editor::bring_back(app, id);
     }
     if let Some(pick) = session.color_pick {
-        color_picked(app, capture_id, &pick, None);
+        color_picked(app, capture_id, &pick, None, false);
     }
 }
 
 /// Pick mode (PLAN 3U): the pixel at `point` (virtual-desktop px) is the
 /// color; None cancels the pick (and a capture made only for it).
-pub fn commit_color(app: &AppHandle, capture_id: CaptureId, point: Option<PhysicalPoint>) {
+/// `second`: a right-click with the markup's eyedropper (PLAN 3Y.3).
+pub fn commit_color(
+    app: &AppHandle,
+    capture_id: CaptureId,
+    point: Option<PhysicalPoint>,
+    second: bool,
+) {
     let state = app.state::<AppState>();
     let in_place = {
         let guard = state.session.lock().unwrap();
@@ -840,6 +858,7 @@ pub fn commit_color(app: &AppHandle, capture_id: CaptureId, point: Option<Physic
             capture_id,
             on: false,
             cursor: None,
+            two: false,
         }
         .emit(app);
         pick
@@ -847,13 +866,19 @@ pub fn commit_color(app: &AppHandle, capture_id: CaptureId, point: Option<Physic
         end(app, capture_id).and_then(|s| s.color_pick)
     };
     if let Some(pick) = pick {
-        color_picked(app, capture_id, &pick, color);
+        color_picked(app, capture_id, &pick, color, second);
     }
 }
 
 /// The pick is over: the window that asked gets its color and the keyboard
 /// back, and a capture made only for the pick goes.
-fn color_picked(app: &AppHandle, capture_id: CaptureId, pick: &ColorPick, color: Option<String>) {
+fn color_picked(
+    app: &AppHandle,
+    capture_id: CaptureId,
+    pick: &ColorPick,
+    color: Option<String>,
+    second: bool,
+) {
     if !pick.in_place {
         app.state::<AppState>()
             .frames
@@ -862,7 +887,18 @@ fn color_picked(app: &AppHandle, capture_id: CaptureId, pick: &ColorPick, color:
             .remove(capture_id);
     }
     let requester = match &pick.target {
-        PickFor::Window(label) => label,
+        PickFor::Window { label, two } => {
+            // The markup's eyedropper can copy it too (PLAN 3Y.3).
+            let also_copy = *two && {
+                let state = app.state::<AppState>();
+                let s = state.settings.read().unwrap();
+                s.color_picker.also_copy
+            };
+            if let (true, Some(color)) = (also_copy, &color) {
+                copy_color(app, color);
+            }
+            label
+        }
         PickFor::Clipboard => {
             if let Some(color) = color {
                 copy_color(app, &color);
@@ -870,7 +906,7 @@ fn color_picked(app: &AppHandle, capture_id: CaptureId, pick: &ColorPick, color:
             return;
         }
     };
-    let _ = ScreenColorPicked { color }.emit_to(app, requester.as_str());
+    let _ = ScreenColorPicked { color, second }.emit_to(app, requester.as_str());
     if let Some(window) = app.get_webview_window(requester) {
         let _ = app.run_on_main_thread(move || {
             if let Ok(hwnd) = window.hwnd() {

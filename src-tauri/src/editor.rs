@@ -55,7 +55,9 @@ const SAVE_FOLDER_KEY: &str = "saveFolder";
 /// Space around the image in a new window (logical px): the command, options
 /// and status bars plus a margin.
 const CHROME: (f64, f64) = (64.0, 200.0);
-const MIN_SIZE: (f64, f64) = (800.0, 560.0);
+/// Wide enough for the command bar with every button squeezed to its icon:
+/// 880 since the eyedropper and Resize joined it (PLAN 3Y.3, 3Z).
+const MIN_SIZE: (f64, f64) = (880.0, 560.0);
 /// A new window never takes more than this share of the work area unless the
 /// user sized it bigger last time.
 const MAX_SHARE: f64 = 0.9;
@@ -1554,8 +1556,8 @@ mod tests {
     #[test]
     fn small_image_gets_min_size_centred() {
         let r = initial_rect(WORK, 1.0, (200, 100), None);
-        assert_eq!((r.width, r.height), (800, 560));
-        assert_eq!((r.x, r.y), (560, 240));
+        assert_eq!((r.width, r.height), (880, 560));
+        assert_eq!((r.x, r.y), (520, 240));
     }
 
     #[test]
@@ -1590,7 +1592,7 @@ mod tests {
     fn negative_origin_monitor() {
         let work = PhysicalRect::new(-1920, -200, 1920, 1040);
         let r = initial_rect(work, 1.0, (200, 100), None);
-        assert_eq!((r.x, r.y), (-1920 + 560, -200 + 240));
+        assert_eq!((r.x, r.y), (-1920 + 520, -200 + 240));
     }
 
     #[test]

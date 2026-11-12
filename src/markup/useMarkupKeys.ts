@@ -28,6 +28,7 @@ import {
 import { editStepLabel } from "./stepEditing";
 import { editText } from "./textEditing";
 import { duplicateSelection } from "./objectActions";
+import { pickIntoChip } from "./eyedropper";
 import { shortcutOf } from "./shortcuts";
 import { isTool, useToolStore } from "./toolStore";
 
@@ -60,6 +61,11 @@ export function useMarkupKeys(active?: () => boolean): void {
         const id = shortcutOf(e, useStyleConfig.getState().shortcuts);
         if (id === "swapColors") {
           if (swapColors()) e.preventDefault();
+          return;
+        }
+        if (id === "eyedropper") {
+          e.preventDefault();
+          void pickIntoChip();
           return;
         }
         if (id && isTool(id)) {

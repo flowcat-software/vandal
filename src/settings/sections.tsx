@@ -251,7 +251,17 @@ export const sections: Section[] = [
             kind: "toggle",
             path: "colorPicker.notify",
             label: "Notify when a color is copied",
+            description: "Also when the markup's eyedropper copies.",
             keywords: ["eyedropper", "color picker", "colour", "toast", "popup", "quiet", "silent"],
+          },
+          {
+            id: "color-picker-also-copy",
+            kind: "toggle",
+            path: "colorPicker.alsoCopy",
+            label: "The markup's eyedropper copies too",
+            description:
+              "Picking a color for the markup (the eyedropper button, or I) also copies it, in the format above.",
+            keywords: ["eyedropper", "color picker", "colour", "clipboard", "editor", "quick edit"],
           },
         ],
       },

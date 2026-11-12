@@ -46,6 +46,11 @@ export const commands = {
 	 *  item, PLAN 3Y), not sent to a window.
 	 */
 	pickCopies: boolean,
+	/**
+	 *  The markup's eyedropper (PLAN 3Y.3): a right-click picks the second
+	 *  color instead of cancelling.
+	 */
+	pickTwo: boolean,
 	/**  Where the pointer was at capture time, so the loupe shows straight away. */
 	cursor: PhysicalPoint | null,
 } | null>("overlay_pending_load", { monitorIndex }),
@@ -67,17 +72,18 @@ export const commands = {
 	/**
 	 *  The color picker's eyedropper (PLAN 3U): capture the screens and pick a
 	 *  pixel on the overlays; the color comes back as `ScreenColorPicked`. False
-	 *  if it couldn't start (a capture is already on screen).
+	 *  if it couldn't start (a capture is already on screen). `two_colors`: the
+	 *  markup's eyedropper, where a right-click picks the second color (3Y.3).
 	 */
-	pickScreenColor: () => __TAURI_INVOKE<boolean>("pick_screen_color"),
+	pickScreenColor: (twoColors: boolean) => __TAURI_INVOKE<boolean>("pick_screen_color", { twoColors }),
 	/**
 	 *  Pick mode: the pixel at `point` (virtual-desktop physical px) is the
-	 *  color; None cancels the pick.
+	 *  color; None cancels the pick. `second`: for the second chip color.
 	 */
 	commitColorPick: (captureId: number, point: {
 	x: number,
 	y: number,
-} | null) => __TAURI_INVOKE<void>("commit_color_pick", { captureId, point }),
+} | null, second: boolean) => __TAURI_INVOKE<void>("commit_color_pick", { captureId, point, second }),
 	/**  Quick edit's Copy / Save on the selection; may close quick edit. */
 	quickOutput: (captureId: number, rect: PhysicalRect, action: QuickAction, markup: QuickMarkup) => typedError<QuickOutcome, string>(__TAURI_INVOKE("quick_output", { captureId, rect, action, markup })),
 	/**  Quick edit's Done (Enter): deliver the selection with its markup. */
@@ -450,6 +456,8 @@ export type ColorPickerSettings = {
 	copyFormat?: ColorFormat,
 	/**  A "Color copied" toast after each copy (PLAN 3Y.2). */
 	notify?: boolean,
+	/**  The markup's eyedropper copies too (PLAN 3Y.3); off by default. */
+	alsoCopy?: boolean,
 };
 
 /**
@@ -739,6 +747,8 @@ export type OverlayColorPick = {
 	captureId: number,
 	on: boolean,
 	cursor: PhysicalPoint | null,
+	/**  As [`OverlayLoad::pick_two`]. */
+	two: boolean,
 };
 
 /**  Rust → overlay-n: fetch and draw this frame, then call `overlay_ready`. */
@@ -779,6 +789,11 @@ export type OverlayLoad = {
 	 *  item, PLAN 3Y), not sent to a window.
 	 */
 	pickCopies: boolean,
+	/**
+	 *  The markup's eyedropper (PLAN 3Y.3): a right-click picks the second
+	 *  color instead of cancelling.
+	 */
+	pickTwo: boolean,
 	/**  Where the pointer was at capture time, so the loupe shows straight away. */
 	cursor: PhysicalPoint | null,
 };
@@ -933,6 +948,8 @@ export type SaveSettings = {
  */
 export type ScreenColorPicked = {
 	color: string | null,
+	/**  Picked with a right-click (or Shift+Enter): the second color (PLAN 3Y.3). */
+	second: boolean,
 };
 
 export type Settings = {
@@ -986,6 +1003,8 @@ export type Shortcuts = {
 	crop?: string | null,
 	/**  Swap the two colors (PLAN 3D.15). */
 	swapColors?: string | null,
+	/**  The eyedropper: pick either chip color from the screen (PLAN 3Y.3). */
+	eyedropper?: string | null,
 };
 
 export type Startup = {

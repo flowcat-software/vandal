@@ -30,6 +30,8 @@ pub struct Shortcuts {
     pub crop: Option<String>,
     /// Swap the two colors (PLAN 3D.15).
     pub swap_colors: Option<String>,
+    /// The eyedropper: pick either chip color from the screen (PLAN 3Y.3).
+    pub eyedropper: Option<String>,
 }
 
 impl Default for Shortcuts {
@@ -51,6 +53,7 @@ impl Default for Shortcuts {
             step: key("N"),
             crop: key("C"),
             swap_colors: key("X"),
+            eyedropper: key("I"),
         }
     }
 }
@@ -80,7 +83,7 @@ pub const FIXED: &[(&str, &str)] = &[
 
 impl Shortcuts {
     /// Each shortcut with what it does, for messages.
-    fn entries_mut(&mut self) -> [(&'static str, &mut Option<String>); 14] {
+    fn entries_mut(&mut self) -> [(&'static str, &mut Option<String>); 15] {
         [
             ("Select", &mut self.select),
             ("Pen", &mut self.pen),
@@ -96,6 +99,7 @@ impl Shortcuts {
             ("Step", &mut self.step),
             ("Crop", &mut self.crop),
             ("Swap colors", &mut self.swap_colors),
+            ("Eyedropper", &mut self.eyedropper),
         ]
     }
 

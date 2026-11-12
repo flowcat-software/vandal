@@ -1,6 +1,11 @@
 // Typed IPC surface for the frontend. Always go through this module rather than
 // raw `invoke` strings; `bindings.ts` is generated from the Rust commands.
-import { commands, events, type Settings as SettingsWire } from "./bindings";
+import {
+  commands,
+  events,
+  type ScreenColorPicked,
+  type Settings as SettingsWire,
+} from "./bindings";
 
 export { commands, events } from "./bindings";
 export type * from "./bindings";
@@ -32,12 +37,25 @@ export type DashStyleSetting = StyleSettings["dashes"][number];
  * (a capture is already on screen).
  */
 export async function pickScreenColor(): Promise<string | null> {
-  let resolve!: (color: string | null) => void;
-  const picked = new Promise<string | null>((r) => (resolve = r));
+  return (await pickColor(false))?.color ?? null;
+}
+
+/**
+ * The markup's eyedropper (PLAN 3Y.3): as {@link pickScreenColor}, but a
+ * right-click picks too, for the second color (`second`). Null if cancelled.
+ */
+export async function pickChipColor(): Promise<{ color: string; second: boolean } | null> {
+  const picked = await pickColor(true);
+  return picked?.color ? { color: picked.color, second: picked.second } : null;
+}
+
+async function pickColor(twoColors: boolean): Promise<ScreenColorPicked | null> {
+  let resolve!: (picked: ScreenColorPicked) => void;
+  const picked = new Promise<ScreenColorPicked>((r) => (resolve = r));
   // Listening before asking, so the answer can't come first.
-  const unlisten = await events.screenColorPicked.listen(({ payload }) => resolve(payload.color));
+  const unlisten = await events.screenColorPicked.listen(({ payload }) => resolve(payload));
   try {
-    if (!(await commands.pickScreenColor())) return null;
+    if (!(await commands.pickScreenColor(twoColors))) return null;
     return await picked;
   } finally {
     unlisten();

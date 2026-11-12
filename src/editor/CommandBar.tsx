@@ -46,6 +46,7 @@ export function CommandBar({
         toolsActive={!cropping}
         onPickTool={onPickTool}
         disabled={empty}
+        eyedropper
         extra={
           <button
             type="button"

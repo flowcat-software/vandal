@@ -30,6 +30,12 @@
   stroke-linejoin: round;
 }
 
+/* A filled icon (the eyedropper, PLAN 3Y.3) looks heavier than the strokes: a little smaller. */
+.tool svg.filledTool {
+  width: 18px;
+  height: 18px;
+}
+
 .tool:hover:not(:disabled) {
   background: var(--hover);
 }

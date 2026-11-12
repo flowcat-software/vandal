@@ -92,6 +92,9 @@ export function OverlayApp() {
   // else. A capture of its own, or quick edit's switched over in place (3U.2).
   const [pickingInPlace, setPickingInPlace] = useState(false);
   const pickColor = !!load?.pickColor || pickingInPlace;
+  // The markup's eyedropper (PLAN 3Y.3): a right-click picks the second color.
+  const [pickTwoInPlace, setPickTwoInPlace] = useState(false);
+  const pickTwo = pickingInPlace ? pickTwoInPlace : !!load?.pickTwo;
   // Quick edit's markup (PLAN 2B.2): the tools work while there's a selection.
   const quickEdit = !!load?.quickEdit;
   const creating = drag?.mode === "create";
@@ -170,6 +173,7 @@ export function OverlayApp() {
       events.overlayColorPick.listen(({ payload }) => {
         if (payload.captureId !== captureId || !loaded) return;
         setPickingInPlace(payload.on);
+        setPickTwoInPlace(payload.two);
         pressedColor.current = false;
         if (payload.on) setPointer(localPoint(loaded, payload.cursor));
       }),
@@ -245,10 +249,10 @@ export function OverlayApp() {
 
   /** Eyedropper: the pixel at a monitor-local point is the color (null: none). */
   const pickColorAt = useCallback(
-    (p: Point | null) => {
+    (p: Point | null, second = false) => {
       if (!load) return;
       const { x, y } = load.physicalBounds;
-      void commands.commitColorPick(load.captureId, p && { x: p.x + x, y: p.y + y });
+      void commands.commitColorPick(load.captureId, p && { x: p.x + x, y: p.y + y }, second);
     },
     [load],
   );
@@ -350,7 +354,7 @@ export function OverlayApp() {
         // Esc cancels (the pick only, in quick edit), Enter picks, arrows
         // nudge the loupe (Shift: 10 px).
         if (e.key === "Escape") return pickColorAt(null);
-        if (e.key === "Enter" && pointer) return pickColorAt(pointer);
+        if (e.key === "Enter" && pointer) return pickColorAt(pointer, pickTwo && e.shiftKey);
         const step = arrowDelta(e.key, e.shiftKey ? 10 : 1);
         if (step && pointer && size) {
           e.preventDefault();
@@ -420,7 +424,8 @@ export function OverlayApp() {
     };
     const onContextMenu = (e: MouseEvent) => {
       e.preventDefault();
-      if (pickColor) return pickColorAt(null);
+      // The markup's eyedropper picks its second color; the others cancel.
+      if (pickColor) return pickColorAt(pickTwo ? pointer : null, pickTwo);
       // The quick edit card has right-clicks of its own (edit a preset, open
       // the custom color picker), and none of them mean cancel.
       if (barRef.current?.contains(e.target as Node)) return;
@@ -777,6 +782,7 @@ export function OverlayApp() {
         <HintBar
           pickColor={pickColor}
           pickCopies={!!load.pickCopies && !pickingInPlace}
+          pickTwo={pickTwo}
           picking={picking}
           hasSelection={!!selection}
           quick={quickEdit}

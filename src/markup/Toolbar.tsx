@@ -1,5 +1,7 @@
 import { hint } from "./HintLine";
 import type { ReactNode } from "react";
+import { pickIntoChip } from "./eyedropper";
+import { EyedropperIcon } from "./EyedropperIcon";
 import { canRedo, canUndo, docStore, useDoc } from "./model/store";
 import { keySuffix } from "./shortcuts";
 import { useStyleConfig } from "./styles";
@@ -16,10 +18,18 @@ interface Props {
   onPickTool?: (tool: ToolId) => void;
   /** Nothing to mark up (an empty editor, PLAN 3G): every button is off. */
   disabled?: boolean;
+  /** The eyedropper's button after the tools (PLAN 3Y.3). */
+  eyedropper?: boolean;
 }
 
 /** Tools, then undo/redo. Shared by quick edit and the editor (PLAN §4.6). */
-export function Toolbar({ extra, toolsActive = true, onPickTool, disabled = false }: Props) {
+export function Toolbar({
+  extra,
+  toolsActive = true,
+  onPickTool,
+  disabled = false,
+  eyedropper = false,
+}: Props) {
   const tool = useToolStore((s) => s.tool);
   const undoable = useDoc(canUndo);
   const redoable = useDoc(canRedo);
@@ -48,6 +58,19 @@ export function Toolbar({ extra, toolsActive = true, onPickTool, disabled = fals
         </button>
       ))}
       {extra}
+      {eyedropper && (
+        <button
+          type="button"
+          className={styles.tool}
+          {...hint("tool.eyedropper")}
+          aria-label={`Eyedropper${keySuffix(keys.eyedropper)}`}
+          title={`Pick a color from the screen${keySuffix(keys.eyedropper)}`}
+          disabled={disabled}
+          onClick={() => void pickIntoChip()}
+        >
+          <EyedropperIcon className={styles.filledTool} />
+        </button>
+      )}
       <span className={styles.toolbarDivider} />
       <button
         type="button"

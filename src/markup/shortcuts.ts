@@ -24,6 +24,7 @@ export const DEFAULT_SHORTCUTS: ShortcutKeys = {
   step: "N",
   crop: "C",
   swapColors: "X",
+  eyedropper: "I",
 };
 
 /** What each shortcut does, in the toolbar's order, for Settings and its messages. */
@@ -42,6 +43,7 @@ export const SHORTCUT_NAMES: Record<ShortcutId, string> = {
   step: "Step marker",
   crop: "Crop",
   swapColors: "Swap colors",
+  eyedropper: "Eyedropper",
 };
 
 /** The shortcut a key press makes, spelled as settings store it, or null if it can't be one. */

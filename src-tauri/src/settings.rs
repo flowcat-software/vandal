@@ -418,6 +418,8 @@ pub struct ColorPickerSettings {
     pub copy_format: ColorFormat,
     /// A "Color copied" toast after each copy (PLAN 3Y.2).
     pub notify: bool,
+    /// The markup's eyedropper copies too (PLAN 3Y.3); off by default.
+    pub also_copy: bool,
 }
 
 impl Default for ColorPickerSettings {
@@ -425,6 +427,7 @@ impl Default for ColorPickerSettings {
         Self {
             copy_format: ColorFormat::default(),
             notify: true,
+            also_copy: false,
         }
     }
 }

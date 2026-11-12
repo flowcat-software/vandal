@@ -29,6 +29,8 @@ export const CONTROL_HINTS = {
   "tool.step": "{step} Click to place numbered or lettered markers · they count up",
   "tool.callout": "{callout} Drag from what to point at to where the text goes, or click",
   "tool.crop": "{crop} Crop the image · [Ctrl+Z] undoes a crop",
+  "tool.eyedropper":
+    "{eyedropper} Pick a color from the screen · click sets the first color, right-click the second",
   undo: "[Ctrl+Z] Undo",
   redo: "[Ctrl+Y] or [Ctrl+Shift+Z] Redo",
   swatch: "[Ctrl+1…9] Pick a color by number · Right-click to change or delete it",

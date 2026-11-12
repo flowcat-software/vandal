@@ -5,6 +5,8 @@ interface Props {
   pickColor: boolean;
   /** The color picker (PLAN 3Y): the pick goes to the clipboard. */
   pickCopies: boolean;
+  /** The markup's eyedropper (PLAN 3Y.3): a right-click picks the second color. */
+  pickTwo: boolean;
   /** Window mode (PLAN 3H): click a window. */
   picking: boolean;
   hasSelection: boolean;
@@ -19,6 +21,7 @@ interface Props {
 export function HintBar({
   pickColor,
   pickCopies,
+  pickTwo,
   picking,
   hasSelection,
   quick,
@@ -27,7 +30,16 @@ export function HintBar({
 }: Props) {
   return (
     <div className={`${styles.hint} ${atBottom ? styles.hintBottom : ""}`}>
-      {pickColor ? (
+      {pickColor && pickTwo ? (
+        <>
+          <Hint keys={["Click"]} label="first color" />
+          <Hint keys={["Right-click"]} label="second color" />
+          <Hint keys={["←↑↓→"]} label="nudge" />
+          <Hint keys={["Enter"]} label="first" />
+          <Hint keys={["Shift", "Enter"]} label="second" />
+          <Hint keys={["Esc"]} label="cancel" />
+        </>
+      ) : pickColor ? (
         <>
           <Hint keys={["Click"]} label={pickCopies ? "copy color" : "pick color"} />
           <Hint keys={["←↑↓→"]} label="nudge" />
