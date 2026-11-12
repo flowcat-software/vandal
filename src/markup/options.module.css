@@ -1049,9 +1049,25 @@
   color: var(--text);
 }
 
-.resizeArrow {
-  margin: 0 8px;
+/* The quiet parts: the "×" in "W × H", the arrow in before → after. */
+.resizeDim {
+  margin: 0 4px;
   color: var(--text-3);
+}
+
+.resizeDim.resizeArrow {
+  margin: 0 8px;
+}
+
+.resizeLabel {
+  margin-right: 2px;
+  color: var(--text-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.resizeSize .colorField {
+  width: 56px;
 }
 
 /* W, the padlock and H: tighter than the bar's 10 px gaps, one size. */

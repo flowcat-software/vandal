@@ -82,25 +82,20 @@ function ResizeBar({ base }: { base: Size }) {
   };
 
   const field = (side: keyof ResizeFields) => (
-    <label className={styles.sizeField}>
-      <span>{side === "width" ? "W" : "H"}</span>
-      <input
-        ref={side === "width" ? widthRef : undefined}
-        className={styles.colorField}
-        inputMode="decimal"
-        aria-label={`${side === "width" ? "Width" : "Height"} (${unit === "px" ? "pixels" : "percent"})`}
-        value={fields[side]}
-        disabled={busy}
-        onFocus={(e) => e.target.select()}
-        onChange={(e) => {
-          const text = e.target.value.replace(unit === "px" ? /[^\d]/g : /[^\d.]/g, "");
-          setFields((f) => typed(f, side, text, base, unit, locked));
-          setError(null);
-        }}
-      />
-      {/* The unit once, after the height: the two read as one size. */}
-      {side === "height" && <span>{unit}</span>}
-    </label>
+    <input
+      ref={side === "width" ? widthRef : undefined}
+      className={styles.colorField}
+      inputMode="decimal"
+      aria-label={`${side === "width" ? "Width" : "Height"} (${unit === "px" ? "pixels" : "percent"})`}
+      value={fields[side]}
+      disabled={busy}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => {
+        const text = e.target.value.replace(unit === "px" ? /[^\d]/g : /[^\d.]/g, "");
+        setFields((f) => typed(f, side, text, base, unit, locked));
+        setError(null);
+      }}
+    />
   );
 
   const message = error ?? problem;
@@ -122,8 +117,12 @@ function ResizeBar({ base }: { base: Size }) {
         ))}
       </div>
       <span className={styles.sep} />
-      {/* W, the padlock and H close together: one size, linked. */}
+      {/* "W × H", then the two boxes and the padlock as one unit, and the
+          unit once at the end: one size, linked. */}
       <span className={styles.resizeSize}>
+        <span className={styles.resizeLabel} aria-hidden>
+          W<span className={styles.resizeDim}>×</span>H
+        </span>
         {field("width")}
         <button
           type="button"
@@ -139,6 +138,7 @@ function ResizeBar({ base }: { base: Size }) {
           </svg>
         </button>
         {field("height")}
+        <span className={styles.resizeLabel}>{unit}</span>
       </span>
       <span className={styles.sep} />
       <span className={message ? styles.resizeError : styles.resizeCaption} role="status">
@@ -147,7 +147,7 @@ function ResizeBar({ base }: { base: Size }) {
             <>
               {base.width} × {base.height}
               {/* Set apart, so the line doesn't run together into one gray blur. */}
-              <span className={styles.resizeArrow} aria-label="becomes">
+              <span className={`${styles.resizeDim} ${styles.resizeArrow}`} aria-label="becomes">
                 →
               </span>
               {size.width} × {size.height} px
