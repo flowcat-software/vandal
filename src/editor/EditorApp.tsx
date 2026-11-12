@@ -22,7 +22,9 @@ import {
 import { alreadyDone, exportImage, markDelivered } from "./actions";
 import { CommandBar } from "./CommandBar";
 import { CropOptions } from "./CropOptions";
-import { toggleResize } from "./ResizeButton";
+import { ResizeOptions } from "./ResizeOptions";
+import { endResize, useResizeStore } from "./resizeStore";
+import { useResizeKeys } from "./useResizeKeys";
 import { EmptyEditor } from "./EmptyEditor";
 import { applyCrop, beginCrop, cancelCrop, useCropStore } from "./cropStore";
 import { paintFrame, startImageVersions } from "./imageVersions";
@@ -63,12 +65,18 @@ export function EditorApp() {
   // Nothing to mark up or crop until an image loads into it.
   const emptyRef = useRef(false);
   useMarkupKeys(() => !emptyRef.current);
+  // Before crop's: resize mode's keys come first while it's on (PLAN 3Z).
+  useResizeKeys(() => !emptyRef.current);
   useCropKeys(() => !emptyRef.current);
   const cropping = useCropStore((s) => s.draft !== null);
+  const resizing = useResizeStore((s) => s.active);
   const empty = status.kind === "empty";
   useEffect(
-    () => useHintSources.setState({ mode: cropping ? "crop" : empty ? "empty" : null }),
-    [cropping, empty],
+    () =>
+      useHintSources.setState({
+        mode: cropping ? "crop" : resizing ? "resize" : empty ? "empty" : null,
+      }),
+    [cropping, resizing, empty],
   );
 
   // Show a document: on mount, and in place when flipping through a folder
@@ -381,13 +389,6 @@ export function EditorApp() {
         void (e.code === "KeyC" ? copyMarkup(setNotice) : replaceMarkup(setNotice));
         return;
       }
-      // Resize image (PLAN 3Z), as Photoshop's Image Size and Affinity's Resize Document.
-      if (e.ctrlKey && e.altKey && !e.shiftKey && e.code === "KeyI") {
-        if (emptyRef.current || isTyping(e.target) || useCropStore.getState().draft) return;
-        e.preventDefault();
-        toggleResize();
-        return;
-      }
       if (!e.ctrlKey || e.altKey) return;
       const view = useViewStore.getState();
       // An empty editor: only what gets an image, and closing (PLAN 3G).
@@ -456,8 +457,15 @@ export function EditorApp() {
         busy={busy || status.kind !== "ready"}
         cropping={cropping}
         empty={status.kind === "empty"}
-        onCrop={() => (cropping ? applyCrop() : status.kind === "ready" && beginCrop())}
-        onPickTool={applyCrop}
+        onCrop={() => {
+          if (cropping) return applyCrop();
+          endResize();
+          if (status.kind === "ready") beginCrop();
+        }}
+        onPickTool={() => {
+          applyCrop();
+          endResize();
+        }}
         onNewCapture={() => void captureHere()}
         onOpen={() => void openImage()}
         onCopy={() => void run("copy")}
@@ -465,7 +473,13 @@ export function EditorApp() {
         onSaveAs={() => void run("saveAs")}
       />
       <div className={styles.optionsBar}>
-        {status.kind === "empty" ? null : cropping ? <CropOptions /> : <ToolOptions />}
+        {status.kind === "empty" ? null : cropping ? (
+          <CropOptions />
+        ) : resizing ? (
+          <ResizeOptions />
+        ) : (
+          <ToolOptions />
+        )}
       </div>
       {status.kind === "empty" ? (
         <EmptyEditor onNewCapture={() => void captureHere()} onOpen={() => void openImage()} />

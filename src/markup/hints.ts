@@ -195,6 +195,10 @@ const TYPING =
 const CROP =
   "Drag edges or corners, [Shift] keeps proportions · Drag outside, or [Ctrl]+drag anywhere, for a new box · [Enter] apply · [Esc] cancel · [←↑↓→] nudge, [Ctrl] resize";
 
+/** Resize mode (PLAN 3Z). */
+const RESIZE =
+  "Type a width or height, the padlock keeps the proportions · [Enter] resize · [Esc] cancel · the marks scale with the image";
+
 /** The editor with no image yet (PLAN 3G): only what gets one. */
 const EMPTY =
   "[Ctrl+N] capture · [Ctrl+O] open an image · [Ctrl+V] paste one · or drop an image file here · [Ctrl+,] settings";
@@ -236,6 +240,7 @@ export function chooseHint(s: HintState): string {
   if (s.hover) return CONTROL_HINTS[s.hover];
   if (s.drag) return DRAG_HINTS[s.drag];
   if (s.mode === "crop") return CROP;
+  if (s.mode === "resize") return RESIZE;
   if (s.mode === "empty") return EMPTY;
   if (s.typing)
     return `${TYPING} · ${colorKeys(s.tool === "callout" || s.calloutSelected ? "callout" : "text", s.twoColors)}`;
@@ -314,7 +319,7 @@ export function parseHint(hint: string): HintPart[] {
 }
 
 /** Modes a host adds beside the tools. */
-export type HostMode = "crop" | "empty";
+export type HostMode = "crop" | "resize" | "empty";
 
 interface HintSources {
   hover: ControlHint | null;

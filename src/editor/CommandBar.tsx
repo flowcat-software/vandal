@@ -5,6 +5,7 @@ import { useSqueeze } from "./squeeze";
 import { useStyleConfig } from "../markup/styles";
 import { Toolbar } from "../markup/Toolbar";
 import { ResizeButton } from "./ResizeButton";
+import { useResizeStore } from "./resizeStore";
 import markupStyles from "../markup/markup.module.css";
 import styles from "./EditorApp.module.css";
 
@@ -15,7 +16,7 @@ interface Props {
   /** No image yet (PLAN 3G): only Capture and Open work. */
   empty: boolean;
   onCrop: () => void;
-  /** Picking a tool while cropping applies the crop first. */
+  /** Picking a tool while cropping applies the crop first (and leaves resize mode). */
   onPickTool: () => void;
   onNewCapture: () => void;
   onOpen: () => void;
@@ -38,13 +39,14 @@ export function CommandBar({
   onSaveAs,
 }: Props) {
   const cropKey = keySuffix(useStyleConfig((s) => s.shortcuts.crop));
+  const resizing = useResizeStore((s) => s.active);
   /** Narrow windows: the buttons drop their labels one at a time, Capture first, then Open, Copy
    *  and Save (labels stay while they fit: Richard). */
   const bar = useSqueeze(4);
   return (
     <div ref={bar} className={styles.commandBar}>
       <Toolbar
-        toolsActive={!cropping}
+        toolsActive={!cropping && !resizing}
         onPickTool={onPickTool}
         disabled={empty}
         eyedropper
@@ -65,7 +67,7 @@ export function CommandBar({
                 <path d="M2 6h16v16" />
               </svg>
             </button>
-            <ResizeButton disabled={empty || cropping} />
+            <ResizeButton disabled={empty} />
           </>
         }
       />

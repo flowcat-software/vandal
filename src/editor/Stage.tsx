@@ -4,6 +4,7 @@ import { useDoc } from "../markup/model/store";
 import { displaySize, snapToDevice, wheelZoomFactor } from "./view";
 import { CropOverlay } from "./CropOverlay";
 import { useCropStore } from "./cropStore";
+import { useResizeStore } from "./resizeStore";
 import { useViewStore } from "./viewStore";
 import { isTyping } from "../shared/dom";
 import styles from "./EditorApp.module.css";
@@ -28,6 +29,7 @@ export function Stage({ canvasRef, message }: Props) {
   const source = useDoc((s) => s.doc.source);
   const draft = useCropStore((s) => s.draft);
   const cropFrame = useCropStore((s) => s.frame);
+  const resizing = useResizeStore((s) => s.active);
   // What's on show: the crop (in crop mode, the crop it started from).
   const area = cropFrame ?? crop;
   const space = useSpaceHeld();
@@ -146,7 +148,7 @@ export function Stage({ canvasRef, message }: Props) {
           scale={scale}
           offset={origin}
           clip={area}
-          interactive={!space && !panning && !draft}
+          interactive={!space && !panning && !draft && !resizing}
         />
       )}
       {css && viewport && draft && cropFrame && (

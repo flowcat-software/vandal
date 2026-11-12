@@ -1037,6 +1037,22 @@
   width: 56px;
 }
 
+/* Resize mode (PLAN 3Z): what the size becomes, or why it can't. */
+.resizeCaption,
+.resizeError {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.resizeCaption {
+  color: var(--text-2);
+}
+
+.resizeError {
+  color: var(--error-text);
+}
+
 /* Aspect-ratio buttons: text, so a little padding instead of a fixed width. */
 .ratio {
   padding: 0 8px;
