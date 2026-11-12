@@ -12,6 +12,7 @@ import {
   toggleCropPortrait,
   useCropStore,
 } from "./cropStore";
+import { tabBetweenSizeBoxes } from "./sizeTab";
 import styles from "../markup/options.module.css";
 
 /**
@@ -161,6 +162,7 @@ function SizeField({
       onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
       onBlur={commit}
       onKeyDown={(e) => {
+        tabBetweenSizeBoxes(e);
         // Enter sets the size and applies the crop (Richard), as Enter in
         // Resize's boxes resizes.
         if (e.key === "Enter") {

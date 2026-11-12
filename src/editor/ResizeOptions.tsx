@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDoc } from "../markup/model/store";
 import { resizeImage } from "./imageVersions";
 import { endResize } from "./resizeStore";
+import { tabBetweenSizeBoxes } from "./sizeTab";
 import {
   fieldsFor,
   sizeOf,
@@ -90,6 +91,7 @@ function ResizeBar({ base }: { base: Size }) {
       value={fields[side]}
       disabled={busy}
       onFocus={(e) => e.target.select()}
+      onKeyDown={tabBetweenSizeBoxes}
       onChange={(e) => {
         const text = e.target.value.replace(unit === "px" ? /[^\d]/g : /[^\d.]/g, "");
         setFields((f) => typed(f, side, text, base, unit, locked));
@@ -128,6 +130,8 @@ function ResizeBar({ base }: { base: Size }) {
           type="button"
           className={styles.toggle}
           aria-pressed={locked}
+          // Tab goes between the boxes only, for now (sizeTab.ts).
+          tabIndex={-1}
           aria-label="Keep proportions"
           title={locked ? "Proportions kept: click to set each side" : "Keep proportions"}
           onClick={toggleLock}
