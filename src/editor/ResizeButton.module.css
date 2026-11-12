@@ -1,0 +1,181 @@
+/* Resize image (PLAN 3Z): the toolbar button's popover. */
+
+.root {
+  position: relative;
+  display: flex;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  width: 264px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 0.16),
+    0 0 0 1px var(--border);
+  color: var(--text);
+  font-size: 12px;
+  cursor: default;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.units {
+  display: flex;
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--control-bg);
+  box-shadow: inset 0 0 0 1px var(--control-border);
+}
+
+.unit {
+  flex: 1;
+  height: 24px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+}
+
+.unit[aria-pressed="true"] {
+  background: var(--button-bg-active);
+  color: var(--text);
+}
+
+.unit:hover:not([aria-pressed="true"]) {
+  background: var(--control-bg-hover);
+}
+
+.sizes {
+  display: grid;
+  grid-template-columns: auto 1fr 28px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 6px;
+}
+
+.label {
+  color: var(--text-2);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--control-bg);
+  box-shadow: inset 0 0 0 1px var(--control-border);
+}
+
+.field:focus-within {
+  background: var(--control-bg-focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+
+.field input {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  padding: 0 8px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.suffix {
+  padding-right: 8px;
+  color: var(--text-3);
+}
+
+/* The lock spans both rows, between the fields and the bracket it closes. */
+.lock {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  width: 28px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-2);
+}
+
+.lock:hover {
+  background: var(--hover);
+}
+
+.lock[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.lock svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.caption {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  color: var(--error-text);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.button {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  font: inherit;
+  background: var(--button-bg);
+  box-shadow: inset 0 0 0 1px var(--control-border);
+  color: var(--text);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--button-bg-hover);
+}
+
+.primary {
+  background: var(--accent);
+  box-shadow: none;
+  color: var(--on-accent);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+
+.primary:disabled {
+  opacity: 0.45;
+}

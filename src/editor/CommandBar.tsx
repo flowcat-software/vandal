@@ -4,6 +4,7 @@ import { keySuffix } from "../markup/shortcuts";
 import { useSqueeze } from "./squeeze";
 import { useStyleConfig } from "../markup/styles";
 import { Toolbar } from "../markup/Toolbar";
+import { ResizeButton } from "./ResizeButton";
 import markupStyles from "../markup/markup.module.css";
 import styles from "./EditorApp.module.css";
 
@@ -48,21 +49,24 @@ export function CommandBar({
         disabled={empty}
         eyedropper
         extra={
-          <button
-            type="button"
-            className={markupStyles.tool}
-            {...hint("tool.crop")}
-            aria-label={`Crop${cropKey}`}
-            aria-pressed={cropping}
-            title={`Crop${cropKey}`}
-            disabled={empty}
-            onClick={onCrop}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden>
-              <path d="M6 2v16h16" />
-              <path d="M2 6h16v16" />
-            </svg>
-          </button>
+          <>
+            <button
+              type="button"
+              className={markupStyles.tool}
+              {...hint("tool.crop")}
+              aria-label={`Crop${cropKey}`}
+              aria-pressed={cropping}
+              title={`Crop${cropKey}`}
+              disabled={empty}
+              onClick={onCrop}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path d="M6 2v16h16" />
+                <path d="M2 6h16v16" />
+              </svg>
+            </button>
+            <ResizeButton disabled={empty || cropping} />
+          </>
         }
       />
       <span className={styles.spacer} />

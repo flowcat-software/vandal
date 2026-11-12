@@ -22,6 +22,7 @@ import {
 import { alreadyDone, exportImage, markDelivered } from "./actions";
 import { CommandBar } from "./CommandBar";
 import { CropOptions } from "./CropOptions";
+import { toggleResize } from "./ResizeButton";
 import { EmptyEditor } from "./EmptyEditor";
 import { applyCrop, beginCrop, cancelCrop, useCropStore } from "./cropStore";
 import { paintFrame, startImageVersions } from "./imageVersions";
@@ -378,6 +379,13 @@ export function EditorApp() {
         if (emptyRef.current || isTyping(e.target)) return;
         e.preventDefault();
         void (e.code === "KeyC" ? copyMarkup(setNotice) : replaceMarkup(setNotice));
+        return;
+      }
+      // Resize image (PLAN 3Z), as Photoshop's Image Size and Affinity's Resize Document.
+      if (e.ctrlKey && e.altKey && !e.shiftKey && e.code === "KeyI") {
+        if (emptyRef.current || isTyping(e.target) || useCropStore.getState().draft) return;
+        e.preventDefault();
+        toggleResize();
         return;
       }
       if (!e.ctrlKey || e.altKey) return;

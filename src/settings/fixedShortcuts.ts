@@ -55,6 +55,7 @@ export const QUICK_EDIT_KEYS: KeyEntry[] = [
 
 export const EDITOR_KEYS: KeyEntry[] = [
   { keys: ["Ctrl+Shift+S"], what: "Save as" },
+  { keys: ["Ctrl+Alt+I"], what: "Resize the image" },
   { keys: ["Ctrl+N"], what: "Capture" },
   { keys: ["Ctrl+O"], what: "Open an image" },
   { keys: ["Ctrl+Shift+C"], what: "Copy the selected marks" },
