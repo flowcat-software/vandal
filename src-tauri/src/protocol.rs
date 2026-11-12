@@ -84,6 +84,8 @@ enum Route {
         format: TransferFormat,
     },
     Editor(EditorId),
+    /// A resized version of the editor's image (PLAN 3Z).
+    EditorVersion(EditorId, u32),
     /// The editor's image file, for the page to decode (PLAN 3Q).
     EditorSource(EditorId),
     EditorLayer(EditorId, LayerKind),
@@ -143,8 +145,13 @@ pub fn handle<R: Runtime>(
                 responder.respond(ok(body, content_type));
             });
         }
-        Some(Route::Editor(id)) => {
-            let Some(image) = state.editors.lock().unwrap().image(id) else {
+        Some(route @ (Route::Editor(_) | Route::EditorVersion(..))) => {
+            let (id, version) = match route {
+                Route::EditorVersion(id, v) => (id, v),
+                Route::Editor(id) => (id, 0),
+                _ => unreachable!(),
+            };
+            let Some(image) = state.editors.lock().unwrap().image_at(id, version) else {
                 responder.respond(error(StatusCode::NOT_FOUND));
                 return;
             };
@@ -231,6 +238,10 @@ fn parse(uri: &tauri::http::Uri) -> Option<Route> {
             })
         }
         ["editor", id] if uri.query().is_none() => Some(Route::Editor(id.parse().ok()?)),
+        ["editor", id, "v", version] if uri.query().is_none() => Some(Route::EditorVersion(
+            id.parse().ok()?,
+            version.parse().ok()?,
+        )),
         ["editor", id, "source"] if uri.query().is_none() => {
             Some(Route::EditorSource(id.parse().ok()?))
         }

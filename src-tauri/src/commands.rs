@@ -406,6 +406,40 @@ pub async fn editor_export(
     .map_err(|e| e.to_string())?
 }
 
+/// Resize image (PLAN 3Z): `crop` of image version `from` resampled to
+/// `width` × `height`, as a new version (fetched from `/editor/{id}/v/{n}`).
+#[tauri::command]
+#[specta::specta]
+pub async fn editor_resize(
+    app: AppHandle,
+    window: WebviewWindow,
+    from: u32,
+    crop: PhysicalRect,
+    width: u32,
+    height: u32,
+) -> Result<editor::Resized, String> {
+    let id = editor::id_from_label(window.label()).ok_or("not an editor window")?;
+    tauri::async_runtime::spawn_blocking(move || {
+        editor::resize(&app, id, from, crop, width, height)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// The resized image versions the page's undo history still reaches (PLAN
+/// 3Z); the others are dropped.
+#[tauri::command]
+#[specta::specta]
+pub fn editor_keep_versions(app: AppHandle, window: WebviewWindow, keep: Vec<u32>) {
+    if let Some(id) = editor::id_from_label(window.label()) {
+        app.state::<AppState>()
+            .editors
+            .lock()
+            .unwrap()
+            .keep_versions(id, &keep);
+    }
+}
+
 /// Ask whether to save unsaved changes before the editor's document goes
 /// (it closes, or another image replaces it).
 #[tauri::command]
@@ -620,6 +654,7 @@ pub fn set_tool_styles(app: AppHandle, styles: String) {
 pub async fn editor_recognize_text(
     app: AppHandle,
     window: WebviewWindow,
+    version: u32,
 ) -> Result<Vec<OcrLine>, OcrError> {
     let id = crate::editor::id_from_label(window.label())
         .ok_or_else(|| OcrError::failed("Not an editor window."))?;
@@ -628,7 +663,7 @@ pub async fn editor_recognize_text(
         .editors
         .lock()
         .unwrap()
-        .image(id)
+        .image_at(id, version)
         .ok_or_else(|| OcrError::failed("The editor has no image."))?;
     recognize_text(app, image).await
 }

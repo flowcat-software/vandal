@@ -287,6 +287,11 @@ export interface Doc {
   crop: Rect;
   /** Back to front. */
   annotations: Annotation[];
+  /**
+   * Which of the editor's images `source` is (PLAN 3Z): a resize makes a new
+   * one in Rust, and undo goes back to the old number. Absent: as loaded (0).
+   */
+  imageVersion?: number;
 }
 
 export function emptyDoc(source: { width: number; height: number }, crop?: Rect): Doc {

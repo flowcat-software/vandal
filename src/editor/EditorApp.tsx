@@ -83,7 +83,9 @@ export function EditorApp() {
         image: { x: 0, y: 0, width: init.width, height: init.height, data: pixels },
       });
       // Redact's Detect text toggle reads this image's words (PLAN 3J).
-      setTextRecognizer(() => commands.editorRecognizeText());
+      setTextRecognizer(() =>
+        commands.editorRecognizeText(docStore.getState().doc.imageVersion ?? 0),
+      );
       cancelCrop();
       docStore.getState().load(initialDoc(init));
       // Reopened from a notification: already delivered (PLAN 3D.1).

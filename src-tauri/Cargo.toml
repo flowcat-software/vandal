@@ -39,6 +39,8 @@ tauri-winrt-notification = "0.8"
 tauri-plugin-dialog = "2"
 # Updates (PLAN 3P). Rust only: no webview gets the updater permission.
 tauri-plugin-updater = "2"
+# Resize image (PLAN 3Z): SIMD Lanczos/Catmull-Rom resampling, RGBA8 only.
+fast_image_resize = { version = "=6.1.0", default-features = false, features = ["std", "only_u8x4"] }
 
 
 # Pixel loops (swizzle, BMP encode) are unusably slow at opt-level 0.

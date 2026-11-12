@@ -87,6 +87,27 @@ pub struct Editor {
     pub overwrite_confirmed: bool,
     /// Reopened from a notification: the document was already delivered.
     pub delivered: bool,
+    /// Resized images (PLAN 3Z); `image` is version 0.
+    pub versions: Versions,
+}
+
+/// An editor's resized images (PLAN 3Z), by version number. The page's
+/// document says which version it shows, so undo and redo only switch
+/// numbers; versions stay here while its history can reach them, and go with
+/// the image (another one loaded, the window closed).
+#[derive(Default)]
+pub struct Versions {
+    last: u32,
+    images: HashMap<u32, Arc<RgbaImage>>,
+}
+
+/// The result of a resize (PLAN 3Z): the new version and its size.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct Resized {
+    pub version: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 /// An image file's bytes as read when it was decoded, served to the editor
@@ -206,8 +227,21 @@ impl Editors {
         self.open.get(&id).and_then(|e| e.source.clone())
     }
 
-    pub fn image(&self, id: EditorId) -> Option<Arc<RgbaImage>> {
-        self.open.get(&id).and_then(|e| e.image.clone())
+    /// The editor's image as of `version` (0: as loaded; PLAN 3Z).
+    pub fn image_at(&self, id: EditorId, version: u32) -> Option<Arc<RgbaImage>> {
+        let e = self.open.get(&id)?;
+        match version {
+            0 => e.image.clone(),
+            v => e.versions.images.get(&v).cloned(),
+        }
+    }
+
+    /// Forget the resized versions not in `keep` (the page's history no
+    /// longer reaches them).
+    pub fn keep_versions(&mut self, id: EditorId, keep: &[u32]) {
+        if let Some(e) = self.open.get_mut(&id) {
+            e.versions.images.retain(|v, _| keep.contains(v));
+        }
     }
 
     /// Keep an uploaded layer for the next export. `false` if the editor is
@@ -546,6 +580,7 @@ fn load_into(
             source,
             overwrite_confirmed: false,
             delivered: false,
+            versions: Versions::default(),
         };
     }
     let _ = window.set_title(title);
@@ -843,6 +878,7 @@ fn open(
         source,
         overwrite_confirmed: false,
         delivered,
+        versions: Versions::default(),
     });
 
     let monitors = state.monitors.read().unwrap().clone();
@@ -956,6 +992,46 @@ pub struct ExportMarkup {
     pub with_highlights: bool,
     /// Composite the annotation layer POSTed to `layerUrl` just before.
     pub with_layer: bool,
+    /// The image version the document shows (PLAN 3Z; 0 as loaded).
+    pub version: u32,
+}
+
+/// Resize image (PLAN 3Z): `crop` of version `from` resampled to
+/// `width` × `height`, kept as a new version, which is returned.
+pub fn resize(
+    app: &AppHandle,
+    id: EditorId,
+    from: u32,
+    crop: PhysicalRect,
+    width: u32,
+    height: u32,
+) -> Result<Resized, String> {
+    let state = app.state::<AppState>();
+    let base = state
+        .editors
+        .lock()
+        .unwrap()
+        .image_at(id, from)
+        .ok_or("That image isn't here any more.")?;
+    let started = Instant::now();
+    // Without the lock: a large resize takes a moment.
+    let image = crate::resample::resample(&base, crop, width, height)?;
+    logln!(
+        "[editor] #{id}: resized {}×{} → {width}×{height} in {:.1}ms",
+        crop.width,
+        crop.height,
+        started.elapsed().as_secs_f64() * 1000.0
+    );
+    let mut editors = state.editors.lock().unwrap();
+    let e = editors.open.get_mut(&id).ok_or("this editor is closed")?;
+    e.versions.last += 1;
+    let version = e.versions.last;
+    e.versions.images.insert(version, Arc::new(image));
+    Ok(Resized {
+        version,
+        width,
+        height,
+    })
 }
 
 /// Crop the base to `crop`, apply `markup`, and copy or save. Runs dialogs and
@@ -973,6 +1049,7 @@ pub fn export(
         redactions,
         with_highlights,
         with_layer,
+        version,
     } = markup;
     let id = id_from_label(window.label()).ok_or("not an editor window")?;
     let (base, layer, highlights, file) = {
@@ -986,8 +1063,11 @@ pub fn export(
         } else {
             None
         };
-        let image = e.image.clone().ok_or("there's no image to copy or save")?;
-        (image, layer, highlights, e.file.clone())
+        let file = e.file.clone();
+        let image = editors
+            .image_at(id, version)
+            .ok_or("there's no image to copy or save")?;
+        (image, layer, highlights, file)
     };
     let mut image = compose::crop_rgba(&base, crop).ok_or("the crop is empty")?;
     redact::apply(&base, crop, &mut image, &redactions);

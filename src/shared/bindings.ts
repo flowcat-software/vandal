@@ -295,6 +295,16 @@ export const commands = {
 	 */
 	editorExport: (crop: PhysicalRect, markup: ExportMarkup, action: ExportAction, layerMs: number | null) => typedError<ExportOutcome, string>(__TAURI_INVOKE("editor_export", { crop, markup, action, layerMs })),
 	/**
+	 *  Resize image (PLAN 3Z): `crop` of image version `from` resampled to
+	 *  `width` × `height`, as a new version (fetched from `/editor/{id}/v/{n}`).
+	 */
+	editorResize: (from: number, crop: PhysicalRect, width: number, height: number) => typedError<Resized, string>(__TAURI_INVOKE("editor_resize", { from, crop, width, height })),
+	/**
+	 *  The resized image versions the page's undo history still reaches (PLAN
+	 *  3Z); the others are dropped.
+	 */
+	editorKeepVersions: (keep: number[]) => __TAURI_INVOKE<void>("editor_keep_versions", { keep }),
+	/**
 	 *  Ask whether to save unsaved changes before the editor's document goes
 	 *  (it closes, or another image replaces it).
 	 */
@@ -319,7 +329,7 @@ export const commands = {
 	 *  The text in the editor's image, for redacting it (PLAN 3J): lines of
 	 *  words, in image pixels.
 	 */
-	editorRecognizeText: () => typedError<OcrLine[], OcrError>(__TAURI_INVOKE("editor_recognize_text")),
+	editorRecognizeText: (version: number) => typedError<OcrLine[], OcrError>(__TAURI_INVOKE("editor_recognize_text", { version })),
 	/**
 	 *  The text in `rect` of a capture (quick edit's selection, PLAN 3J), in
 	 *  virtual-desktop physical pixels like `rect`.
@@ -590,6 +600,8 @@ export type ExportMarkup = {
 	withHighlights: boolean,
 	/**  Composite the annotation layer POSTed to `layerUrl` just before. */
 	withLayer: boolean,
+	/**  The image version the document shows (PLAN 3Z; 0 as loaded). */
+	version: number,
 };
 
 export type ExportOutcome = { kind: "copied" } | { kind: "saved"; path: string } | 
@@ -911,6 +923,13 @@ export type ResetSettings = {
 	 *  turns this off. On by default, so Reset all settings asks again.
 	 */
 	askForGroups?: boolean,
+};
+
+/**  The result of a resize (PLAN 3Z): the new version and its size. */
+export type Resized = {
+	version: number,
+	width: number,
+	height: number,
 };
 
 /**  Where the editor's Save As dialog starts. */

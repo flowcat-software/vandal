@@ -29,6 +29,7 @@ mod output;
 mod overlay;
 mod protocol;
 mod redact;
+mod resample;
 mod scrub;
 mod session;
 mod settings;
@@ -111,6 +112,8 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             commands::editor_init,
             commands::editor_ready,
             commands::editor_export,
+            commands::editor_resize,
+            commands::editor_keep_versions,
             commands::editor_confirm_close,
             commands::editor_new_capture,
             commands::reveal_file,

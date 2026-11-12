@@ -32,6 +32,7 @@ export async function exportImage(init: EditorInit, action: ExportAction): Promi
       redactions: exportRedactions(doc),
       withHighlights: highlights !== null,
       withLayer: layer !== null,
+      version: doc.imageVersion ?? 0,
     },
     action,
     layerMs,
