@@ -17,12 +17,13 @@ All notable changes to Vandal are listed here. The format follows
   what was copied (it can be turned off).
 - **Eyedropper in the toolbar** (**I**), in quick edit and the editor: click a pixel anywhere for
   the first color, right-click for the second (a shape's border, a text box, a marker). The color
-  lands on the custom swatch and on the selected marks. **The markup's eyedropper copies too**
-  also puts it on the clipboard.
+  lands on the custom swatch and on any selected markup. If **The markup's eyedropper copies too**
+  option is enabled in (Settings › Capture › Color picker), it also copies the color value to the
+  clipboard for further use.
 - **Resize image** in the editor (**K** or **Ctrl+Alt+I**, or the button after Crop). Like Crop,
   it's a mode with its controls in the options bar: the width and height in pixels or percent,
   with the proportions kept unless you unlock the padlock, and what the size becomes. Enter or
-  **Resize** applies it; Esc or another tool leaves without resizing. The marks scale with the
+  **Resize** applies it; Esc or another tool leaves without resizing. The markup scales with the
   image, and Ctrl+Z undoes it.
 
 ### Changed
@@ -30,7 +31,7 @@ All notable changes to Vandal are listed here. The format follows
 - The color picker's magnifier shows RGB next to the hex value.
 - The editor window's minimum width is 880 pixels (was 800), to fit the new toolbar buttons.
 - **Crop's size boxes:** Enter applies the crop (it used to only set the size), and the boxes sit
-  side by side after a "W × H" label, with "px" once at the end.
+  side by side after a "W × H" label, with "px" once at the end for a neater look.
 - The editor's general hint lists the crop and resize keys after the tools.
 
 ## [0.3.0-beta.18] - 2026-11-08
