@@ -32,6 +32,8 @@ pub struct Shortcuts {
     pub swap_colors: Option<String>,
     /// The eyedropper: pick either chip color from the screen (PLAN 3Y.3).
     pub eyedropper: Option<String>,
+    /// The editor's resize mode (PLAN 3Z), as Figma's Scale tool.
+    pub resize: Option<String>,
 }
 
 impl Default for Shortcuts {
@@ -54,6 +56,7 @@ impl Default for Shortcuts {
             crop: key("C"),
             swap_colors: key("X"),
             eyedropper: key("I"),
+            resize: key("K"),
         }
     }
 }
@@ -83,7 +86,7 @@ pub const FIXED: &[(&str, &str)] = &[
 
 impl Shortcuts {
     /// Each shortcut with what it does, for messages.
-    fn entries_mut(&mut self) -> [(&'static str, &mut Option<String>); 15] {
+    fn entries_mut(&mut self) -> [(&'static str, &mut Option<String>); 16] {
         [
             ("Select", &mut self.select),
             ("Pen", &mut self.pen),
@@ -100,6 +103,7 @@ impl Shortcuts {
             ("Crop", &mut self.crop),
             ("Swap colors", &mut self.swap_colors),
             ("Eyedropper", &mut self.eyedropper),
+            ("Resize image", &mut self.resize),
         ]
     }
 

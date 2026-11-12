@@ -292,7 +292,7 @@ open, drop, paste (Ctrl+V) or capture an image into it.
   height, or keep a ratio such as 16:9 (with **Portrait** for 9:16). Enter applies, Esc cancels.
   Crop never throws pixels away: undo it, or choose **Show full capture** in crop mode to get
   the rest back.
-- **Resize:** the resize button after Crop (Ctrl+Alt+I) scales the image you see, in pixels or
+- **Resize:** the resize button after Crop (K, or Ctrl+Alt+I) scales the image you see, in pixels or
   percent, keeping its proportions unless you click the padlock. Enter or **Resize** applies it,
   Esc cancels. Your marks scale with the image, so the picture looks the same, only bigger or
   smaller, and Ctrl+Z puts the original back. Sides go up to 16,384 pixels and images up to 100
@@ -421,16 +421,16 @@ numpad.
 **Tools** (editor and quick edit). These are the defaults: change them, or add Ctrl, Alt or
 Shift, in **Settings › Keyboard shortcuts**, which also lists every shortcut.
 
-| Key | Tool        | Key | Tool               |
-| --- | ----------- | --- | ------------------ |
-| V   | Select      | E   | Ellipse            |
-| P   | Pen         | T   | Text               |
-| H   | Highlighter | O   | Callout            |
-| L   | Line        | B   | Redact             |
-| A   | Arrow       | S   | Spotlight          |
-| R   | Rectangle   | N   | Step marker        |
-| X   | Swap colors | C   | Crop (editor only) |
-| I   | Eyedropper  |     |                    |
+| Key | Tool        | Key | Tool                 |
+| --- | ----------- | --- | -------------------- |
+| V   | Select      | E   | Ellipse              |
+| P   | Pen         | T   | Text                 |
+| H   | Highlighter | O   | Callout              |
+| L   | Line        | B   | Redact               |
+| A   | Arrow       | S   | Spotlight            |
+| R   | Rectangle   | N   | Step marker          |
+| X   | Swap colors | C   | Crop (editor only)   |
+| I   | Eyedropper  | K   | Resize (editor only) |
 
 **Styles**
 

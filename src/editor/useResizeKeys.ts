@@ -1,5 +1,5 @@
-// Resize mode's keys (PLAN 3Z), as crop mode's (useCropKeys.ts). Ctrl+Alt+I
-// enters and leaves it. While resizing: Enter resizes, Esc leaves, a tool's
+// Resize mode's keys (PLAN 3Z), as crop mode's (useCropKeys.ts). Its shortcut
+// (K) and Ctrl+Alt+I enter and leave it. While resizing: Enter resizes, Esc leaves, a tool's
 // shortcut leaves for that tool and crop's for crop mode; the fields take
 // typing. Other markup shortcuts are held back (nothing to select or
 // restyle), but saving, copying, undo, zooming and panning still work.
@@ -29,6 +29,14 @@ export function useResizeKeys(active?: () => boolean): void {
         toggleResize();
         return;
       }
+      // Its own key (K; PLAN 3Z), as crop's C: in and out, and from crop mode.
+      const id = isTyping(e.target) ? null : shortcutOf(e, useStyleConfig.getState().shortcuts);
+      if (id === "resize" && !e.repeat) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toggleResize();
+        return;
+      }
       if (!isResizing()) return;
       if (e.code === "Enter" || e.code === "NumpadEnter") {
         e.preventDefault();
@@ -45,7 +53,6 @@ export function useResizeKeys(active?: () => boolean): void {
       // The fields' own typing, moving between the bar's controls (Tab), and
       // Ctrl's editor shortcuts (copy, save, undo, zoom).
       if (isTyping(e.target) || e.ctrlKey || e.code === "Space" || e.code === "Tab") return;
-      const id = shortcutOf(e, useStyleConfig.getState().shortcuts);
       e.stopImmediatePropagation();
       e.preventDefault();
       if (id === "crop") {

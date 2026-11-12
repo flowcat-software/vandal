@@ -1024,6 +1024,8 @@ export type Shortcuts = {
 	swapColors?: string | null,
 	/**  The eyedropper: pick either chip color from the screen (PLAN 3Y.3). */
 	eyedropper?: string | null,
+	/**  The editor's resize mode (PLAN 3Z), as Figma's Scale tool. */
+	resize?: string | null,
 };
 
 export type Startup = {

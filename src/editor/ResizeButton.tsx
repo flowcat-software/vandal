@@ -1,4 +1,6 @@
 import { hint } from "../markup/HintLine";
+import { keySuffix } from "../markup/shortcuts";
+import { useStyleConfig } from "../markup/styles";
 import { toggleResize, useResizeStore } from "./resizeStore";
 import markupStyles from "../markup/markup.module.css";
 
@@ -11,14 +13,15 @@ const CRISP = { strokeWidth: 1, strokeLinecap: "butt", strokeLinejoin: "miter" }
  */
 export function ResizeButton({ disabled }: { disabled: boolean }) {
   const active = useResizeStore((s) => s.active);
+  const label = `Resize image${keySuffix(useStyleConfig((s) => s.shortcuts.resize))}`;
   return (
     <button
       type="button"
       className={markupStyles.tool}
       {...hint("tool.resize")}
-      aria-label="Resize image (Ctrl+Alt+I)"
+      aria-label={label}
       aria-pressed={active}
-      title="Resize image (Ctrl+Alt+I)"
+      title={label}
       disabled={disabled}
       onClick={toggleResize}
     >

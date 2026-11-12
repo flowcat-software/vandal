@@ -17,7 +17,7 @@ All notable changes to Vandal are listed here. The format follows
   the first color, right-click for the second (a shape's border, a text box, a marker). The color
   lands on the custom swatch and on the selected marks. **The markup's eyedropper copies too**
   also puts it on the clipboard.
-- **Resize image** in the editor (**Ctrl+Alt+I**, or the button after Crop): set the width and
+- **Resize image** in the editor (**K** or **Ctrl+Alt+I**, or the button after Crop): set the width and
   height in pixels or percent, with the proportions kept unless you unlock them. The marks scale
   with the image, and Ctrl+Z undoes it.
 

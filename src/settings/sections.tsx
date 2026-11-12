@@ -859,7 +859,7 @@ export const sections: Section[] = [
           kind: "shortcut" as const,
           shortcut,
           label: SHORTCUT_NAMES[shortcut],
-          description: shortcut === "crop" ? "In the editor" : undefined,
+          description: shortcut === "crop" || shortcut === "resize" ? "In the editor" : undefined,
           keywords: ["shortcut", "keyboard", "key", "tool"],
         })),
       },

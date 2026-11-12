@@ -25,6 +25,7 @@ export const DEFAULT_SHORTCUTS: ShortcutKeys = {
   crop: "C",
   swapColors: "X",
   eyedropper: "I",
+  resize: "K",
 };
 
 /** What each shortcut does, in the toolbar's order, for Settings and its messages. */
@@ -44,6 +45,7 @@ export const SHORTCUT_NAMES: Record<ShortcutId, string> = {
   crop: "Crop",
   swapColors: "Swap colors",
   eyedropper: "Eyedropper",
+  resize: "Resize image",
 };
 
 /** The shortcut a key press makes, spelled as settings store it, or null if it can't be one. */

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CONTROL_HINTS, chooseHint, parseHint, type HintState } from "./hints";
+import { CONTROL_HINTS, chooseHint, parseHint, withShortcuts, type HintState } from "./hints";
+import { DEFAULT_SHORTCUTS } from "./shortcuts";
 
 const base: HintState = {
   hover: null,
@@ -111,5 +112,14 @@ describe("parseHint", () => {
         else expect(part.keys.every((k) => k.length > 0)).toBe(true);
       }
     }
+  });
+});
+
+describe("the general hint's keys", () => {
+  it("lists the tools, then crop and resize (PLAN 3Z), each dropped when it has no key", () => {
+    const idle = withShortcuts(chooseHint(base), DEFAULT_SHORTCUTS);
+    expect(idle).toMatch(/^\[V\] \[P\] .*\[N\] tools · \[C\] crop · \[K\] resize · /);
+    const noResize = withShortcuts(chooseHint(base), { ...DEFAULT_SHORTCUTS, resize: null });
+    expect(noResize).toContain("[C] crop · [Ctrl+Z] undo");
   });
 });

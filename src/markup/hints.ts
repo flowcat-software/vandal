@@ -30,7 +30,7 @@ export const CONTROL_HINTS = {
   "tool.callout": "{callout} Drag from what to point at to where the text goes, or click",
   "tool.crop": "{crop} Crop the image · [Ctrl+Z] undoes a crop",
   "tool.resize":
-    "[Ctrl+Alt+I] Resize the image, in pixels or percent · the marks scale with it · [Ctrl+Z] undoes it",
+    "{resize} Resize the image, in pixels or percent · the marks scale with it · [Ctrl+Alt+I] too",
   "tool.eyedropper":
     "{eyedropper} Pick a color from the screen · click sets the first color, right-click the second",
   undo: "[Ctrl+Z] Undo",
@@ -203,7 +203,8 @@ const RESIZE =
 const EMPTY =
   "[Ctrl+N] capture · [Ctrl+O] open an image · [Ctrl+V] paste one · or drop an image file here · [Ctrl+,] settings";
 
-const IDLE = `{tools} tools · [Ctrl+Z] undo · [Ctrl+C] copy · [Ctrl+S] save · ${PAN_ZOOM}`;
+// The editor's own modes after the tools (only the editor shows hints): crop and resize (PLAN 3Z).
+const IDLE = `{tools} tools · {crop?} crop · {resize?} resize · [Ctrl+Z] undo · [Ctrl+C] copy · [Ctrl+S] save · ${PAN_ZOOM}`;
 
 export interface HintState {
   hover: ControlHint | null;
