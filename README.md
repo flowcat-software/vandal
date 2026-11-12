@@ -25,7 +25,7 @@
 ---
 
 <p align="center">
-  <img src="docs/images/quick-edit.png" width="980" alt="Vandal's quick edit toolbar under a selected region of a Wikipedia page">
+  <img src="docs/images/quick-edit.png" width="964" alt="Quick edit on a selected region of a Wikipedia page: a dashed green arrow and highlighted text, with the toolbar and the arrow's style options below">
 </p>
 
 Every single feature in Vandal is built for speed and efficiency. We hate useless clicks as much
