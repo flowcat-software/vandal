@@ -25,6 +25,9 @@ export function toggleResize(): void {
 
 const closeResize = () => useResizeStore.setState({ open: false });
 
+/** The toolbar draws 1.6-unit round strokes; this icon is pixel-snapped instead. */
+const CRISP = { strokeWidth: 1, strokeLinecap: "butt", strokeLinejoin: "miter" } as const;
+
 /**
  * Resize image (PLAN 3Z): the toolbar button and its popover. Width and
  * height in pixels or percent of the visible image, linked by the lock;
@@ -51,10 +54,15 @@ export function ResizeButton({ disabled }: { disabled: boolean }) {
         disabled={disabled}
         onClick={toggleResize}
       >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <rect x="3" y="11" width="10" height="10" rx="1.5" />
-          <path d="M13 11l7-7" />
-          <path d="M14.5 4H20v5.5" />
+        {/* Drawn on the 20 px it's shown at, 1 px lines on half-pixels, so
+            the dots stay crisp at 100% (on 24 units they smeared). */}
+        <svg viewBox="0 0 20 20" style={CRISP} aria-hidden>
+          {/* The image now (solid), growing into its new size (dotted, open
+              where the solid one covers its corner). */}
+          <path d="M6.5 10.5V2.5h11v11h-8" strokeDasharray="1 1" strokeDashoffset="0.5" />
+          <rect x="2.5" y="10.5" width="7" height="7" />
+          <path d="M9.5 10.5l4-4" />
+          <path d="M10.5 6.5h3v3" />
         </svg>
       </button>
       {open && <ResizePanel rootRef={rootRef} />}
