@@ -104,7 +104,8 @@ pub struct Already {
 
 /// Hand a finished capture to the configured actions. Returns immediately; the
 /// work runs on a background thread so the overlay can disappear at once.
-/// `doc` is what the notification's Edit reopens (PLAN 3D.1).
+/// `doc` is what the notification's Edit reopens (PLAN 3D.1); without a
+/// notification nothing can reopen it, so it isn't kept (PLAN 3AA).
 pub fn deliver(
     app: &AppHandle,
     image: RgbaImage,
@@ -116,16 +117,6 @@ pub fn deliver(
     let app = app.clone();
     std::thread::spawn(move || {
         let image = Arc::new(image);
-        let image_id = app
-            .state::<AppState>()
-            .recent_images
-            .lock()
-            .unwrap()
-            .push(Recent {
-                image: image.clone(),
-                doc,
-            });
-
         let copying = settings.after_capture.copy_to_clipboard && !already.copied;
         let copied = copying
             && match copy_to_clipboard(&image) {
@@ -163,6 +154,15 @@ pub fn deliver(
         if !wants_notification(&settings, copied, saved.is_some()) {
             return;
         }
+        let image_id = app
+            .state::<AppState>()
+            .recent_images
+            .lock()
+            .unwrap()
+            .push(Recent {
+                image: image.clone(),
+                doc,
+            });
         let preview = saved.clone().or_else(|| write_preview(&image).ok());
         notify_capture(
             &app,

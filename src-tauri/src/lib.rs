@@ -275,9 +275,7 @@ pub fn run() {
                 capturer: Box::new(GdiCapturer),
                 window_capturer: Box::new(capture::wgc::WgcCapturer::default()),
                 text_recognizer: Box::new(ocr::winrt::WindowsOcr),
-                frames: Mutex::new(FrameStore::new(
-                    settings.history.keep_frames_in_memory as usize,
-                )),
+                frames: Mutex::new(FrameStore::new()),
                 monitors: RwLock::new(monitors.clone()),
                 settings: RwLock::new(settings.clone()),
                 session: Mutex::new(None),

@@ -662,10 +662,6 @@ export type HandoffMarkup = {
 	dy: number,
 };
 
-export type History = {
-	keepFramesInMemory?: number,
-};
-
 /**  Human-readable accelerators, e.g. `"Win+Shift+F12"`. `None` = unassigned. */
 export type Hotkeys = {
 	region?: string | null,
@@ -986,7 +982,6 @@ export type Settings = {
 	/**  Style pickers for the markup tools. */
 	styles?: Styles,
 	startup?: Startup,
-	history?: History,
 	tray?: TraySettings,
 	/**  Automatic updates (PLAN 3P). */
 	updates?: UpdateSettings,

@@ -1,4 +1,4 @@
-//! In-memory store of recent captures (PLAN §4.3). Full-resolution pixels stay
+//! In-memory store of the capture on screen (PLAN §4.3, 3AA). Full-resolution pixels stay
 //! in Rust; the webview fetches them through the custom protocol.
 
 use std::collections::VecDeque;
@@ -33,31 +33,44 @@ impl Capture {
     }
 }
 
+/// The capture on screen, while its overlays are up (PLAN 3AA). A session's
+/// capture leaves when the session ends ([`FrameStore::take`]); whoever
+/// delivers it holds the `Arc` until done, and then the pixels are freed. A
+/// capture that never goes on screen (full screen, a window's own pixels) gets
+/// an id from [`FrameStore::detached`] and isn't stored at all.
 pub struct FrameStore {
-    capacity: usize,
     next_id: CaptureId,
     /// Oldest first.
     captures: VecDeque<Arc<Capture>>,
 }
 
 impl FrameStore {
-    pub fn new(capacity: usize) -> Self {
+    /// Only one capture is on screen at a time. This bounds what a path that
+    /// forgot to take its capture could leave behind.
+    const MAX: usize = 2;
+
+    pub fn new() -> Self {
         Self {
-            capacity: capacity.max(1),
             next_id: 1,
             captures: VecDeque::new(),
         }
     }
 
-    /// Store a capture, evicting the oldest if over capacity.
-    pub fn insert(&mut self, frames: Vec<MonitorFrame>) -> Arc<Capture> {
+    /// A capture with an id, not stored.
+    pub fn detached(&mut self, frames: Vec<MonitorFrame>) -> Arc<Capture> {
         let capture = Arc::new(Capture {
             id: self.next_id,
             frames: frames.into_iter().map(Arc::new).collect(),
         });
         self.next_id = self.next_id.wrapping_add(1).max(1);
+        capture
+    }
+
+    /// Store a capture going on screen, evicting the oldest beyond [`Self::MAX`].
+    pub fn insert(&mut self, frames: Vec<MonitorFrame>) -> Arc<Capture> {
+        let capture = self.detached(frames);
         self.captures.push_back(capture.clone());
-        while self.captures.len() > self.capacity {
+        while self.captures.len() > Self::MAX {
             self.captures.pop_front();
         }
         capture
@@ -75,18 +88,10 @@ impl FrameStore {
             .cloned()
     }
 
-    pub fn remove(&mut self, id: CaptureId) -> bool {
-        let before = self.captures.len();
-        self.captures.retain(|c| c.id != id);
-        self.captures.len() != before
-    }
-
-    /// Change how many captures are kept, evicting the oldest if needed.
-    pub fn set_capacity(&mut self, capacity: usize) {
-        self.capacity = capacity.max(1);
-        while self.captures.len() > self.capacity {
-            self.captures.pop_front();
-        }
+    /// Remove a capture and hand it over.
+    pub fn take(&mut self, id: CaptureId) -> Option<Arc<Capture>> {
+        let i = self.captures.iter().position(|c| c.id == id)?;
+        self.captures.remove(i)
     }
 
     pub fn len(&self) -> usize {
@@ -117,10 +122,10 @@ mod tests {
     }
 
     #[test]
-    fn evicts_oldest_beyond_capacity() {
-        let mut store = FrameStore::new(3);
-        let ids: Vec<_> = (0..5).map(|_| store.insert(vec![frame(0)]).id).collect();
-        assert_eq!(store.len(), 3);
+    fn evicts_oldest_beyond_max() {
+        let mut store = FrameStore::new();
+        let ids: Vec<_> = (0..4).map(|_| store.insert(vec![frame(0)]).id).collect();
+        assert_eq!(store.len(), FrameStore::MAX);
         assert!(store.get(ids[0]).is_none());
         assert!(store.get(ids[1]).is_none());
         for id in &ids[2..] {
@@ -129,8 +134,18 @@ mod tests {
     }
 
     #[test]
+    fn detached_captures_get_ids_but_arent_kept() {
+        let mut store = FrameStore::new();
+        let a = store.insert(vec![]).id;
+        let b = store.detached(vec![frame(0)]).id;
+        assert_ne!(a, b);
+        assert_eq!(store.len(), 1);
+        assert!(store.get(b).is_none());
+    }
+
+    #[test]
     fn ids_are_unique_and_nonzero() {
-        let mut store = FrameStore::new(2);
+        let mut store = FrameStore::new();
         let a = store.insert(vec![]).id;
         let b = store.insert(vec![]).id;
         assert_ne!(a, 0);
@@ -139,7 +154,7 @@ mod tests {
 
     #[test]
     fn frame_lookup_by_monitor_index() {
-        let mut store = FrameStore::new(3);
+        let mut store = FrameStore::new();
         let id = store.insert(vec![frame(0), frame(1)]).id;
         assert_eq!(store.frame(id, 1).unwrap().bgra[0], 1);
         assert!(store.frame(id, 2).is_none());
@@ -147,24 +162,16 @@ mod tests {
     }
 
     #[test]
-    fn remove_frees_capture() {
-        let mut store = FrameStore::new(3);
+    fn take_hands_the_capture_over() {
+        let mut store = FrameStore::new();
         let id = store.insert(vec![frame(0)]).id;
         let held = store.frame(id, 0).unwrap();
-        assert!(store.remove(id));
-        assert!(!store.remove(id));
+        let taken = store.take(id).unwrap();
+        assert!(store.take(id).is_none());
         assert_eq!(store.len(), 0);
+        assert_eq!(taken.id, id);
         // Outstanding readers (e.g. an in-flight protocol response) keep their Arc.
         assert_eq!(held.width, 2);
-    }
-
-    #[test]
-    fn shrinking_capacity_evicts_oldest() {
-        let mut store = FrameStore::new(3);
-        let ids: Vec<_> = (0..3).map(|_| store.insert(vec![]).id).collect();
-        store.set_capacity(1);
-        assert_eq!(store.len(), 1);
-        assert!(store.get(ids[2]).is_some());
     }
 
     #[test]
@@ -191,12 +198,5 @@ mod tests {
         );
         assert_eq!(capture.color_at(PhysicalPoint::new(2, 0)), None);
         assert_eq!(capture.color_at(PhysicalPoint::new(0, 1)), None);
-    }
-
-    #[test]
-    fn zero_capacity_keeps_one() {
-        let mut store = FrameStore::new(0);
-        let id = store.insert(vec![frame(0)]).id;
-        assert!(store.get(id).is_some());
     }
 }

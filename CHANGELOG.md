@@ -6,6 +6,13 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Vandal uses much less memory between captures.** It used to keep your last few screenshots
+  in memory (about 25 MB each on a 1440p screen), so it grew to 100 MB or more after a few
+  captures. Now a screenshot is freed as soon as it's copied or saved, unless its notification
+  still needs it for **Edit** or **Save**.
+
 ## [0.3.0-beta.19] - 2026-11-12
 
 ### Added

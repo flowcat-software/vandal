@@ -3,6 +3,7 @@
 
 use std::collections::HashSet;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
@@ -617,7 +618,8 @@ pub fn capture_fullscreen(app: &AppHandle, screens: Screens) {
     let Some((monitors, layout_changed, frames, _)) = grab(&state) else {
         return;
     };
-    let capture = state.frames.lock().unwrap().insert(frames);
+    // Never on screen, so not stored: freed once delivered (PLAN 3AA).
+    let capture = state.frames.lock().unwrap().detached(frames);
     // With quick edit on, full-screen captures go to the editor (PLAN 2B).
     let to_editor = state.settings.read().unwrap().quick_edit.enabled;
     let one = |m: Option<&MonitorInfo>| m.map(|m| m.physical_bounds);
@@ -785,8 +787,10 @@ pub fn window_pick_changed(
     .emit(app);
 }
 
-/// End the session and hide the overlays. The frames stay in the FrameStore.
-fn end(app: &AppHandle, capture_id: CaptureId) -> Option<Session> {
+/// End the session and hide the overlays. Its capture leaves the FrameStore
+/// and comes back with it, so the pixels are freed once the caller is done
+/// with them (PLAN 3AA).
+fn end(app: &AppHandle, capture_id: CaptureId) -> Option<(Session, Option<Arc<Capture>>)> {
     let state = app.state::<AppState>();
     let session = {
         let mut guard = state.session.lock().unwrap();
@@ -806,11 +810,12 @@ fn end(app: &AppHandle, capture_id: CaptureId) -> Option<Session> {
         visible: session.visible,
         reports: session.reports.clone(),
     });
-    Some(session)
+    let capture = state.frames.lock().unwrap().take(capture_id);
+    Some((session, capture))
 }
 
 pub fn cancel(app: &AppHandle, capture_id: CaptureId) {
-    let Some(session) = end(app, capture_id) else {
+    let Some((session, _)) = end(app, capture_id) else {
         return;
     };
     // From an editor: it comes back as it was.
@@ -818,7 +823,7 @@ pub fn cancel(app: &AppHandle, capture_id: CaptureId) {
         editor::bring_back(app, id);
     }
     if let Some(pick) = session.color_pick {
-        color_picked(app, capture_id, &pick, None, false);
+        color_picked(app, &pick, None, false);
     }
 }
 
@@ -863,29 +868,16 @@ pub fn commit_color(
         .emit(app);
         pick
     } else {
-        end(app, capture_id).and_then(|s| s.color_pick)
+        end(app, capture_id).and_then(|(s, _)| s.color_pick)
     };
     if let Some(pick) = pick {
-        color_picked(app, capture_id, &pick, color, second);
+        color_picked(app, &pick, color, second);
     }
 }
 
 /// The pick is over: the window that asked gets its color and the keyboard
-/// back, and a capture made only for the pick goes.
-fn color_picked(
-    app: &AppHandle,
-    capture_id: CaptureId,
-    pick: &ColorPick,
-    color: Option<String>,
-    second: bool,
-) {
-    if !pick.in_place {
-        app.state::<AppState>()
-            .frames
-            .lock()
-            .unwrap()
-            .remove(capture_id);
-    }
+/// back. (A capture made only for the pick went with its session.)
+fn color_picked(app: &AppHandle, pick: &ColorPick, color: Option<String>, second: bool) {
     let requester = match &pick.target {
         PickFor::Window { label, two } => {
             // The markup's eyedropper can copy it too (PLAN 3Y.3).
@@ -1006,7 +998,7 @@ fn deliver_window(
     started: Instant,
 ) {
     // Cancelled while the window was being captured.
-    let Some(session) = end(app, capture_id) else {
+    let Some((session, _)) = end(app, capture_id) else {
         return;
     };
     let state = app.state::<AppState>();
@@ -1042,7 +1034,7 @@ fn deliver_window(
         bgra: image.bgra,
         has_alpha: true,
     };
-    let capture = state.frames.lock().unwrap().insert(vec![frame]);
+    let capture = state.frames.lock().unwrap().detached(vec![frame]);
     if let Some(id) = session.into {
         editor::open_capture_into(app, &capture, bounds, id);
         return;
@@ -1053,13 +1045,10 @@ fn deliver_window(
 
 fn commit_now(app: &AppHandle, capture_id: CaptureId, target: CaptureTarget) {
     let started = Instant::now();
-    let Some(session) = end(app, capture_id) else {
+    let Some((session, Some(capture))) = end(app, capture_id) else {
         return;
     };
     let state = app.state::<AppState>();
-    let Some(capture) = state.frames.lock().unwrap().get(capture_id) else {
-        return;
-    };
     let monitors: Vec<MonitorInfo> = capture.frames.iter().map(|f| f.monitor.clone()).collect();
     // F / A and a picked window, with quick edit on, open the editor (PLAN
     // 2B, 3H); regions don't get here in quick edit, and without it
@@ -1102,16 +1091,11 @@ pub fn quick_done(
     markup: QuickMarkup,
 ) -> Result<(), String> {
     let started = Instant::now();
-    let Some(session) = end(app, capture_id) else {
+    let Some((session, capture)) = end(app, capture_id) else {
         return Err("This capture has already closed.".into());
     };
     let state = app.state::<AppState>();
-    let capture = state
-        .frames
-        .lock()
-        .unwrap()
-        .get(capture_id)
-        .ok_or("This capture is no longer in memory.")?;
+    let capture = capture.ok_or("This capture is no longer in memory.")?;
     let open_editor = state.settings.read().unwrap().after_capture.open_editor;
     if open_editor {
         // The markup goes along, still editable; the editor finishes the job.
@@ -1198,16 +1182,10 @@ pub fn quick_open_editor(
     rect: PhysicalRect,
     annotations: String,
 ) -> Result<(), String> {
-    if end(app, capture_id).is_none() {
+    let Some((_, capture)) = end(app, capture_id) else {
         return Err("This capture has already closed.".into());
-    }
-    let capture = app
-        .state::<AppState>()
-        .frames
-        .lock()
-        .unwrap()
-        .get(capture_id)
-        .ok_or("This capture is no longer in memory.")?;
+    };
+    let capture = capture.ok_or("This capture is no longer in memory.")?;
     editor::open_capture(app, &capture, rect, Some(annotations));
     Ok(())
 }

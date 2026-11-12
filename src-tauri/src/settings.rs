@@ -42,7 +42,6 @@ pub struct Settings {
     /// Style pickers for the markup tools.
     pub styles: Styles,
     pub startup: Startup,
-    pub history: History,
     pub tray: TraySettings,
     /// Automatic updates (PLAN 3P).
     pub updates: UpdateSettings,
@@ -68,7 +67,6 @@ impl Default for Settings {
             appearance: Appearance::default(),
             styles: Styles::default(),
             startup: Startup::default(),
-            history: History::default(),
             tray: TraySettings::default(),
             updates: UpdateSettings::default(),
             reset: ResetSettings::default(),
@@ -370,20 +368,6 @@ impl Default for Startup {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
-#[serde(default, rename_all = "camelCase")]
-pub struct History {
-    pub keep_frames_in_memory: u32,
-}
-
-impl Default for History {
-    fn default() -> Self {
-        Self {
-            keep_frames_in_memory: 3,
-        }
-    }
-}
-
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
 #[serde(default, rename_all = "camelCase")]
 pub struct TraySettings {
@@ -522,7 +506,6 @@ pub fn validate(mut s: Settings) -> Result<Settings, String> {
         s.overlay.dim_opacity = OverlaySettings::default().dim_opacity;
     }
     s.overlay.dim_opacity = s.overlay.dim_opacity.clamp(0.0, 0.9);
-    s.history.keep_frames_in_memory = s.history.keep_frames_in_memory.clamp(1, 20);
     s.styles = s.styles.normalized();
     s.shortcuts = s.shortcuts.checked()?;
     let captures = [
@@ -566,13 +549,6 @@ pub fn update(app: &AppHandle<Wry>, new: Settings) -> Result<Settings, String> {
     }
     if old.startup.launch_on_login != new.startup.launch_on_login {
         crate::tray::apply_autostart(app, new.startup.launch_on_login);
-    }
-    if old.history != new.history {
-        state
-            .frames
-            .lock()
-            .unwrap()
-            .set_capacity(new.history.keep_frames_in_memory as usize);
     }
     if old.appearance.theme != new.appearance.theme {
         crate::appearance::apply(app, new.appearance.theme);
@@ -905,12 +881,10 @@ mod tests {
         let mut s = Settings::default();
         s.save.directory = "  C:/shots  ".into();
         s.overlay.dim_opacity = 5.0;
-        s.history.keep_frames_in_memory = 0;
         s.version = 0;
         let v = validate(s).unwrap();
         assert_eq!(v.save.directory, "C:/shots");
         assert_eq!(v.overlay.dim_opacity, 0.9);
-        assert_eq!(v.history.keep_frames_in_memory, 1);
         assert_eq!(v.version, CURRENT_VERSION);
 
         let mut s = Settings::default();
@@ -931,7 +905,8 @@ mod tests {
     #[test]
     fn older_files_get_new_fields_with_defaults() {
         let (s, _) = migrate(Some(
-            json!({ "version": 1, "save": { "directory": "D:/x" } }),
+            // `history` was dropped in 3AA; files that still have it load.
+            json!({ "version": 1, "save": { "directory": "D:/x" }, "history": { "keepFramesInMemory": 3 } }),
         ));
         assert_eq!(s.save.directory, "D:/x");
         assert!(s.save.notification_save_button);
@@ -954,7 +929,8 @@ mod tests {
         assert_eq!(v["editor"]["onClose"]["copy"], true);
         assert_eq!(v["editor"]["onClose"]["save"], false);
         assert_eq!(v["save"]["format"], "png");
-        assert_eq!(v["history"]["keepFramesInMemory"], 3);
+        // Captures leave memory once delivered (PLAN 3AA): no setting for it.
+        assert!(v.get("history").is_none());
         assert_eq!(v["editor"]["shareColor"], false);
         assert_eq!(v["editor"]["showShortcutHints"], true);
         assert_eq!(v["editor"]["showButtonUnits"], false);
