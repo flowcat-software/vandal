@@ -157,13 +157,14 @@ function ResizePanel({ rootRef }: { rootRef: React.RefObject<HTMLDivElement | nu
   return (
     <div className={styles.panel} role="dialog" aria-label="Resize image">
       <div className={styles.title}>Resize image</div>
-      <div className={styles.units} role="group" aria-label="Unit">
+      <div className={styles.units} role="radiogroup" aria-label="Unit">
         {(["px", "%"] as const).map((u) => (
           <button
             key={u}
             type="button"
+            role="radio"
             className={styles.unit}
-            aria-pressed={unit === u}
+            aria-checked={unit === u}
             onClick={() => setUnitTo(u)}
           >
             {u === "px" ? "Pixels" : "Percent"}
