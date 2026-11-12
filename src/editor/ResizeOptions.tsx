@@ -119,13 +119,14 @@ function ResizeBar({ base }: { base: Size }) {
         ))}
       </div>
       <span className={styles.sep} />
-      {/* "W × H", then the two boxes and the padlock as one unit, and the
-          unit once at the end: one size, linked. */}
+      {/* "W × H", the two boxes side by side as crop's, then the padlock. No
+          unit after them: the Pixels / Percent switch says it. */}
       <span className={styles.sizePair}>
         <span className={styles.sizeLabel} aria-hidden>
           W × H
         </span>
         {field("width")}
+        {field("height")}
         <button
           type="button"
           className={styles.toggle}
@@ -141,8 +142,6 @@ function ResizeBar({ base }: { base: Size }) {
             <path d={locked ? "M8 11V8a4 4 0 0 1 8 0v3" : "M8 11V8a4 4 0 0 1 7.6-1.8"} />
           </svg>
         </button>
-        {field("height")}
-        <span className={styles.sizeLabel}>{unit}</span>
       </span>
       <span className={styles.sep} />
       <span className={message ? styles.resizeError : styles.resizeCaption} role="status">
