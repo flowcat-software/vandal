@@ -45,7 +45,7 @@ export const QuickBar = forwardRef<HTMLDivElement, Props>(function QuickBar(
       onDoubleClick={(e) => e.stopPropagation()}
     >
       <div className={styles.quickRow}>
-        <Toolbar />
+        <Toolbar eyedropper />
         <span className={styles.quickDivider} />
         <button
           type="button"
