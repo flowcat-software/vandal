@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hexAt, loupePixels, type FramePixels } from "./loupe";
+import { hexAt, loupePixels, rgbText, type FramePixels } from "./loupe";
 
 // 2×2: red, green / blue, white.
 const frame: FramePixels = {
@@ -32,5 +32,13 @@ describe("loupePixels", () => {
     expect(at(2, 1)).toEqual([0, 255, 0, 255]);
     expect(at(1, 2)).toEqual([0, 0, 255, 255]);
     expect(at(2, 2)).toEqual([255, 255, 255, 255]);
+  });
+});
+
+describe("rgbText", () => {
+  it("spells a hex color's channels", () => {
+    expect(rgbText("#1e88e5")).toBe("30, 136, 229");
+    expect(rgbText("#000000")).toBe("0, 0, 0");
+    expect(rgbText("#FFFFFF")).toBe("255, 255, 255");
   });
 });

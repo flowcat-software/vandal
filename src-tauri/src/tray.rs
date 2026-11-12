@@ -70,7 +70,16 @@ fn build_menu(app: &AppHandle, s: &Settings) -> tauri::Result<Menu<Wry>> {
             hk.fullscreen.as_deref(),
         )?)?;
     }
-    // Captures | the two "New…" items | Open (PLAN 3H.10).
+    // Captures | the color picker (PLAN 3Y) | the two "New…" items | Open
+    // (PLAN 3H.10).
+    menu.append(&PredefinedMenuItem::separator(app)?)?;
+    menu.append(&MenuItem::with_id(
+        app,
+        "color-picker",
+        "Pick a color",
+        true,
+        hk.color_picker.as_deref(),
+    )?)?;
     menu.append(&PredefinedMenuItem::separator(app)?)?;
     menu.append(&MenuItem::with_id(
         app,
@@ -152,6 +161,7 @@ pub fn create(app: &AppHandle, s: &Settings) -> tauri::Result<()> {
                             Screens::Monitor(id[SCREEN_PREFIX.len()..].to_string()),
                         ),
                         "window" => session::start_window(app),
+                        "color-picker" => session::start_color_picker(app),
                         "settings" => settings_window::open(app),
                         "install-update" => crate::updater::install_in_background(app),
                         "open" => {

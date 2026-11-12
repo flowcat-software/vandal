@@ -223,6 +223,12 @@ pub fn copy_to_clipboard(image: &RgbaImage) -> Result<(), String> {
     crate::clipboard::set_image(image)
 }
 
+/// Text on the clipboard (the color picker's copy, PLAN 3Y).
+pub fn copy_text(text: &str) -> Result<(), String> {
+    let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
+    clipboard.set_text(text).map_err(|e| e.to_string())
+}
+
 /// The image on the clipboard ("New from clipboard").
 pub fn paste_image() -> Result<RgbaImage, String> {
     let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
@@ -593,6 +599,17 @@ fn notify_capture(app: &AppHandle, t: CaptureToast) {
         }
         Ok(())
     });
+    if let Err(e) = toast.show() {
+        logln!("[output] toast failed: {e}");
+    }
+}
+
+/// The color picker copied `text` (PLAN 3Y): a quiet toast saying what.
+pub fn notify_color_copied(app: &AppHandle, text: &str) {
+    let toast = Toast::new(&app_id(app))
+        .title("Color copied")
+        .text1(text)
+        .sound(None);
     if let Err(e) = toast.show() {
         logln!("[output] toast failed: {e}");
     }

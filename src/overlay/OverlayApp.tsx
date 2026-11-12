@@ -776,6 +776,7 @@ export function OverlayApp() {
       {load && focused && !drag && (!lockedOut || pickColor) && (
         <HintBar
           pickColor={pickColor}
+          pickCopies={!!load.pickCopies && !pickingInPlace}
           picking={picking}
           hasSelection={!!selection}
           quick={quickEdit}

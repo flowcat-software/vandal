@@ -33,6 +33,12 @@ export function loupePixels(frame: FramePixels, cx: number, cy: number, n: numbe
 }
 
 /** The pixel at (`x`, `y`) as `#rrggbb`, or null off the frame. */
+/** `#rrggbb` as "r, g, b" for the loupe's readout (PLAN 3Y). */
+export function rgbText(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+}
+
 export function hexAt(frame: FramePixels, x: number, y: number): string | null {
   if (x < 0 || y < 0 || x >= frame.width || y >= frame.height) return null;
   const i = (y * frame.width + x) * 4;

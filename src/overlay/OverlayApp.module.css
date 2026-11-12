@@ -444,6 +444,12 @@
   white-space: nowrap;
 }
 
+.loupeRgb {
+  padding-left: 6px;
+  border-left: 1px solid rgb(255 255 255 / 0.3);
+  color: rgb(255 255 255 / 0.8);
+}
+
 .loupeSwatch {
   width: 14px;
   height: 14px;

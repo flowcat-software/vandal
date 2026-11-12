@@ -30,6 +30,7 @@ enum Action {
     Fullscreen,
     Window,
     AllScreens,
+    ColorPicker,
 }
 
 impl Action {
@@ -39,6 +40,7 @@ impl Action {
             Self::Fullscreen => "full-screen capture",
             Self::Window => "window capture",
             Self::AllScreens => "all-screens capture",
+            Self::ColorPicker => "color picker",
         }
     }
 }
@@ -145,6 +147,7 @@ pub fn register(app: &AppHandle, hotkeys: &Hotkeys) {
         (hotkeys.fullscreen.as_deref(), Action::Fullscreen),
         (hotkeys.window.as_deref(), Action::Window),
         (hotkeys.all_screens.as_deref(), Action::AllScreens),
+        (hotkeys.color_picker.as_deref(), Action::ColorPicker),
     ];
     let mut failures = Vec::new();
     for (hotkey, action) in bindings {
@@ -158,6 +161,7 @@ pub fn register(app: &AppHandle, hotkeys: &Hotkeys) {
                     Action::Fullscreen => session::capture_fullscreen(app, Screens::Pointer),
                     Action::Window => session::start_window(app),
                     Action::AllScreens => session::capture_fullscreen(app, Screens::All),
+                    Action::ColorPicker => session::start_color_picker(app),
                 }
             }
         });
@@ -205,9 +209,14 @@ mod tests {
     fn converted_defaults_parse() {
         use tauri_plugin_global_shortcut::Shortcut;
         let defaults = Hotkeys::default();
-        for h in [defaults.region, defaults.fullscreen, defaults.window]
-            .into_iter()
-            .flatten()
+        for h in [
+            defaults.region,
+            defaults.fullscreen,
+            defaults.window,
+            defaults.color_picker,
+        ]
+        .into_iter()
+        .flatten()
         {
             assert!(to_accelerator(&h).parse::<Shortcut>().is_ok(), "{h}");
         }

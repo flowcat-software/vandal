@@ -41,6 +41,11 @@ export const commands = {
 	monitorCount: number,
 	/**  The color picker's eyedropper (PLAN 3U): click a pixel, nothing else. */
 	pickColor: boolean,
+	/**
+	 *  The pick is copied to the clipboard (the color picker's hotkey or tray
+	 *  item, PLAN 3Y), not sent to a window.
+	 */
+	pickCopies: boolean,
 	/**  Where the pointer was at capture time, so the loupe shows straight away. */
 	cursor: PhysicalPoint | null,
 } | null>("overlay_pending_load", { monitorIndex }),
@@ -426,6 +431,25 @@ export type ColorControl =
 /**  A button per color that opens the palette. */
 "dropdown";
 
+/**  How a picked color is copied (Settings › Color picker). */
+export type ColorFormat = 
+/**  `#1e88e5` */
+"hexLower" | 
+/**  `#1E88E5` */
+"hexUpper" | 
+/**  `rgb(30, 136, 229)` */
+"rgb" | 
+/**  `30, 136, 229` */
+"rgbBare" | 
+/**  `hsl(207, 79%, 51%)` */
+"hsl";
+
+/**  The color picker (PLAN 3Y). */
+export type ColorPickerSettings = {
+	/**  What its hotkey and tray item copy. */
+	copyFormat?: ColorFormat,
+};
+
 /**
  *  A dashed or dotted line style in the options bar's list (PLAN 3X). Dash and
  *  gap are in line widths, with round ends: a dash of 1 is a dot. Solid isn't
@@ -630,6 +654,11 @@ export type Hotkeys = {
 	/**  Window capture (PLAN 3H.4): the overlay opens in window mode. */
 	window?: string | null,
 	repeatLast?: string | null,
+	/**
+	 *  The color picker (PLAN 3Y): pick a pixel anywhere, copied to the
+	 *  clipboard. Win+` would be nicer, but Windows Terminal takes it.
+	 */
+	colorPicker?: string | null,
 };
 
 /**  What clicking the tray icon or launching Vandal does (PLAN 3G). */
@@ -743,6 +772,11 @@ export type OverlayLoad = {
 	monitorCount: number,
 	/**  The color picker's eyedropper (PLAN 3U): click a pixel, nothing else. */
 	pickColor: boolean,
+	/**
+	 *  The pick is copied to the clipboard (the color picker's hotkey or tray
+	 *  item, PLAN 3Y), not sent to a window.
+	 */
+	pickCopies: boolean,
 	/**  Where the pointer was at capture time, so the loupe shows straight away. */
 	cursor: PhysicalPoint | null,
 };
@@ -922,6 +956,8 @@ export type Settings = {
 	reset?: ResetSettings,
 	/**  Settings › About › Debugging (PLAN 3V.8). */
 	debugging?: Debugging,
+	/**  The color picker's hotkey and tray item (PLAN 3Y). */
+	colorPicker?: ColorPickerSettings,
 };
 
 /**  Rust → all windows: settings changed (from any source), here's the new state. */

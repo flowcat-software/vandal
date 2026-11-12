@@ -3,6 +3,8 @@ import styles from "./OverlayApp.module.css";
 interface Props {
   /** The color picker's eyedropper (PLAN 3U): click a pixel. */
   pickColor: boolean;
+  /** The color picker (PLAN 3Y): the pick goes to the clipboard. */
+  pickCopies: boolean;
   /** Window mode (PLAN 3H): click a window. */
   picking: boolean;
   hasSelection: boolean;
@@ -14,14 +16,22 @@ interface Props {
   screens: number;
 }
 
-export function HintBar({ pickColor, picking, hasSelection, quick, atBottom, screens }: Props) {
+export function HintBar({
+  pickColor,
+  pickCopies,
+  picking,
+  hasSelection,
+  quick,
+  atBottom,
+  screens,
+}: Props) {
   return (
     <div className={`${styles.hint} ${atBottom ? styles.hintBottom : ""}`}>
       {pickColor ? (
         <>
-          <Hint keys={["Click"]} label="pick color" />
+          <Hint keys={["Click"]} label={pickCopies ? "copy color" : "pick color"} />
           <Hint keys={["←↑↓→"]} label="nudge" />
-          <Hint keys={["Enter"]} label="pick" />
+          <Hint keys={["Enter"]} label={pickCopies ? "copy" : "pick"} />
           <Hint keys={["Esc"]} label="cancel" />
         </>
       ) : picking ? (

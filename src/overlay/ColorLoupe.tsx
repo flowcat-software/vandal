@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { useRedactSource } from "../markup/redact";
 import type { Point } from "./selection";
-import { hexAt, loupePixels } from "./loupe";
+import { hexAt, loupePixels, rgbText } from "./loupe";
 import styles from "./OverlayApp.module.css";
 
 /** Pixels across the loupe (odd, so one is in the middle). */
@@ -22,7 +22,7 @@ interface Props {
 /**
  * The eyedropper's round magnifier (PLAN 3U), centred on the pointer in place
  * of the cursor: the pixels around it with the picked one outlined, and its
- * color underneath.
+ * color underneath, as hex and RGB (PLAN 3Y).
  */
 export function ColorLoupe({ point, scale, view }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,6 +59,7 @@ export function ColorLoupe({ point, scale, view }: Props) {
         >
           <span className={styles.loupeSwatch} style={{ background: hex }} />
           {hex.toUpperCase()}
+          <span className={styles.loupeRgb}>{rgbText(hex)}</span>
         </div>
       )}
     </div>

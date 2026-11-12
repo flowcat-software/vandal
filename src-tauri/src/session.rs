@@ -11,6 +11,7 @@ use tauri::{AppHandle, Manager};
 use tauri_specta::Event;
 
 use crate::capture::{cutout, CaptureTiming, MonitorFrame, WindowImage};
+use crate::color_format;
 use crate::compose;
 use crate::editor::LayerKind;
 use crate::frames::{Capture, CaptureId};
@@ -57,6 +58,9 @@ pub struct OverlayLoad {
     pub monitor_count: u32,
     /// The color picker's eyedropper (PLAN 3U): click a pixel, nothing else.
     pub pick_color: bool,
+    /// The pick is copied to the clipboard (the color picker's hotkey or tray
+    /// item, PLAN 3Y), not sent to a window.
+    pub pick_copies: bool,
     /// Where the pointer was at capture time, so the loupe shows straight away.
     pub cursor: Option<PhysicalPoint>,
 }
@@ -78,13 +82,22 @@ pub struct OverlayColorPick {
     pub cursor: Option<PhysicalPoint>,
 }
 
-/// An eyedropper pick on the overlays (PLAN 3U): for the window `requester`
-/// (a label). `in_place`: quick edit's own, on its capture, which goes on
-/// afterwards; otherwise the capture was made for the pick and ends with it.
+/// An eyedropper pick on the overlays (PLAN 3U). `in_place`: quick edit's
+/// own, on its capture, which goes on afterwards; otherwise the capture was
+/// made for the pick and ends with it.
 #[derive(Debug, Clone)]
 struct ColorPick {
-    requester: String,
+    target: PickFor,
     in_place: bool,
+}
+
+/// Where a picked color goes.
+#[derive(Debug, Clone)]
+pub enum PickFor {
+    /// The window with this label, whose eyedropper asked (PLAN 3U).
+    Window(String),
+    /// The clipboard, in Settings' format (the color picker, PLAN 3Y).
+    Clipboard,
 }
 
 /// Rust → overlays: you're now shown; reply with `overlay_visible` once painted.
@@ -404,7 +417,18 @@ pub fn start_color_pick(app: &AppHandle, requester: &str) -> bool {
     if overlay::is_overlay(requester) {
         return pick_in_place(app, requester);
     }
-    start_region_for(app, None, false, Some(requester.to_string()))
+    start_region_for(
+        app,
+        None,
+        false,
+        Some(PickFor::Window(requester.to_string())),
+    )
+}
+
+/// The color picker's hotkey or tray item (PLAN 3Y): pick a pixel on the
+/// frozen screens and copy it. Nothing happens if a capture is on screen.
+pub fn start_color_picker(app: &AppHandle) {
+    start_region_for(app, None, false, Some(PickFor::Clipboard));
 }
 
 fn pick_in_place(app: &AppHandle, requester: &str) -> bool {
@@ -415,7 +439,7 @@ fn pick_in_place(app: &AppHandle, requester: &str) -> bool {
             return false;
         };
         s.color_pick = Some(ColorPick {
-            requester: requester.to_string(),
+            target: PickFor::Window(requester.to_string()),
             in_place: true,
         });
         s.capture_id
@@ -435,7 +459,7 @@ fn start_region_for(
     app: &AppHandle,
     into: Option<editor::EditorId>,
     picking: bool,
-    color_for: Option<String>,
+    color_for: Option<PickFor>,
 ) -> bool {
     let started = Instant::now();
     let state = app.state::<AppState>();
@@ -487,6 +511,7 @@ fn start_region_for(
             hovered,
             monitor_count: monitors.len() as u32,
             pick_color: color_for.is_some(),
+            pick_copies: matches!(color_for, Some(PickFor::Clipboard)),
             cursor,
         })
         .collect();
@@ -512,8 +537,8 @@ fn start_region_for(
         layer: None,
         highlights: None,
         into,
-        color_pick: color_for.map(|requester| ColorPick {
-            requester,
+        color_pick: color_for.map(|target| ColorPick {
+            target,
             in_place: false,
         }),
     });
@@ -836,13 +861,42 @@ fn color_picked(app: &AppHandle, capture_id: CaptureId, pick: &ColorPick, color:
             .unwrap()
             .remove(capture_id);
     }
-    let _ = ScreenColorPicked { color }.emit_to(app, pick.requester.as_str());
-    if let Some(window) = app.get_webview_window(&pick.requester) {
+    let requester = match &pick.target {
+        PickFor::Window(label) => label,
+        PickFor::Clipboard => {
+            if let Some(color) = color {
+                copy_color(app, &color);
+            }
+            return;
+        }
+    };
+    let _ = ScreenColorPicked { color }.emit_to(app, requester.as_str());
+    if let Some(window) = app.get_webview_window(requester) {
         let _ = app.run_on_main_thread(move || {
             if let Ok(hwnd) = window.hwnd() {
                 overlay::force_foreground(windows::Win32::Foundation::HWND(hwnd.0));
             }
         });
+    }
+}
+
+/// The color picker's copy (PLAN 3Y), in Settings' format, with a toast.
+fn copy_color(app: &AppHandle, hex: &str) {
+    let Some(rgb) = color_format::parse_hex(hex) else {
+        logln!("[color] not a color: {hex}");
+        return;
+    };
+    let format = app
+        .state::<AppState>()
+        .settings
+        .read()
+        .unwrap()
+        .color_picker
+        .copy_format;
+    let text = color_format::format(rgb, format);
+    match output::copy_text(&text) {
+        Ok(()) => output::notify_color_copied(app, &text),
+        Err(e) => output::notify_error(app, "Couldn't copy the color", &e),
     }
 }
 

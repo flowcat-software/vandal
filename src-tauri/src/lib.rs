@@ -7,6 +7,7 @@ mod browser_keys;
 mod capture;
 mod cli;
 mod clipboard;
+mod color_format;
 mod commands;
 mod compose;
 mod crash;

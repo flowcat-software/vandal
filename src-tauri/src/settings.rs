@@ -16,6 +16,7 @@ use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_store::StoreExt;
 use tauri_specta::Event;
 
+use crate::color_format::ColorFormat;
 use crate::shortcuts::Shortcuts;
 use crate::state::AppState;
 use crate::styles::Styles;
@@ -49,6 +50,8 @@ pub struct Settings {
     pub reset: ResetSettings,
     /// Settings › About › Debugging (PLAN 3V.8).
     pub debugging: Debugging,
+    /// The color picker's hotkey and tray item (PLAN 3Y).
+    pub color_picker: ColorPickerSettings,
 }
 
 impl Default for Settings {
@@ -70,6 +73,7 @@ impl Default for Settings {
             updates: UpdateSettings::default(),
             reset: ResetSettings::default(),
             debugging: Debugging::default(),
+            color_picker: ColorPickerSettings::default(),
         }
     }
 }
@@ -116,6 +120,9 @@ pub struct Hotkeys {
     /// Window capture (PLAN 3H.4): the overlay opens in window mode.
     pub window: Option<String>,
     pub repeat_last: Option<String>,
+    /// The color picker (PLAN 3Y): pick a pixel anywhere, copied to the
+    /// clipboard. Win+` would be nicer, but Windows Terminal takes it.
+    pub color_picker: Option<String>,
 }
 
 impl Default for Hotkeys {
@@ -137,6 +144,7 @@ impl Default for Hotkeys {
             window: key("Win+Alt+F12"),
             all_screens: None,
             repeat_last: None,
+            color_picker: key("Win+Alt+`"),
         }
     }
 }
@@ -402,6 +410,14 @@ impl Default for ResetSettings {
     }
 }
 
+/// The color picker (PLAN 3Y).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[serde(default, rename_all = "camelCase")]
+pub struct ColorPickerSettings {
+    /// What its hotkey and tray item copy.
+    pub copy_format: ColorFormat,
+}
+
 /// Settings › About › Debugging (PLAN 3V.8).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(default, rename_all = "camelCase")]
@@ -496,17 +512,18 @@ pub fn validate(mut s: Settings) -> Result<Settings, String> {
     s.styles = s.styles.normalized();
     s.shortcuts = s.shortcuts.checked()?;
     let captures = [
-        (&s.hotkeys.region, "a region"),
-        (&s.hotkeys.fullscreen, "the full screen"),
-        (&s.hotkeys.window, "a window"),
-        (&s.hotkeys.all_screens, "all screens"),
+        (&s.hotkeys.region, "capture a region"),
+        (&s.hotkeys.fullscreen, "capture the full screen"),
+        (&s.hotkeys.window, "capture a window"),
+        (&s.hotkeys.all_screens, "capture all screens"),
+        (&s.hotkeys.color_picker, "pick a color"),
     ];
     for (i, (a, what_a)) in captures.iter().enumerate() {
         for (b, what_b) in &captures[i + 1..] {
             if let (Some(a), Some(b)) = (a, b) {
                 if a.eq_ignore_ascii_case(b) {
                     return Err(format!(
-                        "{a} can't capture both {what_a} and {what_b}: pick another shortcut."
+                        "{a} can't both {what_a} and {what_b}: pick another shortcut."
                     ));
                 }
             }
@@ -860,8 +877,13 @@ mod tests {
         s.hotkeys.fullscreen = None;
         assert!(validate(s.clone()).is_ok());
         s.hotkeys.window = Some("CTRL+WIN+F9".into());
+        let e = validate(s.clone()).unwrap_err();
+        assert!(e.contains("capture a region and capture a window"), "{e}");
+        // The color picker's too (PLAN 3Y).
+        s.hotkeys.window = None;
+        s.hotkeys.color_picker = Some("Ctrl+Win+F9".into());
         let e = validate(s).unwrap_err();
-        assert!(e.contains("a region and a window"), "{e}");
+        assert!(e.contains("capture a region and pick a color"), "{e}");
     }
 
     #[test]
