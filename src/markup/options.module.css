@@ -1059,19 +1059,20 @@
   margin: 0 8px;
 }
 
-.resizeLabel {
+.sizeLabel {
   margin-right: 2px;
   color: var(--text-2);
   font-size: 12px;
   white-space: nowrap;
 }
 
-.resizeSize .colorField {
+.sizePair .colorField {
   width: 56px;
 }
 
-/* W, the padlock and H: tighter than the bar's 10 px gaps, one size. */
-.resizeSize {
+/* A size (crop, resize): "W × H", the two boxes (resize: the padlock between
+   them), the unit once, tighter than the bar's 10 px gaps so it reads as one. */
+.sizePair {
   display: flex;
   align-items: center;
   gap: 4px;

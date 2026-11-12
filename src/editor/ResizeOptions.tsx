@@ -119,8 +119,8 @@ function ResizeBar({ base }: { base: Size }) {
       <span className={styles.sep} />
       {/* "W × H", then the two boxes and the padlock as one unit, and the
           unit once at the end: one size, linked. */}
-      <span className={styles.resizeSize}>
-        <span className={styles.resizeLabel} aria-hidden>
+      <span className={styles.sizePair}>
+        <span className={styles.sizeLabel} aria-hidden>
           W × H
         </span>
         {field("width")}
@@ -138,7 +138,7 @@ function ResizeBar({ base }: { base: Size }) {
           </svg>
         </button>
         {field("height")}
-        <span className={styles.resizeLabel}>{unit}</span>
+        <span className={styles.sizeLabel}>{unit}</span>
       </span>
       <span className={styles.sep} />
       <span className={message ? styles.resizeError : styles.resizeCaption} role="status">

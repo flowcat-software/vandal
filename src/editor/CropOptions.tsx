@@ -43,12 +43,23 @@ export function CropOptions() {
 
   return (
     <div className={styles.options}>
-      <SizeField label="W" value={draft.width} onChange={(w) => resize(w, draft.height, "width")} />
-      <SizeField
-        label="H"
-        value={draft.height}
-        onChange={(h) => resize(draft.width, h, "height")}
-      />
+      {/* "W × H", the two boxes, the unit once: as Resize's (PLAN 3Z). */}
+      <span className={styles.sizePair}>
+        <span className={styles.sizeLabel} aria-hidden>
+          W × H
+        </span>
+        <SizeField
+          label="Width"
+          value={draft.width}
+          onChange={(w) => resize(w, draft.height, "width")}
+        />
+        <SizeField
+          label="Height"
+          value={draft.height}
+          onChange={(h) => resize(draft.width, h, "height")}
+        />
+        <span className={styles.sizeLabel}>px</span>
+      </span>
       <span className={styles.sep} />
       <div className={styles.group} role="radiogroup" aria-label="Aspect ratio">
         {CROP_RATIOS.map((r) => (
@@ -141,29 +152,25 @@ function SizeField({
     setDraft(null);
   };
   return (
-    <label className={styles.sizeField}>
-      <span>{label}</span>
-      <input
-        className={styles.colorField}
-        inputMode="numeric"
-        aria-label={label === "W" ? "Width" : "Height"}
-        value={draft ?? String(value)}
-        onFocus={(e) => e.target.select()}
-        onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          // Enter sets the size; it doesn't apply the crop from here.
-          if (e.key === "Enter") {
-            e.stopPropagation();
-            e.currentTarget.blur();
-          }
-          if (e.key === "Escape") {
-            setDraft(null);
-            e.currentTarget.blur();
-          }
-        }}
-      />
-      <span>px</span>
-    </label>
+    <input
+      className={styles.colorField}
+      inputMode="numeric"
+      aria-label={`${label} (pixels)`}
+      value={draft ?? String(value)}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        // Enter sets the size; it doesn't apply the crop from here.
+        if (e.key === "Enter") {
+          e.stopPropagation();
+          e.currentTarget.blur();
+        }
+        if (e.key === "Escape") {
+          setDraft(null);
+          e.currentTarget.blur();
+        }
+      }}
+    />
   );
 }
