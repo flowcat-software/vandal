@@ -98,7 +98,8 @@ function ResizeBar({ base }: { base: Size }) {
           setError(null);
         }}
       />
-      <span>{unit}</span>
+      {/* The unit once, after the height: the two read as one size. */}
+      {side === "height" && <span>{unit}</span>}
     </label>
   );
 
@@ -121,27 +122,39 @@ function ResizeBar({ base }: { base: Size }) {
         ))}
       </div>
       <span className={styles.sep} />
-      {field("width")}
-      <button
-        type="button"
-        className={styles.toggle}
-        aria-pressed={locked}
-        aria-label="Keep proportions"
-        title={locked ? "Proportions kept: click to set each side" : "Keep proportions"}
-        onClick={toggleLock}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <rect x="5" y="11" width="14" height="10" rx="2" />
-          <path d={locked ? "M8 11V8a4 4 0 0 1 8 0v3" : "M8 11V8a4 4 0 0 1 7.6-1.8"} />
-        </svg>
-      </button>
-      {field("height")}
+      {/* W, the padlock and H close together: one size, linked. */}
+      <span className={styles.resizeSize}>
+        {field("width")}
+        <button
+          type="button"
+          className={styles.toggle}
+          aria-pressed={locked}
+          aria-label="Keep proportions"
+          title={locked ? "Proportions kept: click to set each side" : "Keep proportions"}
+          onClick={toggleLock}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d={locked ? "M8 11V8a4 4 0 0 1 8 0v3" : "M8 11V8a4 4 0 0 1 7.6-1.8"} />
+          </svg>
+        </button>
+        {field("height")}
+      </span>
       <span className={styles.sep} />
       <span className={message ? styles.resizeError : styles.resizeCaption} role="status">
         {message ??
-          (size
-            ? `${base.width} × ${base.height} → ${size.width} × ${size.height} px`
-            : `${base.width} × ${base.height} px`)}
+          (size ? (
+            <>
+              {base.width} × {base.height}
+              {/* Set apart, so the line doesn't run together into one gray blur. */}
+              <span className={styles.resizeArrow} aria-label="becomes">
+                →
+              </span>
+              {size.width} × {size.height} px
+            </>
+          ) : (
+            `${base.width} × ${base.height} px`
+          ))}
       </span>
       <span className={styles.optionsSpacer} />
       <button

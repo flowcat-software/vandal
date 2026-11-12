@@ -1046,7 +1046,19 @@
 }
 
 .resizeCaption {
-  color: var(--text-2);
+  color: var(--text);
+}
+
+.resizeArrow {
+  margin: 0 8px;
+  color: var(--text-3);
+}
+
+/* W, the padlock and H: tighter than the bar's 10 px gaps, one size. */
+.resizeSize {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .resizeError {
