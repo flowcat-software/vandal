@@ -6,6 +6,8 @@ All notable changes to Vandal are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0-beta.19] - 2026-11-12
+
 ### Added
 
 - **Color picker.** Press **Win+Alt+\`** (or **Pick a color** in the tray menu) anywhere in Windows,
@@ -17,14 +19,19 @@ All notable changes to Vandal are listed here. The format follows
   the first color, right-click for the second (a shape's border, a text box, a marker). The color
   lands on the custom swatch and on the selected marks. **The markup's eyedropper copies too**
   also puts it on the clipboard.
-- **Resize image** in the editor (**K** or **Ctrl+Alt+I**, or the button after Crop): set the width and
-  height in pixels or percent, with the proportions kept unless you unlock them. The marks scale
-  with the image, and Ctrl+Z undoes it.
+- **Resize image** in the editor (**K** or **Ctrl+Alt+I**, or the button after Crop). Like Crop,
+  it's a mode with its controls in the options bar: the width and height in pixels or percent,
+  with the proportions kept unless you unlock the padlock, and what the size becomes. Enter or
+  **Resize** applies it; Esc or another tool leaves without resizing. The marks scale with the
+  image, and Ctrl+Z undoes it.
 
 ### Changed
 
 - The color picker's magnifier shows RGB next to the hex value.
 - The editor window's minimum width is 880 pixels (was 800), to fit the new toolbar buttons.
+- **Crop's size boxes:** Enter applies the crop (it used to only set the size), and the boxes sit
+  side by side after a "W × H" label, with "px" once at the end.
+- The editor's general hint lists the crop and resize keys after the tools.
 
 ## [0.3.0-beta.18] - 2026-11-08
 
@@ -543,7 +550,8 @@ The first build for beta testers.
 - Copy to clipboard, auto-save with a file-name pattern, and capture notifications.
 - Searchable Settings window where changes apply immediately.
 
-[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.18...HEAD
+[Unreleased]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.19...HEAD
+[0.3.0-beta.19]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.18...v0.3.0-beta.19
 [0.3.0-beta.18]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.17...v0.3.0-beta.18
 [0.3.0-beta.17]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.16...v0.3.0-beta.17
 [0.3.0-beta.16]: https://github.com/flowcat-software/vandal/compare/v0.3.0-beta.15...v0.3.0-beta.16
